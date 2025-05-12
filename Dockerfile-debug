@@ -1,4 +1,5 @@
-FROM gcr.io/distroless/java17-debian12@sha256:6d25f6a8d826f7472f18dc32a9c439d2f245713df4029e5ecec19378eaaf952c
-COPY target/ms-document-submission-manager-*.jar /app.jar
+FROM gcr.io/distroless/java17-debian12:nonroot@sha256:8dd4f872897b75d1f2c45b630ef0bbbbeba57bc7da37d68726ac66dc801595c6
+COPY --chown=nonroot:nonroot target/ms-document-submission-manager-*.jar /app.jar
 EXPOSE 8080
+USER nonroot
 ENTRYPOINT ["java", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:8000", "-jar", "/app.jar"]

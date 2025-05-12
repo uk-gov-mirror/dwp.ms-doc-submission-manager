@@ -18,6 +18,7 @@ workflow:
         paths: ['**/*']
       variables:
         ENVIRONMENT: 'nonprodacct'
+        ASSUME_ROLE_ARN: "arn:aws:iam::$NONPROD_SHARED_ACCOUNT_ID:role/gitlab/pip-apply-nonprod-pipeline-build"
       when: always
     ####################################################################################
     ### DEFAULT BRANCH                                                               ###
@@ -25,6 +26,7 @@ workflow:
     - if: '$CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH && $CI_PIPELINE_SOURCE == "web"'
       variables:
         ENVIRONMENT: 'nonprodacct'
+        ASSUME_ROLE_ARN: "arn:aws:iam::$NONPROD_SHARED_ACCOUNT_ID:role/gitlab/pip-apply-nonprod-pipeline-build"
       when: always
     ####################################################################################
     ### RELEASE BRANCHES - NONPROD CREDS                                             ###
@@ -32,6 +34,7 @@ workflow:
     - if: '$CI_COMMIT_REF_NAME =~ /^[Rr]-.*$/ && $CI_PIPELINE_SOURCE != "schedule" && $PROD_AWS_ACCESS_KEY_ID == null && $PROD_AWS_SECRET_ACCESS_KEY == null && $PROD_AWS_SESSION_TOKEN == null'
       variables:
         ENVIRONMENT: 'nonprodacct'
+        ASSUME_ROLE_ARN: "arn:aws:iam::$NONPROD_SHARED_ACCOUNT_ID:role/gitlab/pip-apply-nonprod-pipeline-build"
       when: always
     ####################################################################################
     ### RELEASE BRANCHES - PROD CREDS                                                ###
@@ -48,6 +51,7 @@ workflow:
     - if: '$CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH && $CI_PIPELINE_SOURCE == "schedule"'
       variables:
         ENVIRONMENT: 'nonprodacct'
+        ASSUME_ROLE_ARN: "arn:aws:iam::$NONPROD_SHARED_ACCOUNT_ID:role/gitlab/pip-apply-nonprod-pipeline-build"
         # job triggers
         DOCUMENTATION: "true"
       when: always
@@ -57,6 +61,7 @@ workflow:
     - if: '$CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH && $CI_PIPELINE_SOURCE == "push"' # the only push to default branch is on merge
       variables:
         ENVIRONMENT: 'nonprodacct'
+        ASSUME_ROLE_ARN: "arn:aws:iam::$NONPROD_SHARED_ACCOUNT_ID:role/gitlab/pip-apply-nonprod-pipeline-build"
         # job triggers
         MERGE_TO_DEVELOP: "true"
         DOCUMENTATION: "true"
@@ -67,5 +72,6 @@ workflow:
     - if: $CI_COMMIT_BRANCH == "main"
       variables:
         ENVIRONMENT: 'nonprodacct'
+        ASSUME_ROLE_ARN: "arn:aws:iam::$NONPROD_SHARED_ACCOUNT_ID:role/gitlab/pip-apply-nonprod-pipeline-build"
       when: always
     - when: never

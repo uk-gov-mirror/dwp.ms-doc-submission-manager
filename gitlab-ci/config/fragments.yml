@@ -58,9 +58,6 @@ include:
     ref: 5.1.1
     file: 'ci-include-docker-build-base.yml'
     #container-image-test
-  - project: 'dwp/engineering/pipeline-solutions/gitlab/fragments/sast-container-check'
-    ref: 2.11.0
-    file: 'ci-include-sast-container-check-base.yml'
   - project: 'dwp/engineering/pipeline-solutions/gitlab/fragments/trivy-container-check'
     ref: 2.21.0
     file: 'ci-include-trivy-container-check-base.yml'
@@ -87,3 +84,7 @@ include:
   - project: 'dwp/engineering/pipeline-solutions/gitlab/fragments/release-helper-jobs'
     ref: 1.0.1
     file: 'ci-include-release-jobs-gitflow.yml'
+  # oidc
+  - project: 'dwp/health/shared-tooling/gitlab-oidc-credentials'
+    ref: 1.0.0
+    file: 'gitlab-oidc-credentials.yml'

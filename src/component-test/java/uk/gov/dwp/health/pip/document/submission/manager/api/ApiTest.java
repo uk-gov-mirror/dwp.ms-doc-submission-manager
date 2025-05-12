@@ -13,11 +13,17 @@ import org.slf4j.LoggerFactory;
 
 import uk.gov.dwp.health.pip.document.submission.manager.config.RestAssuredConfiguration;
 
+import uk.gov.dwp.health.pip.document.submission.manager.utils.MessageUtil;
+
 import static io.restassured.RestAssured.given;
 
 public class ApiTest {
   static RequestSpecification requestSpec;
   private static boolean loggingReconfigured = false;
+  protected static MessageUtil applicationSubmittedUtils;
+  protected static MessageUtil stateChangeUtils;
+  protected static MessageUtil batchDocUtils;
+  protected static MessageUtil submittedApplicationUtils;
 
   @BeforeAll
   public static void setup() {
@@ -32,6 +38,34 @@ public class ApiTest {
             .addFilter(new AllureRestAssured())
             .build();
     RestAssuredConfiguration.configureObjectMapper();
+
+    var awsEndpointOverride = getEnv("AWS_ENDPOINT_OVERRIDE", "http://localhost:4566");
+    var awsRegion = getEnv("AWS_REGION", "eu-west-2");
+    var submissionQueueUrl =
+            getEnv(
+                    "SUBMISSION_QUEUE_URL",
+                    "http://localhost:4566/000000000000/application-submission");
+
+    var stateChangeQueueUrl =
+            getEnv(
+                    "STATE_CHANGE_QUEUE_URL",
+                    "http://localhost:4566/000000000000/state-change-in");
+
+    var batchDocQueueUrl =
+        getEnv(
+            "BATCH_DOC_QUEUE_URL",
+            "http://localhost:4566/000000000000/docbatch-batch-upload");
+
+    var submittedApplicationQueueUrl =
+        getEnv(
+            "SUBMITTED_APP_QUEUE_URL",
+            "http://localhost:4566/000000000000/submitted-application-queue");
+
+    applicationSubmittedUtils =
+        new MessageUtil(awsEndpointOverride, awsRegion, submissionQueueUrl);
+    batchDocUtils = new MessageUtil(awsEndpointOverride, awsRegion, batchDocQueueUrl);
+    stateChangeUtils = new MessageUtil(awsEndpointOverride, awsRegion, stateChangeQueueUrl);
+    submittedApplicationUtils = new MessageUtil(awsEndpointOverride, awsRegion, submittedApplicationQueueUrl);
   }
 
   private static void reduceLoggerOutput() {

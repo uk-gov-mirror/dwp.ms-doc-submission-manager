@@ -1,0 +1,11 @@
+{
+  "email": "testing@test.com",
+  "nino": "AA123456C",
+  "dob": "1990-01-20",
+  "forename": "Peter",
+  "surname": "Parker",
+  "mobile_phone": "01234567890",
+  "postcode": "AB12 3CD",
+  "language": "EN",
+  "user_journey": "STRATEGIC"
+}

@@ -1,0 +1,6 @@
+{
+  "questionType": "BOOL_QUESTION",
+  "reference": "moving-around-affected",
+  "question": "Does your condition affect you moving around?",
+  "response": true
+}

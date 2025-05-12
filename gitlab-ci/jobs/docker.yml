@@ -17,6 +17,10 @@
   rules:
     - if: $BUILD_TYPE
 
+.docker-not-prod: &docker-not-prod
+  rules:
+    - if: $BUILD_TYPE && $ENVIRONMENT == 'nonprodacct'
+
 .docker-not-merge: &docker-not-merge
   rules:
     - if: $BUILD_TYPE && $MERGE_TO_DEVELOP == null
@@ -34,7 +38,6 @@
     - export GITLAB_IMAGE="$CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG:${CI_COMMIT_SHA:0:8}"
     - export MOCK_IMAGE=$(aws ssm get-parameter --name "/artifact/$PRODUCT/$PIP_APPLY_MOCKS_NAME/$MOCK_IMAGE" --with-decryption --output json | jq --raw-output '.Parameter.Value')
     - echo $DT_API_TOKEN | docker login -u pik94420 --password-stdin https://pik94420.live.dynatrace.com
-    - echo $CI_JOB_TOKEN | docker login -u gitlab-ci-token --password-stdin $CI_REGISTRY
 
 ### LINT
 docker-lint:
@@ -82,18 +85,6 @@ api-test:
   needs: [maven-package, docker-build]
 
 ### IMAGE TEST
-sast-container:
-  extends: .sast-container-base
-  retry:
-    max: 2
-    when:
-      - runner_system_failure
-      - stuck_or_timeout_failure
-      - scheduler_failure
-  <<: *environment
-  <<: *docker-build
-  needs: [docker-build]
-
 trivy-container:
   extends: .trivy-container-base
   retry:
@@ -132,3 +123,14 @@ push-to-ecr-prodaws:
     ACCOUNT_ID: $PROD_ACCOUNT_ID
   <<: *environment
   <<: *docker-build-only-prod
+
+# Push to new pip account
+push-to-ecr-nonprod-pip:
+  extends:
+    - .setup-id-token
+    - .acquire-oidc-credentials
+    - .push-to-ecr
+  variables:
+    ACCOUNT_ID: $NONPROD_SHARED_ACCOUNT_ID
+  <<: *environment
+  <<: *docker-not-prod

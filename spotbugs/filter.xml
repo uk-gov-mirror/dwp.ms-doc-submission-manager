@@ -12,4 +12,9 @@
     <!-- May want to investigate as there are 47 of these reported -->
     <Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2"/>
   </Match>
+  <Match>
+    <!-- We need to convert objects to maps, this is safe -->
+    <Package name="uk.gov.dwp.health.pip.document.submission.manager.event.*"/>
+    <Bug pattern="CT_CONSTRUCTOR_THROW"/>
+  </Match>
 </FindBugsFilter>

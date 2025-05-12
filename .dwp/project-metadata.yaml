@@ -6,11 +6,11 @@ project:
   - project_id: 28977642
     component_name: ms-document-submission-manager
 
-    version: 2.9.2
+    version: 2.11.0
 
     last_verified:
-      date: "2025-02-26"
-      name: "@kevin.monteiro"
+      date: "2025-05-07"
+      name: "@matt.anderson4"
 
     tags:
       payments: false
