@@ -1,0 +1,299 @@
+components:
+  schemas:
+    ApplicationId:
+      type: object
+      description: application id
+      properties:
+        application_id:
+          example: "6ed1d430716609122be7a4d6"
+          type: string
+          pattern: ^[a-zA-Z0-9]{24}
+
+    NationalInsurance:
+      type: object
+      properties:
+        nino:
+          type: string
+          description: NINO
+          example: AA123456C
+          pattern: "(^(?!BG)(?!GB)(?!NK)(?!KN)(?!TN)(?!NT)(?!ZZ)[A-Z&&[^DFIQUV]][A-Z&&[^DFIOQUV]][0-9]{6}[A-D]$)"
+
+    ReviewId:
+      type: object
+      description: reviewId
+      properties:
+        review_id:
+          example: "662bab3052490c0dd2a42d21"
+          type: string
+          pattern: ^[a-zA-Z0-9]{24}
+
+    ReviewOutcome:
+      type: object
+      description: review outcome
+      properties:
+        review_outcome:
+          example: "ALLOWED"
+          type: string
+
+    DecisionId:
+      type: object
+      description: decision id
+      properties:
+        decision_id:
+          example: "662bab3052490c0dd2a42d21"
+          type: string
+          pattern: ^[a-zA-Z0-9]{24}
+
+    UserWhoCreatedTheReview:
+      type: object
+      description: user who created the review
+      properties:
+        user_who_created_the_review:
+          example: "aUser"
+          type: string
+
+    UserWhoCreatedTheDecision:
+      type: object
+      description: user who created the decision
+      properties:
+        user_who_created_the_decision:
+          example: "aUser"
+          type: string
+
+    ReviewCreatedDate:
+      type: object
+      description: date review created against the application
+      properties:
+        review_date:
+          example: "2023-01-29T17:32:28Z"
+          type: string
+          format: date-time
+
+    DecisionDate:
+      type: object
+      description: date decision recorded on the claim
+      properties:
+        decision_date:
+          example: "2023-01-29T17:32:28Z"
+          type: string
+          format: date-time
+
+    Decision:
+      type: object
+      properties:
+        decision:
+          $ref: '#/components/schemas/DecisionEnum'
+
+    DecisionEnum:
+      title: DecisionEnum
+      type: string
+      enum:
+        - ALLOWED
+        - DISALLOWED
+
+    DailyLivingRate:
+      type: object
+      properties:
+        daily_living_rate:
+          $ref: '#/components/schemas/Rate'
+
+    DecisionType:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/Type'
+
+    ReportType:
+      type: object
+      properties:
+        report_type:
+          $ref: '#/components/schemas/ReportTypeEnum'
+
+    MobilityRate:
+      type: object
+      properties:
+        mobility_rate:
+          $ref: '#/components/schemas/Rate'
+
+    Rate:
+      title: Rate
+      type: string
+      enum:
+        - NIL
+        - STANDARD
+        - ENHANCED
+
+    Type:
+      title: Type
+      type: string
+      enum:
+        - ORIGINAL
+        - MANDATORY_RECONSIDERATION
+
+    ReportTypeEnum:
+      title: ReportType
+      type: string
+      enum:
+        - FULL
+        - SUMMARY
+        - NONE
+
+    DailyLivingScore:
+      type: object
+      description: daily living score total
+      properties:
+        daily_living_score:
+          example: 15
+          type: integer
+          format: int32
+
+    MobilityScore:
+      type: object
+      description: mobility score total
+      properties:
+        mobility_score:
+          example: 12
+          type: integer
+          format: int32
+
+    AwardStartDate:
+      type: object
+      properties:
+        award_start_date:
+          type: string
+          format: date
+          example: "2024-04-20"
+
+    AwardEndDate:
+      type: object
+      properties:
+        award_end_date:
+          type: string
+          format: date
+          example: "2024-04-20"
+
+    RecommendedReviewDate:
+      type: object
+      properties:
+        recommended_review_date:
+          type: string
+          format: date
+          example: "2024-04-20"
+
+    ReviewDate:
+      type: object
+      properties:
+        review_date:
+          type: string
+          format: date
+          example: "2024-04-20"
+
+    CaseManagerReviewPeriod:
+      type: object
+      properties:
+        case_manager_review_period:
+          $ref: '#/components/schemas/CaseManagerReviewPeriodEnum'
+
+    CaseManagerReviewPeriodEnum:
+      title: CaseManagerReviewPeriodEnum
+      example: "1 year"
+      type: string
+      enum:
+        - "1 year"
+        - "18 months"
+        - "2 years"
+        - "3 years"
+        - "4 years"
+        - "5 years"
+        - "10 years"
+        - "Indefinite"
+        - "No review period needed"
+
+    RecommendedReviewPeriod:
+      type: object
+      properties:
+        recommended_review_period:
+          $ref: '#/components/schemas/RecommendedReviewPeriodEnum'
+
+    RecommendedReviewPeriodEnum:
+      title: RecommendedReviewPeriodEnum
+      example: "1 year"
+      type: string
+      enum:
+        - "1 year"
+        - "18 months"
+        - "2 years"
+        - "3 years"
+        - "4 years"
+        - "5 years"
+        - "10 years"
+        - "No future assessments required"
+        - "Other"
+
+    AssessmentReportCompletionDate:
+      type: object
+      properties:
+        assessment_report_completion_date:
+          type: string
+          format: date
+          example: "2024-04-20"
+
+    ReviewActivitiesDetails:
+      type: object
+      description: Container holding groups of activities used for making a decision
+      additionalProperties:
+        $ref: '#/components/schemas/ReviewActivitiesGroup'
+
+    ReviewActivitiesGroup:
+      type: object
+      description: Container holding activities used for making a decision
+      additionalProperties:
+        $ref: '#/components/schemas/ReviewActivitiesActivity'
+
+    ReviewActivitiesActivity:
+      title: ReviewActivitiesActivity
+      type: object
+      properties:
+        descriptor:
+          type: string
+        justification:
+          type: string
+        status:
+          type: string
+
+    UpdateReviewActivityRequest:
+      title: UpdateReviewActivityRequest
+      type: object
+      properties:
+        descriptor:
+          type: string
+        justification:
+          type: string
+
+    UpdateAgentAgreeAPReviewPeriodRequest:
+      type: object
+      properties:
+        does_agent_agree_ap_award_review_period:
+          $ref: '#/components/schemas/DoesAgentAgreeApAwardReviewPeriodEnum'
+        justification:
+          type: string
+          example: "justification for agreeing or disagreeing with ap review period"
+
+    DoesAgentAgreeApAwardReviewPeriodEnum:
+      title: DoesAgentAgreeApAwardReviewPeriodEnum
+      example: "YES"
+      type: string
+      enum:
+        - "YES"
+        - "NO"
+
+    QpPtDto:
+      title: QpPtDto
+      type: object
+      properties:
+        qualifying_period:
+          type: string
+          example: "yes"
+        prospective_test:
+          type: string
+          example: "no"

@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "$id": "https://gitlab.com/dwp/health/pip-apply/schemas/database/ms-account-manager-db-schema-v1.json",
+  "type": "object",
+  "title": "ms-account-manager database json schema",
+  "description": "Schema describe PIP-apply ms-account-manager database",
+  "properties": {
+    "auth": {
+      "type": "object",
+      "properties": {
+        "failedAttempts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "stage": {
+                "type": "string"
+              },
+              "timestamp": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "failureCounter": {
+          "type": "integer"
+        },
+        "password": {
+          "type": "string"
+        },
+        "status": {
+          "type": "integer"
+        }
+      }
+    },
+    "dateOfBirth": {
+      "type": "string"
+    },
+    "dobHash": {
+      "type": "string"
+    },
+    "emailAddress": {
+      "type": "string"
+    },
+    "enableCap": {
+      "type": "boolean"
+    },
+    "forename": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string"
+    },
+    "instanceId": {
+      "type": "string"
+    },
+    "language": {
+      "type": "string"
+    },
+    "mobileNumber": {
+      "type": "string"
+    },
+    "nino": {
+      "type": "string"
+    },
+    "ninoHash": {
+      "type": "string"
+    },
+    "postcode": {
+      "type": "string"
+    },
+    "region": {
+      "type": "string",
+      "enum": [
+        "GB",
+        "NI"
+      ]
+    },
+    "surname": {
+      "type": "string"
+    },
+    "userJourney": {
+      "type": "string",
+      "enum": [
+        "TACTICAL",
+        "STRATEGIC"
+      ]
+    }
+  }
+}

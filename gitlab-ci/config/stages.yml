@@ -11,8 +11,3 @@ stages:
   - update-project-metadata
   - create-schedules
   - open-source
-  - update-changelog
-  - release-mr-main
-  - release-tag
-  - release-update-version
-  - release-mr-develop

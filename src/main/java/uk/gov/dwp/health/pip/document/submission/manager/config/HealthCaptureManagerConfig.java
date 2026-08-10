@@ -12,13 +12,9 @@ public class HealthCaptureManagerConfig {
 
   private final HealthCaptureManagerProperties healthCaptureManagerProperties;
 
-  public String getHcmApplicationByIdUri() {
-    return this.healthCaptureManagerProperties.getBaseUri() + "/"
-        + this.healthCaptureManagerProperties.getGetApplicationByIdEndpoint();
-  }
-
-  public String getHcmFormSpecificationByIdUri() {
-    return this.healthCaptureManagerProperties.getBaseUri() + "/"
-        + this.healthCaptureManagerProperties.getGetFormSpecificationByIdEndpoint();
+  public String getHcmApplicationByIdV2Uri() {
+    return this.healthCaptureManagerProperties.getBaseUri()
+        + "/"
+        + this.healthCaptureManagerProperties.getGetApplicationByIdV2Endpoint();
   }
 }

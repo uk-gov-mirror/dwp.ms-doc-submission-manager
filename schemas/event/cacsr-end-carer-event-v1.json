@@ -1,0 +1,50 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "recordId": {
+      "type": "string",
+      "description": "Unique Identifier for each record in the file"
+    },
+    "fileName": {
+      "type": "string",
+      "pattern": "^[p|P]80201500[1|2]00\\d{5}$",
+      "description": "Carer Event file name"
+    },
+    "lastRecord": {
+      "type": "boolean",
+      "description": "Flag indicating if this is the last record"
+    },
+    "totalRecordCount": {
+      "type": "integer",
+      "description": "Total number of records in the file(populated when lastRecord is true)"
+    },
+    "recordType": {
+      "type": "string",
+      "enum": [
+        "3"
+      ]
+    },
+    "dpNino": {
+      "type": "string",
+      "pattern": "^(?!BG|GB|NK|KN|TN|NT|ZZ)[ABCEGHJ-PRSTW-Z][ABCEGHJ-NPRSTW-Z]\\d{6}"
+    },
+    "customerNino": {
+      "type": "string",
+      "pattern": "^(?!BG|GB|NK|KN|TN|NT|ZZ)[ABCEGHJ-PRSTW-Z][ABCEGHJ-NPRSTW-Z]\\d{6}[A-D]"
+    },
+    "serviceIndicator": {
+      "enum": [
+        "1",
+        "2"
+      ]
+    }
+  },
+  "required": [
+    "fileName",
+    "recordType",
+    "dpNino",
+    "customerNino",
+    "serviceIndicator"
+  ]
+}

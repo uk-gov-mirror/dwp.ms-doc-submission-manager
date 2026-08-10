@@ -1,17 +1,17 @@
 package uk.gov.dwp.health.pip.document.submission.manager.service.impl;
 
-import com.amazonaws.services.cloudwatch.AmazonCloudWatch;
-import com.amazonaws.services.cloudwatch.model.MetricDatum;
-import com.amazonaws.services.cloudwatch.model.PutMetricDataRequest;
-import com.amazonaws.services.cloudwatch.model.StandardUnit;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.core.env.Environment;
+import software.amazon.awssdk.services.cloudwatch.CloudWatchClient;
+import software.amazon.awssdk.services.cloudwatch.model.MetricDatum;
+import software.amazon.awssdk.services.cloudwatch.model.PutMetricDataRequest;
+import software.amazon.awssdk.services.cloudwatch.model.StandardUnit;
 import uk.gov.dwp.health.pip.document.submission.manager.config.properties.CloudWatchProperties;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -19,24 +19,31 @@ import static org.mockito.Mockito.verify;
 class CloudWatchMetricsServiceTest {
 
   @Test
-  public void incrementMetric() {
+  void incrementMetric() {
     final String metricName = "fred";
     final String namespace = "namespace";
-    final CloudWatchProperties properties = new CloudWatchProperties();
-    properties.setNamespace(namespace);
-    final AmazonCloudWatch client = mock(AmazonCloudWatch.class);
+
+    final CloudWatchProperties cloudWatchProperties = new CloudWatchProperties();
+    cloudWatchProperties.setNamespace(namespace);
+
+    final CloudWatchClient cloudWatchClient = mock(CloudWatchClient.class);
     final Environment environment = mock(Environment.class);
-    final CloudWatchMetricsServiceImpl service = new CloudWatchMetricsServiceImpl(client, properties, environment);
-    service.incrementMetric(metricName);
-    final ArgumentCaptor<PutMetricDataRequest> datum = ArgumentCaptor.forClass(PutMetricDataRequest.class);
-    verify(client, times(1)).putMetricData(datum.capture());
-    final PutMetricDataRequest actualRequest = datum.getValue();
-    final List<MetricDatum> metricData = actualRequest.getMetricData();
-    assertEquals(1, metricData.size());
-    assertEquals(metricName, metricData.get(0).getMetricName());
-    assertEquals(StandardUnit.None.toString(), metricData.get(0).getUnit());
-    assertEquals(1d, metricData.get(0).getValue());
-    assertEquals(5, metricData.get(0).getDimensions().size());
-    assertEquals(namespace, actualRequest.getNamespace());
+
+    final CloudWatchMetricsServiceImpl cloudWatchMetricsService =
+        new CloudWatchMetricsServiceImpl(cloudWatchClient, cloudWatchProperties, environment);
+    cloudWatchMetricsService.incrementMetric(metricName);
+
+    final ArgumentCaptor<PutMetricDataRequest> putMetricDataRequestArgumentCaptor =
+        ArgumentCaptor.forClass(PutMetricDataRequest.class);
+    verify(cloudWatchClient, times(1)).putMetricData(putMetricDataRequestArgumentCaptor.capture());
+
+    final PutMetricDataRequest putMetricDataRequest = putMetricDataRequestArgumentCaptor.getValue();
+    final List<MetricDatum> metricData = putMetricDataRequest.metricData();
+    assertThat(metricData).hasSize(1);
+    assertThat(metricData.get(0).metricName()).isEqualTo(metricName);
+    assertThat(metricData.get(0).unit()).isEqualTo(StandardUnit.NONE);
+    assertThat(metricData.get(0).value()).isEqualTo(1d);
+    assertThat(metricData.get(0).dimensions()).hasSize(5);
+    assertThat(putMetricDataRequest.namespace()).isEqualTo(namespace);
   }
 }

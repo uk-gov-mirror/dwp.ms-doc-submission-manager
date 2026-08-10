@@ -19,12 +19,6 @@ public class CloudWatchProperties {
   @NotBlank(message = "AWS region required")
   private String awsRegion;
 
-  @Value("${credentials.accessKey:}")
-  private String awsAccessKey;
-
-  @Value("${credentials.secretKey:}")
-  private String awsSecretAccessKey;
-
   private String endpointOverride;
 
   private String namespace;
@@ -37,5 +31,4 @@ public class CloudWatchProperties {
 
   @Value("${submission.failure.metric.name:submission-failed}")
   private String submissionFailureMetricName;
-
 }

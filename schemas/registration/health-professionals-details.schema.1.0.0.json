@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "$id": "https://gitlab.com/dwp/health/pip-apply/schemas/registration/health-professionals-details.schema.1.0.0.json",
+  "title": "address schema",
+  "description": "health professionals details schema definition.",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "pattern": "^[ -~]+$",
+      "examples": [
+        "Miss Medic"
+      ],
+      "maxLength": 56
+    },
+    "profession": {
+      "type": "string",
+      "examples": [
+        "GP"
+      ]
+    },
+    "phoneNumber": {
+      "type": "string",
+      "maxLength": 15,
+      "examples": [
+        "01234123123"
+      ]
+    },
+    "address": {
+      "$ref": "address.schema.1.0.0.json"
+    },
+    "lastContact": {
+      "type": "string",
+      "examples": [
+        "last week",
+        "20th June",
+        "about 18 months ago"
+      ]
+    }
+  },
+  "required": [
+    "name",
+    "profession",
+    "phoneNumber",
+    "address",
+    "lastContact"
+  ]
+}

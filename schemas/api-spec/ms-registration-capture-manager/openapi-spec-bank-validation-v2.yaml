@@ -1,0 +1,55 @@
+openapi: 3.1.0
+info:
+  title: Bank Account Details Validation API
+  description: RESTful API for bank account details validation
+  version: '@project.version@'
+
+paths:
+  /v2/validate:
+    post:
+      description: >-
+        Endpoint used to validate bank details.<br/>Correlation Id (UUID) and Consumer Id is a required header.
+      operationId: validate
+      parameters:
+        - name: X-Correlation-Id
+          in: header
+          required: true
+          schema:
+            pattern: "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"
+            type: string
+          example: aea45fc6-9ace-4fd9-b9a4-f78cdf1126a7
+        - name: X-Consumer-Id
+          in: header
+          required: true
+          schema:
+            pattern: "^([a-zA-Z0-9_\\s\\-]{1,8}$)"
+            type: string
+          example: BVAL-UI
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountDetails'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                example: [VALID]
+                enum: [VALID,SERVICE_DOWN,INVALID_ACCOUNT_COMBINATION,INVALID_ROLL_NUMBER,ROLL_NUMBER_FORMAT,ROLL_NUMBER_REQUIRED,INVALID_SORT_CODE_ACCOUNT_NUMBER_DATA_FORMAT]
+
+components:
+  schemas:
+    AccountDetails:
+      type: object
+      properties:
+        sortCode:
+          type: string
+        accountNumber:
+          type: string
+        rollNumber:
+          type: string

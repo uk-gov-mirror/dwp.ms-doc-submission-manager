@@ -1,0 +1,268 @@
+openapi: 3.1.0
+
+info:
+  title: DWP HTDS Submission Service - PIP
+  description: Rest API for managing document submissions
+  version: 2.0.0
+
+servers:
+  - url: 'https://localhost:8080'
+
+paths:
+  /v2/account/create:
+    post:
+      tags:
+        - create
+      summary: POST call to create a new account
+      description: POST call to create new account with all the verified data that will be used as part of the identification and authorisation steps
+      operationId: createAccount
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: 'openapi-spec-v1.yaml#/components/schemas/NewAccountRequest'
+      responses:
+        201:
+          description: CREATED - new account created
+          content:
+            application/json:
+              schema:
+                $ref: 'openapi-spec-v1.yaml#/components/schemas/AccountReturn'
+        400:
+          description: BAD REQUEST - badly formed json or duplicate entry
+        409:
+          description: CONFLICT - citizen account already exists. Will return message body of 'NINO' or 'EMAIL'
+          content:
+            application/json:
+              schema:
+                $ref: 'openapi-spec-v1.yaml#/components/schemas/FailureResponse'
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+
+  /v2/account/email:
+    patch:
+      tags:
+        - patch
+      summary: PATCH an account with new email address
+      description: PATCH to request updating existing email
+      operationId: updateEmail
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: 'openapi-spec-v1.yaml#/components/schemas/UpdateEmailRequest'
+      responses:
+        202:
+          description: ACCEPTED - email updated accepted
+          content:
+            application/json:
+              schema:
+                $ref: 'openapi-spec-v1.yaml#/components/schemas/AccountDetails'
+        400:
+          description: BAD REQUEST - badly formed json
+        401:
+          description: UNAUTHORIZED - Account not exist with given existing email
+        409:
+          description: CONFLICT - New email already registerd with an existing account
+          content:
+            application/json:
+              schema:
+                $ref: 'openapi-spec-v1.yaml#/components/schemas/FailureResponse'
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+
+  /v2/account/password:
+    post:
+      tags:
+        - password
+      summary: POST call request to create/reset password
+      description: POST to request create or reset password
+      operationId: createUpdatePassword
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: 'openapi-spec-v1.yaml#/components/schemas/PasswordSetResetRequest'
+      responses:
+        200:
+          description: OK - password reset successfully
+        201:
+          description: CREATED - new password created successfully
+        400:
+          description: BAD REQUEST - badly formed json
+        401:
+          description: UNAUTHORIZED - TOTP or credentials not valid
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+        503:
+          description: SERVICE UNAVAILABLE - TOTP or Notify failure
+
+
+  /v2/account/details/id/{accountId}:
+    get:
+      tags:
+        - query
+      summary: Get request to get account(s) details
+      description: GET request account details
+      operationId: accountDetailsByAccountNumber
+      parameters:
+        - name: accountId
+          in: path
+          description: unique account id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK - account exists with these values
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: 'openapi-spec-v1.yaml#/components/schemas/AccountDetails'
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+
+  /v2/account/details/email/{email}:
+    get:
+      tags:
+        - query
+      summary: Get request to get account(s) details
+      description: GET request account details
+      operationId: accountDetailsByEmail
+      parameters:
+        - name: email
+          in: path
+          description: email address
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK - account exists with these values
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: 'openapi-spec-v1.yaml#/components/schemas/AccountDetails'
+        400:
+          description: BAD REQUEST
+          content:
+            application/json:
+              schema:
+                $ref: 'openapi-spec-v1.yaml#/components/schemas/FailureResponse'
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+
+  /v2/account/details/nino/{nino}:
+    get:
+      tags:
+        - query
+      summary: Get request to get account(s) details
+      description: GET request account details
+      operationId: accountDetailsByNino
+      parameters:
+        - name: nino
+          in: path
+          description: national insurance number
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK - account exists with these values
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: 'openapi-spec-v1.yaml#/components/schemas/AccountDetails'
+        400:
+          description: BAD REQUEST
+          content:
+            application/json:
+              schema:
+                $ref: 'openapi-spec-v1.yaml#/components/schemas/FailureResponse'
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+
+  /v2/account/identification:
+    post:
+      tags:
+        - identification
+      summary: POST call to identify account holder
+      description: request account manager to identify citizen account exists with the option to generate a totp and send it for verification
+      operationId: identification
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: 'openapi-spec-v1.yaml#/components/schemas/IdRequest'
+      responses:
+        200:
+          description: OK - account exists with these values
+          content:
+            application/json:
+              schema:
+                $ref: 'openapi-spec-v1.yaml#/components/schemas/IdentificationResponse'
+        400:
+          description: BAD REQUEST - badly formed json
+        401:
+          description: UNAUTHORIZED - account does not exist with these values
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+        503:
+          description: SERVICE NOT AVAILABLE - TOTP or Notify failure
+
+  /v2/account/verify/login:
+    post:
+      tags:
+        - identification
+      summary: POST call request for initial login validation using email and password
+      description: POST call request to validate email with password and generate totp
+      operationId: validFirstFactor
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: 'openapi-spec-v1.yaml#/components/schemas/ValidEmailPasswordRequest'
+      responses:
+        200:
+          description: OK - account exist and credentials valid
+          content:
+            application/json:
+              schema:
+                $ref: 'openapi-spec-v1.yaml#/components/schemas/AccountReturn'
+        400:
+          description: BAD REQUEST - badly formed json
+        401:
+          description: UNAUTHORIZED - credentials not valid or account not exist
+        403:
+          description: FORBIDDEN - acccount locked allowed login attempts exceeded
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+        503:
+          description: SERVICE NOT AVAILABLE - TOTP or Notify failure
+
+  /v2/account/verify/totp:
+    post:
+      tags:
+        - identification
+      summary: POST call request to confirm and complete login validation using account and totp
+      description: POST call request validate totp
+      operationId: valid2fFactor
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: 'openapi-spec-v1.yaml#/components/schemas/ValidTotpRequest'
+      responses:
+        200:
+          description: OK - account validated
+        400:
+          description: BAD REQUEST - badly formed json
+        401:
+          description: UNAUTHORIZED - final credentials validation failed
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+        503:
+          description: SERVICE NOT AVAILABLE - TOTP failure

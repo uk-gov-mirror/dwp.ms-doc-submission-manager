@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "title": "award-event-outbound-v1",
+  "description": "Onward event from sending from award manager",
+  "required": [
+    "award_id",
+    "event_type",
+    "event"
+  ],
+  "properties": {
+    "award_id": {
+      "$ref": "#/$defs/award_id_def"
+    },
+    "event_type": {
+      "$ref": "common/award-event-types.json"
+    },
+    "event": {
+      "$ref": "common/award-events.json"
+    },
+    "notes": {
+      "$ref": "#/$defs/notes_def"
+    },
+    "eject_reason": {
+      "description": "Optional field that for REQUEST_EJECTION can be populated, its not required though even in that state",
+      "$ref": "common/eject-reason.json"
+    },
+    "application_id": {
+      "$ref": "#/$defs/application_id_def"
+    },
+    "nino": {
+      "$ref": "#/$defs/nino_def"
+    }
+  },
+  "$defs": {
+    "award_id_def": {
+      "type": "string",
+      "description": "Award ID"
+    },
+    "notes_def": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Notes field"
+    },
+    "nino_def": {
+      "type": "string",
+      "description": "Citizen nino associated with the application"
+    },
+    "application_id_def": {
+      "type": "string",
+      "description": "Application ID"
+    }
+  }
+}

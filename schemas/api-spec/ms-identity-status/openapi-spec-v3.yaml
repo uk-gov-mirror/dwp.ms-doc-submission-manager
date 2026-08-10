@@ -1,0 +1,179 @@
+openapi: 3.1.0
+
+info:
+  title: DWP IDENTITY STATUS SERVICE IDV
+  description: Rest API for managing user identity
+  version: 3.0.0
+
+servers:
+  - url: 'https://localhost:8080'
+
+paths:
+
+  /v3/identity:
+
+    post:
+      tags:
+        - identity
+      summary: Creates or updates an Identity with information from a oneLogin token, returns the Identity
+      operationId: registerUserIdentityV3
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                oneLoginToken:
+                  $ref: '#/components/schemas/OneLoginToken'
+                channel:
+                  type: string
+                  enum: [ oidv, aidv, seeded ]
+              required: [ oneLoginToken, channel ]
+      responses:
+        200:
+          description: Identity found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IdentityResponse3"
+        201:
+          description: Identity Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IdentityResponse3"
+        400:
+          description: Bad request - Invalid input
+        403:
+          description: Forbidden - token identity conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ForbiddenResponse"
+        409:
+          description: Conflict
+        500:
+          description: Internal server error - an internal error occurred
+
+    get:
+      tags:
+        - get
+      summary: Get an identity record. Exactly one of the following headers must be provided - oneloginSubjectId, nino, or subjectId.
+      operationId: getIdentity
+      description: Please note only one header is allowed. Providing more than one will result in a validation error.
+      parameters:
+        - in: header
+          name: oneloginSubjectId
+          schema:
+            type: string
+        - in: header
+          name: nino
+          schema:
+            $ref: '../../registration/personal-details.schema.1.2.0.json#/properties/nino'
+        - in: header
+          name: subjectId
+          schema:
+            $ref: 'openapi-spec-v1.yaml#/components/schemas/subjectId'
+      responses:
+        200:
+          description: The identity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetIdentityResponseV3'
+        400:
+          description: Bad request - Invalid input
+        404:
+          description: An identity with the given oneloginSubjectId, nino, or subjectId was not found.
+
+  /v3/identity/confirmed:
+
+    post:
+      tags:
+        - identity
+      summary: verify user identity
+      operationId: verifyUserIdentityV3
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                oneLoginToken:
+                  $ref: '#/components/schemas/OneLoginToken'
+              required: [ oneLoginToken ]
+      responses:
+        200:
+          description: Successfully published message to external system PIPCS
+        400:
+          description: Bad request - Invalid input
+        500:
+          description: Internal server error - an internal error occurred
+
+
+components:
+
+  schemas:
+
+    OneLoginToken:
+      type: string
+      minLength: 1
+
+    IdentityResponse3:
+      type: object
+      properties:
+        userId:
+          type: string
+          description: database id for Identity
+          example: "5ed0d430716609122be7a4d6"
+        nino:
+          $ref: '../../registration/personal-details.schema.1.2.0.json#/properties/nino'
+        oneLoginSubjectId:
+          type: string
+          description: oneLoginSubjectId
+        outcome:
+          type: string
+          enum: [created, updated, found]
+          description: an identity was created, updated or found in the db
+        updatedFields:
+          type: object
+          description: |
+            not a complete list, used to convey information for the user/UI, 
+            the identity can be updated in the database and this object absent or not contain the updated field.
+          properties:
+            newEmail:
+              type: string
+              description: the new email/subjectId saved in the database.
+
+    ForbiddenResponse:
+      type: string
+      enum: [ oneLoginSubjectIdConflict, ninoConflict, emailConflict ]
+
+    GetIdentityResponseV3:
+      type: object
+      properties:
+        userId:
+          type: string
+          description: database id for Identity
+          example: "5ed0d430716609122be7a4d6"
+        contactEmail:
+          $ref: 'openapi-spec-v1.yaml#/components/schemas/subjectId'
+        oneLoginSubjectId:
+          type: string
+          description: oneLoginSubjectId
+        nino:
+          $ref: '../../registration/personal-details.schema.1.2.0.json#/properties/nino'
+        vot:
+          type: string
+          enum:
+            - P0.Cl.Cm
+            - P1.Cl.Cm
+            - P2.Cl.Cm
+        KbvStatus:
+          type: string
+          description: The status of KBV
+          enum:
+            - VERIFIED
+            - UNVERIFIED

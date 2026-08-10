@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "pip-apply-decision-made-event-v1.json",
+  "type": "object",
+  "title": "DecisionMadeV1",
+  "description": "Event published outside of the pip apply context to notify that a decision has been made",
+  "required": [
+    "decision",
+    "bankDetails"
+  ],
+  "properties": {
+    "decision": {
+      "$ref": "common/decision-data-v1.json"
+    },
+  "bankDetails": {
+      "$ref": "common/bank-details-v1.json"
+    }
+  }
+}

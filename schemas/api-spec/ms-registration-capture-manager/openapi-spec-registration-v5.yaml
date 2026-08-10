@@ -1,0 +1,73 @@
+openapi: '3.1.0'
+
+info:
+  title: DWP PIP Application Manager Service
+  description: Rest API for managing the application
+  version: '@project.version@'
+
+servers:
+  - url: 'https://localhost:8080'
+
+paths:
+
+  /v5/application/status:
+    get:
+      tags:
+        - registration
+      summary: get registration status data by a choice of one of 4 id's
+      operationId: getRegistrationStatusByIds
+      description: Please note only one query parameter is allowed
+      parameters:
+        - in: query
+          name: application_id
+          schema:
+            type: string
+            pattern: ^[a-z0-9]{24}
+            example: "5ed0d430716609122be7a4d6"
+        - in: query
+          name: claimant_id
+          schema:
+            type: string
+            pattern: ^[a-z0-9]{24}
+            example: "5ed0d430716609122be7a4d6"
+        - in: query
+          name: nino
+          schema:
+            type: string
+            pattern: ^(?!BG|GB|NK|KN|TN|NT|ZZ)[ABCEGHJ-PRSTW-Z][ABCEGHJ-NPRSTW-Z]\d{6}[A-D]
+            example: "NS212121D"
+        - in: query
+          name: submission_id
+          schema:
+            type: string
+            pattern: ^[a-z0-9]{24}
+            example: "5ed0d430716609122be7a4d6"
+      responses:
+        200:
+          description: OK - claimant id and overall status history
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/V5ApplicationStatus'
+        404:
+          description: NOT FOUND - application not found
+        400:
+          description: Bad request, either zero or more than one id is passed
+
+        409:
+          description: Multiple applications found with passed id
+
+components:
+  schemas:
+    V5ApplicationStatus:
+      type: object
+      description: application status history and a bunch of other id's
+      title: Claimant id and application status history
+      allOf:
+        - $ref: 'includes/components.yaml#/components/schemas/ApplicationId'
+        - $ref: 'includes/components.yaml#/components/schemas/ClaimantId'
+        - $ref: 'includes/components.yaml#/components/schemas/SubmissionId'
+        - $ref: 'includes/components.yaml#/components/schemas/Nino'
+        - $ref: 'includes/components.yaml#/components/schemas/StateDto'
+
+

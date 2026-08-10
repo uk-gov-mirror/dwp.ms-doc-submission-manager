@@ -1,0 +1,116 @@
+openapi: '3.1.0'
+
+info:
+  title: DWP PIP Decision Manager Service
+  description: Rest API for operations relating to metadata
+  version: '@project.version@'
+
+servers:
+  - url: 'https://localhost:8080'
+
+paths:
+
+  /v1/metadata/activities:
+    get:
+      tags:
+        - activities
+      summary: Get metadata describing mapping from descriptions to scores and descriptions for all activities
+      operationId: getActivityMetadata
+      responses:
+        200:
+          description: OK - Activities, scores and descriptors retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivitiesMetadata'
+              example:
+                dailyLiving:
+                  title:
+                    en: "Daily Living"
+                    cy: "Bywyd bob dydd"
+                  activities:
+                    takingNutrition:
+                      title:
+                        en: "Can take nutrition unaided"
+                        cy: "Gall gymryd maeth heb gymorth"
+                      descriptors:
+                        A:
+                          score: 2
+                          description:
+                            en: "Needs"
+                            cy: "Anghenion"
+                          options:
+                            en:
+                              - "prompting to be able to dress, undress or determine appropriate circumstances for remaining clothed"
+                              - "prompting or assistance to be able to select appropriate clothing"
+                            cy:
+                              - "anogaeth i allu gwisgo, dadwisgo neu bennu amgylchiadau priodol ar gyfer aros yn ddillad"
+                              - "anogaeth neu gymorth i allu dewis dillad priodol"
+
+        404:
+          description: NOT FOUND - Activities not found
+        500:
+          description: INTERNAL SERVER ERROR - Internal server error occurred
+
+components:
+  securitySchemes:
+    sideCarProxySecurity:
+      type: mutualTLS
+      description: "Security is enforced by an external side car proxy using mTLS, not directly by this API"
+      x-sidecar-implementation: true
+  schemas:
+    ActivitiesMetadata:
+      type: object
+      additionalProperties:
+        $ref: '#/components/schemas/GroupMetadata'
+
+    GroupMetadata:
+      type: object
+      properties:
+        title:
+          type: object
+          additionalProperties:
+            type: string
+        order:
+          type: number
+        activities:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/ActivityMetadata'
+
+    ActivityMetadata:
+      type: object
+      properties:
+        title:
+          type: object
+          additionalProperties:
+            type: string
+        order:
+          type: number
+        descriptors:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/DescriptorMetadata'
+
+    DescriptorMetadata:
+      type: object
+      properties:
+        score:
+          type: integer
+          format: int32
+          example: 2
+        description:
+          type: object
+          additionalProperties:
+            type: string
+        options:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+          x-field-extra-annotation: "@com.fasterxml.jackson.annotation.JsonInclude(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY)"
+      required: [ "score", "description" ]
+
+security:
+  - sideCarProxySecurity : []

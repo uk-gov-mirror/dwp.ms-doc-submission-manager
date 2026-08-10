@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://business.events.integration.health.dwp.gov.uk/intra-domain-business-event/pipservice-referral-created-payload-schema.json",
+  "type": "object",
+  "title": "pipservice-referral-created-payload-schema",
+  "description": "Intra Domain Business Event. PIP Service referral created Schema (Fat Event Payload with callback url)",
+  "required": [
+    "payload"
+  ],
+  "properties": {
+    "payload": {
+      "type": "object",
+      "$ref": "#/$defs/payload_def_v1_0_2"
+    }
+  },
+  "$defs": {
+    "payload_def_v1_0_2": {
+      "type": "object",
+      "properties": {
+        "referral_id": {
+          "$ref": "#/$defs/referral_id_def"
+        },
+        "referral_type": {
+          "$ref": "#/$defs/referral_type_def"
+        },
+        "referral_created_date": {
+          "$ref": "#/$defs/referral_created_date_def"
+        },
+        "benefit_system": {
+          "type": "string",
+          "enum": [
+            "PIPSERVICE",
+            "pipservice"
+          ]
+        },
+        "benefit_type": {
+          "type": "string",
+          "enum": [
+            "PIP",
+            "pip"
+          ]
+        },
+        "nino": {
+          "$ref": "#/$defs/nino_def"
+        },
+        "first_name": {
+          "$ref": "#/$defs/name_def"
+        },
+        "surname": {
+          "$ref": "#/$defs/name_def"
+        },
+        "dob": {
+          "$ref": "#/$defs/dob_def"
+        },
+        "srel": {
+          "$ref": "#/$defs/srel_def"
+        },
+        "postcode": {
+          "$ref": "#/$defs/postcode_def"
+        },
+        "referral_details_id": {
+          "$ref": "#/$defs/referral_details_id_def"
+        }
+      },
+      "required": [
+        "referral_id",
+        "referral_type",
+        "referral_created_date",
+        "benefit_system",
+        "benefit_type",
+        "nino",
+        "first_name",
+        "surname",
+        "dob",
+        "srel",
+        "postcode",
+        "referral_details_url"
+      ]
+    },
+    "referral_id_def": {
+      "type": "string",
+      "description": "PIP Service referral guid"
+    },
+    "referral_type_def": {
+      "type": "string",
+      "enum": [
+        "newReferral"
+      ],
+      "description": "PIP Service referral type. Enumerates all supported referral types such as new referrals, mandatory reconsiderations etc;"
+    },
+    "referral_created_date_def": {
+      "type": "string",
+      "description": "ISO8601 date string. Date the PIP referral was created"
+    },
+    "nino_def": {
+      "type": "string",
+      "description": "Citizen nino associated with the referral"
+    },
+    "name_def": {
+      "type": "string",
+      "description": "Citizen Name type",
+      "maxlength": 70
+    },
+    "dob_def": {
+      "type": "string",
+      "description": "ISO8601 date string. Citizen Date of Birth"
+    },
+    "srel_def": {
+      "type": "boolean",
+      "description": "Citizen SREL status. 'true'(Citizen has been determined as SREL), 'false'(Citizen has been determined as not SREL)"
+    },
+    "postcode_def": {
+      "type": "string",
+      "description": "Citizen postcode"
+    },
+    "referral_details_id_def": {
+      "type": "string",
+      "description": "PIP Service referral details Id. Used by consumer to get referral details from PIP Application Manager Registration end-point"
+    }
+  }
+}

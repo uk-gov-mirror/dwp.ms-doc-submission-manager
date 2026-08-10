@@ -6,11 +6,6 @@
 ###      - image push                                                                ###
 ########################################################################################
 
-### ENVIRONMENT
-.environment: &environment
-  environment:
-    name: "$ENVIRONMENT"
-    action: prepare
 
 ### TRIGGERS
 .docker-build: &docker-build
@@ -27,22 +22,21 @@
 
 .docker-build-only-prod: &docker-build-only-prod
   rules:
-    - if: $BUILD_TYPE && $PROD_AWS_ACCESS_KEY_ID && $PROD_AWS_SECRET_ACCESS_KEY && $PROD_AWS_SESSION_TOKEN
+    - if: $BUILD_TYPE && $PROD_RELEASE == "true"
+  environment:
+    name: "prodacct"
+    action: prepare
 
 .prepare-test: &prepare-test
   before_script:
-    - apk add --no-cache py-pip jq
-    - pip install awscli
-    - eval $(aws ecr get-login --no-include-email --region eu-west-2 | sed 's|https://||')
     - echo $CI_JOB_TOKEN | docker login -u gitlab-ci-token --password-stdin $CI_REGISTRY
     - export GITLAB_IMAGE="$CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG:${CI_COMMIT_SHA:0:8}"
-    - export MOCK_IMAGE=$(aws ssm get-parameter --name "/artifact/$PRODUCT/$PIP_APPLY_MOCKS_NAME/$MOCK_IMAGE" --with-decryption --output json | jq --raw-output '.Parameter.Value')
-    - echo $DT_API_TOKEN | docker login -u pik94420 --password-stdin https://pik94420.live.dynatrace.com
+    - export MOCK_IMAGE="$PIP_APPLY_MOCKS_IMAGE:$PIP_APPLY_MOCKS_BRANCH"
+    - echo $DT_API_TOKEN_SAAS | docker login -u eyq18885 --password-stdin https://eyq18885.live.dynatrace.com
 
 ### LINT
 docker-lint:
   extends: .docker-lint-template
-  <<: *environment
   <<: *docker-not-merge
   needs: []
 
@@ -50,11 +44,10 @@ docker-lint:
 docker-build:
   extends: .docker-build-template
   before_script:
-    - echo $DT_API_TOKEN | docker login -u pik94420 --password-stdin https://pik94420.live.dynatrace.com
+    - echo $DT_API_TOKEN_SAAS | docker login -u eyq18885 --password-stdin https://eyq18885.live.dynatrace.com
   variables:
     ADD_LATEST_TAG: "true"
     DOCKER_CLI_ARGS: "--build-arg GITLAB_REGISTRY_TOKEN=${GITLAB_REGISTRY_TOKEN}"
-  <<: *environment
   <<: *docker-build
   needs: [maven-package]
 
@@ -64,7 +57,8 @@ api-test:
   stage: component-test
   variables:
     DOCKER_COMPOSE_FILE: "docker-compose.yml"
-    DOCKER_COMPOSE_COMMAND: "--exit-code-from api-test"
+    DOCKER_COMPOSE_PRE: "docker-compose up -d --scale api-test=0"
+    DOCKER_COMPOSE_COMMAND: "--exit-code-from api-test api-test"
     MVN_OPTS: '-Dmaven.repo.local=~/.m2/repository'
     MVN_M2: "~/.m2"
   <<: *prepare-test
@@ -80,7 +74,6 @@ api-test:
       - target/test/reports/
     when: always
     expose_as: 'Document Submission manager API Component Test Report'
-  <<: *environment
   <<: *docker-build
   needs: [maven-package, docker-build]
 
@@ -93,44 +86,37 @@ trivy-container:
       - runner_system_failure
       - stuck_or_timeout_failure
       - scheduler_failure
-  <<: *environment
   <<: *docker-build
   needs: [docker-build]
 
 container-test-command:
   extends: .container-test-template
-  <<: *environment
   <<: *docker-build
   needs: [docker-build]
 
 ### IMAGE PUSH
 push-to-ecr-nonprodaws:
-  extends: .push-to-ecr
-  variables:
-    ACCOUNT_ID: $DEV_ACCOUNT_ID
-  <<: *environment
-  <<: *docker-build
-
-push-to-ecr-prodaws:
-  extends: .push-to-ecr
-  before_script:
-    - |
-      echo "Setting production credentials..."
-      export AWS_ACCESS_KEY_ID=$PROD_AWS_ACCESS_KEY_ID
-      export AWS_SECRET_ACCESS_KEY=$PROD_AWS_SECRET_ACCESS_KEY
-      export AWS_SESSION_TOKEN=$PROD_AWS_SESSION_TOKEN
-  variables:
-    ACCOUNT_ID: $PROD_ACCOUNT_ID
-  <<: *environment
-  <<: *docker-build-only-prod
-
-# Push to new pip account
-push-to-ecr-nonprod-pip:
   extends:
     - .setup-id-token
     - .acquire-oidc-credentials
     - .push-to-ecr
   variables:
     ACCOUNT_ID: $NONPROD_SHARED_ACCOUNT_ID
-  <<: *environment
-  <<: *docker-not-prod
+    ASSUME_ROLE_ACCOUNT_ID: $NONPROD_SHARED_ACCOUNT_ID
+  <<: *docker-build
+
+push-to-ecr-prodaws:
+  extends:
+    - .setup-id-token
+    - .acquire-oidc-credentials
+    - .push-to-ecr
+  variables:
+    ACCOUNT_ID: $PROD_SHARED_ACCOUNT_ID
+    ASSUME_ROLE_ACCOUNT_ID: $PROD_SHARED_ACCOUNT_ID
+  <<: *docker-build-only-prod
+
+dwp-place-change-verification-trigger:
+  variables:
+    ASSUME_ROLE_ACCOUNT_ID: $PROD_SHARED_ACCOUNT_ID
+  <<: *docker-build-only-prod
+

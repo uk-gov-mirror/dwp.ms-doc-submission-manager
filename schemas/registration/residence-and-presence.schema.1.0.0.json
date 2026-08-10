@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "$id": "https://gitlab.com/dwp/health/pip-apply/schemas/registration/residence-and-presence.schema.1.0.0.json",
+  "title": "residence and presence schema",
+  "description": "The residence and presence section of the registration data",
+  "type": "object",
+  "properties": {
+    "nationality": {
+      "description": "The claimant's nationality",
+      "$ref": "nationality.schema.1.0.0.json"
+    },
+    "residentBeforeBrexit": {
+      "type": "string",
+      "enum": [
+        "Yes",
+        "No",
+        "Don't know"
+      ]
+    },
+    "inUkTwoOutOfThreeYears": {
+      "type": "string",
+      "enum": [
+        "Yes",
+        "No",
+        "Don't know"
+      ]
+    },
+    "receivingPensionsOrBenefitsFromEEA": {
+      "type": "boolean"
+    },
+    "payingInsuranceEEA": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "nationality"
+  ]
+}

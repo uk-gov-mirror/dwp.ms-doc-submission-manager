@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "string",
+  "javaType" : "uk.gov.dwp.health.pip.common.model.events.v1.award.AwardStates",
+  "title": "AwardStates",
+  "description": "States for the lifecycle of the claim",
+  "enum": [
+    "CREATED",
+    "IN_PAYMENT",
+    "SUSPENDED",
+    "STOPPED",
+    "EJECTED_PAYMENT_STOPPED",
+    "EJECTED_REBUILT_IN_PIPCS",
+    "FINISHED"
+  ]
+}

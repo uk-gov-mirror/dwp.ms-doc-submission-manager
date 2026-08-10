@@ -1,0 +1,410 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "$id": "https://gitlab.com/dwp/health/pip-apply/schemas/health-and-disability/daily-living.schema.1.0.0.json",
+  "title": "daily living schema",
+  "description": "Schema to describe the details needed for daily living section within the the pip-apply application",
+  "type": "object",
+  "properties": {
+    "preparingFood": {
+      "description": "Supports the provision of details for the preparing food section of a PIP2 claim",
+      "type": "object",
+      "properties": {
+        "conditionAffected": {
+          "$ref": "#/$defs/conditionAffected"
+        }
+      },
+      "oneOf": [
+        {
+          "properties": {
+            "conditionAffected": {
+              "const": false
+            }
+          },
+          "required": [ "conditionAffected" ],
+          "additionalProperties": false
+        },
+        {
+          "properties": {
+            "conditionAffected": {
+              "const": true
+            },
+            "preparingFoodDescription": {
+              "description": "Free text to hold details entered by a claimant about any difficulties they have with preparing food.",
+              "type": "string",
+              "maxLength": 5000,
+              "examples": [
+                "All of the details the claimant wants to enter about their difficulties preparing food."
+              ]
+            }
+          },
+          "required": [ "conditionAffected", "preparingFoodDescription" ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "eatingDrinking": {
+      "description": "Supports the provision of details for the eating and drinking section of a PIP2 claim",
+      "type": "object",
+      "properties": {
+        "conditionAffected": {
+          "$ref": "#/$defs/conditionAffected"
+        }
+      },
+      "oneOf": [
+        {
+          "properties": {
+            "conditionAffected": {
+              "const": false
+            }
+          },
+          "required": [ "conditionAffected" ],
+          "additionalProperties": false
+        },
+        {
+          "properties": {
+            "conditionAffected": {
+              "const": true
+            },
+            "useFeedingTube": {
+              "type": "string",
+              "description": "indicates whether a claimant uses a feeding tube or similar device to eat or drink.",
+              "enum": [
+                "Yes",
+                "No"
+              ],
+              "examples": [
+                "No"
+              ]
+            },
+            "eatingDrinkingDescription": {
+              "description": "Free text to hold details entered by a claimant about any difficulties they have with eating and drinking.",
+              "type": "string",
+              "maxLength": 5000,
+              "examples": [
+                "All of the details the claimant wants to enter about their difficulties eating and drinking."
+              ]
+            }
+          },
+          "required": [ "conditionAffected", "useFeedingTube", "eatingDrinkingDescription" ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "manageTreatment": {
+      "description": "Supports the provision of details for the managing treatments section of a PIP2 claim",
+      "type": "object",
+      "properties": {
+        "conditionAffected": {
+          "$ref": "#/$defs/conditionAffected"
+        }
+      },
+      "oneOf": [
+        {
+          "properties": {
+            "conditionAffected": {
+              "const": false
+            }
+          },
+          "required": [ "conditionAffected" ],
+          "additionalProperties": false
+        },
+        {
+          "properties": {
+            "conditionAffected": {
+              "const": true
+            },
+            "therapy": {
+              "type": "string",
+              "description": "Free text to hold details entered by a claimant about any therapies taken at home that need the help of another person.",
+              "maxLength": 5000,
+              "examples": [
+                "All of the details the claimant wants to enter about their therapies."
+              ]
+            },
+            "manageTreatmentDescription": {
+              "description": "Free text to hold details entered by a claimant about any difficulties they have with managing their treatments.",
+              "type": "string",
+              "maxLength": 5000,
+              "examples": [
+                "All of the details the claimant wants to enter about difficulties managing their treatments."
+              ]
+            }
+          },
+          "required": [ "conditionAffected", "therapy", "manageTreatmentDescription" ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "washingBathing": {
+      "description": "Supports the provision of details for the washing and bathing section of a PIP2 claim",
+      "type": "object",
+      "properties": {
+        "conditionAffected": {
+          "$ref": "#/$defs/conditionAffected"
+        }
+      },
+      "oneOf": [
+        {
+          "properties": {
+            "conditionAffected": {
+              "const": false
+            }
+          },
+          "required": [ "conditionAffected" ],
+          "additionalProperties": false
+        },
+        {
+          "properties": {
+            "conditionAffected": {
+              "const": true
+            },
+            "washingBathingDescription": {
+              "description": "Free text to hold details entered by a claimant about any difficulties they have with washing and bathingd.",
+              "type": "string",
+              "maxLength": 5000,
+              "examples": [
+                "All of the details the claimant wants to enter about their difficulties washing and bathing."
+              ]
+            }
+          },
+          "required": [ "conditionAffected", "washingBathingDescription" ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "toiletIncontinence": {
+      "description": "Supports the provision of details for the toilet needs and incontinence section of a PIP2 claim",
+      "type": "object",
+      "properties": {
+        "conditionAffected": {
+          "$ref": "#/$defs/conditionAffected"
+        }
+      },
+      "oneOf": [
+        {
+          "properties": {
+            "conditionAffected": {
+              "const": false
+            }
+          },
+          "required": [ "conditionAffected" ],
+          "additionalProperties": false
+        },
+        {
+          "properties": {
+            "conditionAffected": {
+              "const": true
+            },
+            "toiletIncontinenceDescription": {
+              "description": "Free text to hold details entered by a claimant about any difficulties they have with going to the toilet and managing incontinence.",
+              "type": "string",
+              "maxLength": 5000,
+              "examples": [
+                "All of the details the claimant wants to enter about their difficulties going to the toilet and managing incontinence."
+              ]
+            }
+          },
+          "required": [ "conditionAffected", "toiletIncontinenceDescription" ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "dressingUndressing": {
+      "description": "Supports the provision of details for the dressing and undressing section of a PIP2 claim",
+      "type": "object",
+      "properties": {
+        "conditionAffected": {
+          "$ref": "#/$defs/conditionAffected"
+        }
+      },
+      "oneOf": [
+        {
+          "properties": {
+            "conditionAffected": {
+              "const": false
+            }
+          },
+          "required": [ "conditionAffected" ],
+          "additionalProperties": false
+        },
+        {
+          "properties": {
+            "conditionAffected": {
+              "const": true
+            },
+            "dressingUndressingDescription": {
+              "description": "Free text to hold details entered by a claimant about any difficulties they have with dressing and undressing.",
+              "type": "string",
+              "maxLength": 5000,
+              "examples": [
+                "All of the details the claimant wants to enter about their difficulties dressing and undressing."
+              ]
+            }
+          },
+          "required": [ "conditionAffected", "dressingUndressingDescription" ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "commCognitive": {
+      "description": "Supports the provision of details for the talking, listening and understanding section of a PIP2 claim",
+      "type": "object",
+      "properties": {
+        "conditionAffected": {
+          "$ref": "#/$defs/conditionAffected"
+        }
+      },
+      "oneOf": [
+        {
+          "properties": {
+            "conditionAffected": {
+              "const": false
+            }
+          },
+          "required": [ "conditionAffected" ],
+          "additionalProperties": false
+        },
+        {
+          "properties": {
+            "conditionAffected": {
+              "const": true
+            },
+            "commCognitiveDescription": {
+              "description": "Free text to hold details entered by a claimant about any difficulties they have talking, listening and understanding.",
+              "type": "string",
+              "maxLength": 5000,
+              "examples": [
+                "All of the details the claimant wants to enter about their difficulties talking, listening and understanding."
+              ]
+            }
+          },
+          "required": [ "conditionAffected", "commCognitiveDescription" ],
+          "additionalProperties": false
+        }
+      ]
+
+    },
+    "reading": {
+      "description": "Supports the provision of details for the reading section of a PIP2 claim",
+      "type": "object",
+      "properties": {
+        "conditionAffected": {
+          "$ref": "#/$defs/conditionAffected"
+        }
+      },
+      "oneOf": [
+        {
+          "properties": {
+            "conditionAffected": {
+              "const": false
+            }
+          },
+          "required": [ "conditionAffected" ],
+          "additionalProperties": false
+        },
+        {
+          "properties": {
+            "conditionAffected": {
+              "const": true
+            },
+            "readingDescription": {
+              "description": "Free text to hold details entered by a claimant about any difficulties they have with reading.",
+              "type": "string",
+              "maxLength": 5000,
+              "examples": [
+                "All of the details the claimant wants to enter about their difficulties reading."
+              ]
+            }
+          },
+          "required": [ "conditionAffected", "readingDescription" ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "social": {
+      "description": "Supports the provision of details for the mixing with other people section of a PIP2 claim",
+      "type": "object",
+      "properties": {
+        "conditionAffected": {
+          "$ref": "#/$defs/conditionAffected"
+        }
+      },
+      "oneOf": [
+        {
+          "properties": {
+            "conditionAffected": {
+              "const": false
+            }
+          },
+          "required": [ "conditionAffected" ],
+          "additionalProperties": false
+        },
+        {
+          "properties": {
+            "conditionAffected": {
+              "const": true
+            },
+            "socialDescription": {
+              "description": "Free text to hold details entered by a claimant about any difficulties they have mixing with other people.",
+              "type": "string",
+              "maxLength": 5000,
+              "examples": [
+                "All of the details the claimant wants to enter about their difficulties mixing with other people."
+              ]
+            }
+          },
+          "required": [ "conditionAffected", "socialDescription" ],
+          "additionalProperties": false
+        }
+      ]
+
+    },
+    "manageMoney": {
+      "description": "Supports the provision of details for the managing money section of a PIP2 claim",
+      "type": "object",
+      "properties": {
+        "conditionAffected": {
+          "$ref": "#/$defs/conditionAffected"
+        }
+      },
+      "oneOf": [
+        {
+          "properties": {
+            "conditionAffected": {
+              "const": false
+            }
+          },
+          "required": [ "conditionAffected" ],
+          "additionalProperties": false
+        },
+        {
+          "properties": {
+            "conditionAffected": {
+              "const": true
+            },
+            "manageMoneyDescription": {
+              "description": "Free text to hold details entered by a claimant about any difficulties they have with managing money.",
+              "type": "string",
+              "maxLength": 5000,
+              "examples": [
+                "All of the details the claimant wants to enter about their difficulties managing money."
+              ]
+            }
+          },
+          "required": [ "conditionAffected", "manageMoneyDescription" ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  "$defs": {
+    "conditionAffected": {
+      "description": "Indicates whether a claimant's condition affects a particular aspect of their daily living",
+      "type": "boolean",
+      "examples": [
+        true,
+        false
+      ]
+    }
+  }
+}

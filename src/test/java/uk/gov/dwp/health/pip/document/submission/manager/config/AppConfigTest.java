@@ -1,10 +1,10 @@
 package uk.gov.dwp.health.pip.document.submission.manager.config;
 
-import com.fasterxml.jackson.databind.json.JsonMapper;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.json.JsonMapper;
 import uk.gov.dwp.health.pip.document.submission.manager.utils.RequestPartition;
 
 import java.text.DateFormat;

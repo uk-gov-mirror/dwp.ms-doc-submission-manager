@@ -1,72 +1,79 @@
 package uk.gov.dwp.health.pip.document.submission.manager.utils;
 
-import com.amazonaws.client.builder.AwsClientBuilder;
-import com.amazonaws.services.sns.AmazonSNS;
-import com.amazonaws.services.sns.AmazonSNSClientBuilder;
-import com.amazonaws.services.sqs.AmazonSQS;
-import com.amazonaws.services.sqs.AmazonSQSClientBuilder;
-import com.amazonaws.services.sqs.model.GetQueueAttributesRequest;
-import com.amazonaws.services.sqs.model.PurgeQueueRequest;
-import com.amazonaws.services.sqs.model.QueueAttributeName;
-import com.amazonaws.services.sqs.model.ReceiveMessageResult;
-import com.amazonaws.services.sqs.model.SendMessageRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.sqs.SqsClient;
+import software.amazon.awssdk.services.sqs.model.GetQueueAttributesRequest;
+import software.amazon.awssdk.services.sqs.model.Message;
+import software.amazon.awssdk.services.sqs.model.PurgeQueueRequest;
+import software.amazon.awssdk.services.sqs.model.QueueAttributeName;
+import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest;
+import software.amazon.awssdk.services.sqs.model.ReceiveMessageResponse;
+import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
 
+import java.net.URI;
 import java.time.Duration;
 import java.util.Map;
 
 import static org.awaitility.Awaitility.await;
 
 public class MessageUtil {
-  private final AmazonSQS amazonSQS;
-  private final String queueUrl;
+  private static final Logger logger = LoggerFactory.getLogger(MessageUtil.class);
+  private static final Duration QUEUE_CLEAR_TIMEOUT = Duration.ofMinutes(1);
+  private static final int MAX_MESSAGES_TO_RECEIVE = 1;
+  private static final String ZERO_MESSAGES = "0";
 
-  public MessageUtil(
-      String serviceEndpoint,
-      String awsRegion,
-      String queueUrl) {
-    var endpointConfiguration =
-        new AwsClientBuilder.EndpointConfiguration(serviceEndpoint, awsRegion);
-    amazonSQS =
-        AmazonSQSClientBuilder.standard().withEndpointConfiguration(endpointConfiguration).build();
-    this.queueUrl = queueUrl;
+  private final SqsClient sqsClient;
+
+  public MessageUtil(String serviceEndpoint, String awsRegion) {
+    this.sqsClient =
+        SqsClient.builder()
+            .endpointOverride(URI.create(serviceEndpoint))
+            .region(Region.of(awsRegion))
+            .build();
   }
 
-  public void sendMessageToQueue(final String payload) {
-    SendMessageRequest sendMessageRequest = new SendMessageRequest(queueUrl, payload);
-    amazonSQS.sendMessage(sendMessageRequest);
+  public String getMessageCount(String queueUrl) {
+    Map<QueueAttributeName, String> queueAttributes = getQueueAttributes(queueUrl);
+    return queueAttributes.get(QueueAttributeName.APPROXIMATE_NUMBER_OF_MESSAGES);
   }
 
-
-  private Map<String, String> getQueueAttributes(String queueUrl) {
-    var getQueueAttributesRequest =
-        new GetQueueAttributesRequest(queueUrl).withAttributeNames(QueueAttributeName.All);
-    return amazonSQS.getQueueAttributes(getQueueAttributesRequest).getAttributes();
-  }
-
-  public String getMessageCount() {
-    var queueAttributes = getQueueAttributes(queueUrl);
-    return queueAttributes.get(QueueAttributeName.ApproximateNumberOfMessages.toString());
-  }
-
-  public void clearQueue() {
-    amazonSQS.purgeQueue(new PurgeQueueRequest(queueUrl));
+  public void clearQueue(String queueUrl) {
+    sqsClient.purgeQueue(PurgeQueueRequest.builder().queueUrl(queueUrl).build());
 
     await()
-        .atMost(Duration.ofMinutes(1))
-        .until(() -> getMessageCount().equals("0"));
+        .atMost(QUEUE_CLEAR_TIMEOUT)
+        .until(() -> ZERO_MESSAGES.equals(getMessageCount(queueUrl)));
   }
 
-  public ReceiveMessageResult receiveMessage() {
-    return amazonSQS.receiveMessage(queueUrl);
+  public void sendMessageToQueue(String queueUrl, String messageBody) {
+    SendMessageRequest sendMessageRequest =
+        SendMessageRequest.builder().queueUrl(queueUrl).messageBody(messageBody).build();
+
+    logger.info("Sending message to queue: queueUrl=[{}], messageBody=[{}]", queueUrl, messageBody);
+    sqsClient.sendMessage(sendMessageRequest);
   }
 
-  public static String createSubmissionTestMessage(String applicationId) {
-    return """
-        {
-          "application_id": "%s"
-        }
-        """
-        .formatted(applicationId);
+  public Message getMessage(String queueUrl) {
+    ReceiveMessageRequest receiveMessageRequest =
+        ReceiveMessageRequest.builder()
+            .queueUrl(queueUrl)
+            .messageAttributeNames("All")
+            .maxNumberOfMessages(MAX_MESSAGES_TO_RECEIVE)
+            .build();
+
+    ReceiveMessageResponse receiveMessageResponse = sqsClient.receiveMessage(receiveMessageRequest);
+    return receiveMessageResponse.messages().get(0);
   }
 
+  private Map<QueueAttributeName, String> getQueueAttributes(String queueUrl) {
+    GetQueueAttributesRequest getQueueAttributesRequest =
+        GetQueueAttributesRequest.builder()
+            .queueUrl(queueUrl)
+            .attributeNames(QueueAttributeName.ALL)
+            .build();
+
+    return sqsClient.getQueueAttributes(getQueueAttributesRequest).attributes();
+  }
 }

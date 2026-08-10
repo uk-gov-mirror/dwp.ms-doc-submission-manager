@@ -1,0 +1,571 @@
+openapi: 3.1.0
+
+info:
+  title: Document Submission Service - PIP-Apply
+  description: Rest API for managing document submissions to DRS
+  version: '@project.version@'
+
+servers:
+  - url: 'https://localhost:9980'
+
+paths:
+
+  /v1/attach:
+    post:
+      tags:
+        - submission
+      summary: POST call to attach a new document to the existing submission
+      description: endpoint to attach further documents to an existing submission.  the `submission_id` and `claimant_id` is required to link the new documents to an existing submission and query DRS required claimant metadata
+      operationId: attachToExisting
+      parameters:
+        - name: x-user-id
+          in: header
+          required: true
+          schema:
+            type: string
+            example: 507f1f77bcf86cd799439011
+          description: The identity id tied to the identity object.
+      requestBody:
+        $ref: '#/components/requestBodies/SubmissionAttachBody'
+      responses:
+        202:
+          description: submission accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttachDocumentResponseObjectV1'
+        400:
+          description: BAD REQUEST - badly formed json
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseObject'
+        404:
+          description: NOT FOUND - application not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseObject'
+        500:
+          description: INTERNAL SERVER ERROR - request failed due to an error, detail provided
+
+  /v1/status/{requestId}:
+    get:
+      tags:
+        - query
+      summary: GET call /v1/status/{requestId} to get status of a DRS request
+      description: endpoint to query a `request_id` for all attached documents (a batch).
+      operationId: queryDrsRequestStatus
+      parameters:
+        - name: requestId
+          in: path
+          description: submission request id from a previous apply or attach request
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: request status of a batch file upload to DRS
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueryRequestResponseObject'
+        400:
+          description: BAD REQUEST - badly formed json
+        404:
+          description: NOT FOUND - DRS request audit not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseObject'
+        500:
+          description: INTERNAL SERVER ERROR - request failed due to an error, detail provided
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseObject'
+
+  /v1/administration/report/{dayOrWeek}:
+    get:
+      tags:
+        - query
+      summary: GET call /v1/administration/report/{dayOrWeek} to get the count of submission requests
+      description: endpoint to query the number of submissions requests
+      operationId: getReportingData
+      parameters:
+        - name: dayOrWeek
+          in: path
+          description: Get the number of submissions requests based on a time
+          required: true
+          schema:
+            type: string
+            description: day is for last 24 hours and week is for last 7 days
+      responses:
+        200:
+          description: Count of submissions based on their status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportingResponseObject'
+        404:
+          description: NOT FOUND - Illegal method argument passed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseObject'
+        500:
+          description: INTERNAL SERVER ERROR - request failed due to an error
+
+  /v1/administration/resubmit:
+    post:
+      tags:
+        - services
+      summary: POST call /v1/administration/resubmit resubmit failed DRS requst
+      description: endpoint to submit failed DRS requests
+      operationId: resubmitDrsRequest
+      requestBody:
+        $ref: '#/components/requestBodies/ResubmitDrsRequestBody'
+      responses:
+        202:
+          description: drs resubmission accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResubmitResponseObject'
+        400:
+          description: BAD REQUEST - badly formed json or invalid PIP form data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseObject'
+        404:
+          description: NOT FOUND - drs request not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseObject'
+        500:
+          description: INTERNAL SERVER ERROR - request failed due to an error, detail provided
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseObject'
+
+components:
+  securitySchemes:
+    sideCarProxySecurity:
+      type: mutualTLS
+      description: "Security is enforced by an external side car proxy using mTLS, not directly by this API"
+      x-sidecar-implementation: true
+
+  requestBodies:
+    PipApplicationBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PipApplicationV1'
+
+    SubmissionAttachBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SubmissionAttachObjectV1'
+
+    ResubmitDrsRequestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ResubmitDrsRequestObjectV1'
+
+  schemas:
+    PipApplicationV1:
+      type: object
+      required:
+        - claimant_id
+        - application_id
+        - documents
+        - region
+      allOf:
+        - $ref: '#/components/schemas/ClaimantId'
+        - $ref: '#/components/schemas/ApplicationId'
+        - $ref: '#/components/schemas/Region'
+        - type: object
+          properties:
+            drs_metadata:
+              $ref: '#/components/schemas/DrsMetadata'
+        - type: object
+          properties:
+            application_meta:
+              $ref: '#/components/schemas/ApplicationMeta'
+            documents:
+              description: a list of file submissions in s3
+              type: array
+              items:
+                $ref: '#/components/schemas/S3RequestDocumentObject'
+
+    SubmissionAttachObjectV1:
+      type: object
+      required:
+        - region
+      allOf:
+        - $ref: '#/components/schemas/SubmissionId'
+        - $ref: '#/components/schemas/SubmissionDocumentObject'
+        - type: object
+          properties:
+            drs_metadata:
+              $ref: '#/components/schemas/DrsMetadata'
+        - $ref: '#/components/schemas/Region'
+
+    ResubmitDrsRequestObjectV1:
+      type: object
+      required:
+        - drs_request_ids
+        - drs_metadata
+        - region
+      allOf:
+        - type: object
+          properties:
+            drs_request_ids:
+              description: a list of file submissions
+              type: array
+              items:
+                $ref: '#/components/schemas/RequestId'
+        - type: object
+          properties:
+            drs_metadata:
+              $ref: '#/components/schemas/DrsMetadata'
+        - $ref: '#/components/schemas/Region'
+
+    Region:
+      type: object
+      properties:
+        region:
+          description: PIP region code, NI or GB
+          type: string
+          enum:
+            - GB
+            - NI
+
+    SubmissionResponseObjectV1:
+      allOf:
+        - type: object
+          properties:
+            drs_request_ids:
+              description: a list of file submissions
+              type: array
+              items:
+                $ref: '#/components/schemas/RequestId'
+        - $ref: '#/components/schemas/SubmissionId'
+
+    AttachDocumentResponseObjectV1:
+      allOf:
+        - type: object
+          properties:
+            drs_request_ids:
+              description: a list of file submissions
+              type: array
+              items:
+                $ref: '#/components/schemas/RequestId'
+
+    SubmissionDocumentObject:
+      type: object
+      required:
+        - documents
+      allOf:
+        - type: object
+          properties:
+            documents:
+              description: a list of file submissions in s3
+              type: array
+              items:
+                $ref: '#/components/schemas/S3RequestDocumentObject'
+
+
+    S3RequestDocumentObject:
+      allOf:
+        - $ref: '#/components/schemas/S3DocumentObject'
+
+    ErrorResponseObject:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/ErrorDetails'
+
+    QueryRequestResponseObject:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/RequestId'
+        - $ref: '#/components/schemas/DrsSubmissionStatus'
+        - type: object
+          properties:
+            documents:
+              description: a list of file submissions
+              type: array
+              items:
+                $ref: '#/components/schemas/DocumentObject'
+
+    ResubmitResponseObject:
+      type: object
+      allOf:
+        - type: object
+          properties:
+            resubmits:
+              description: a list of file submissions
+              type: array
+              items:
+                $ref: '#/components/schemas/Resubmission'
+
+    DocumentObject:
+      allOf:
+        - $ref: '#/components/schemas/SubmissionId'
+        - $ref: '#/components/schemas/DocumentId'
+        - $ref: '#/components/schemas/DocumentMetaData'
+
+    S3DocumentObject:
+      required:
+        - bucket
+        - s3Ref
+        - drsDocType
+      allOf:
+        - $ref: '#/components/schemas/S3Bucket'
+        - $ref: '#/components/schemas/S3FileKey'
+        - $ref: '#/components/schemas/DocumentMetaData'
+        - $ref: '#/components/schemas/ReceivedDateObject'
+        - $ref: '#/components/schemas/DrsDocType'
+
+    ReceivedDateObject:
+      required:
+        - dateTime
+      allOf:
+        - $ref: '#/components/schemas/DateTime'
+
+    ApplicationMeta:
+      type: object
+      required:
+        - start_date
+        - completed_date
+      properties:
+        start_date:
+          description: date (ISO8601) file received from citizen
+          example: "2020-05-12"
+          type: string
+          format: date
+        completed_date:
+          description: date (ISO8601) file received from citizen
+          example: "2020-05-20"
+          type: string
+          format: date
+
+    DocumentMetaData:
+      type: object
+      required:
+        - content_type
+        - name
+        - size
+      properties:
+        content_type:
+          description: the mime type of the uploaded document
+          example: "application/pdf"
+          type: string
+          pattern: ^(?!\s*$).+
+        name:
+          description: the document original name when uploaded
+          example: "medical-evidence.jpg"
+          type: string
+          pattern: ^(?!\s*$).+
+        size:
+          description: appoximate size in kilobytes
+          example: 5000
+          type: integer
+          minimum: 0
+
+    SubmissionId:
+      type: object
+      properties:
+        submission_id:
+          description: the submission ID of the claim submission
+          example: "b0a0d4fb-e6c8-419e-8cb9-af45914bd1a6"
+          type: string
+          pattern: ^(?!\s*$).+
+
+    RequestId:
+      type: object
+      properties:
+        request_id:
+          description: the DRS request trace ID
+          example: "b0a0d4fb-e6c8-419e-8cb9-af45914bd1a6"
+          type: string
+          pattern: ^(?!\s*$).+
+
+    ErrorDetails:
+      type: object
+      properties:
+        message:
+          description: detail description of fail/success
+          type: string
+
+    DocumentId:
+      type: object
+      properties:
+        document_id:
+          description: if complete, the document id of the form data
+          example: "b0a0d4fb-e6c8-419e-8cb9-af45914bd1a6"
+          type: string
+          pattern: ^(?!\s*$).+
+
+    ClaimantId:
+      type: object
+      properties:
+        claimant_id:
+          description: claimant id (account manager micro-service)
+          example: "1234567"
+          type: string
+          pattern: ^(?!\s*$).+
+
+    ApplicationId:
+      type: object
+      properties:
+        application_id:
+          description: application id (application manager micro-service)
+          example: "1234567"
+          type: string
+          pattern: ^(?!\s*$).+
+
+    S3Bucket:
+      type: object
+      properties:
+        bucket:
+          description: aws bucket id
+          example: "pip_bucket"
+          type: string
+          pattern: ^(?!\s*$).+
+
+    DrsDocType:
+      type: object
+      properties:
+        drsDocType:
+          description: Set document type to 1274 for a PIP2 form, and 1241 for further evidence
+          type: string
+          enum:
+            - "1274"
+            - "1241"
+
+    S3FileKey:
+      type: object
+      properties:
+        s3Ref:
+          description: unique s3 file key
+          example: "123_TEST.jpg.2020.08.06"
+          type: string
+          pattern: ^(?!\s*$).+
+
+    DateTime:
+      type: object
+      properties:
+        dateTime:
+          description: date time (ISO8601) file received from citizen
+          example: "2020-09-08T14:30"
+          type: string
+          format: date-time
+
+    Resubmission:
+      type: object
+      required:
+        - failed_drs_request_id
+        - retry_drs_request_id
+      properties:
+        failed_drs_request_id:
+          description: failed drs request id
+          type: string
+          example: b0a0d4fb-e6c8-419e-8cb9-af45914bd1a6
+        retry_drs_request_id:
+          description: failed drs request id
+          type: string
+          example: a0a0d4fc-e6c8-300e-7abf-fsdeg1hdb424
+
+    DrsMetadata:
+      type: object
+      required:
+        - surname
+        - forename
+        - dob
+        - nino
+        - postcode
+      properties:
+        surname:
+          description: citizen's surname
+          example: Smith
+          type: string
+          pattern: "^[A-Z]([-' .]?[A-Za-z]+)+$"
+        forename:
+          description: citizen's forename
+          example: John
+          type: string
+          pattern: "^[A-Z]([-' .]?[A-Za-z]+)+$"
+        dob:
+          description: citizen's dob
+          type: string
+          format: date
+          example: "1990-01-20"
+        nino:
+          description: natioanl insurance number
+          type: string
+          example: AA123456C
+          pattern: "(^(?!BG)(?!GB)(?!NK)(?!KN)(?!TN)(?!NT)(?!ZZ)[A-Z&&[^DFIQUV]][A-Z&&[^DFIOQUV]][0-9]{6}[A-D]$)"
+        postcode:
+          description: UK postal code
+          type: string
+          example: SW1H 9NA
+          pattern: ^(?!\s*$).+
+
+    DrsSubmissionStatus:
+      type: object
+      properties:
+        drs_upload_status:
+          type: string
+          enum:
+            - RECIEVED
+            - PUBLISHED
+            - SUCCESS
+            - FAIL
+            - RESUBMITTED
+          description: RECIEVED yet to be upload to DRS, PUBLISHED request published, SUCCESS drs respond ok, FAIL drs respond failure, RESUBMITTED resubmitted by DWP
+
+    ReportingResponseObject:
+      type: object
+      required:
+        - submission_total
+      properties:
+        submission_total:
+          description: total number of submissions to DRS
+          example: 25
+          type: integer
+        successful_submission:
+          description: total successful submissions to DRS
+          example: 18
+          type: integer
+        failed_submission:
+          description: total failed submission to DRS
+          example: 1
+          type: integer
+        inflight_submission:
+          description: total published submission to DRS
+          example: 2
+          type: integer
+        received_submission:
+          description: total received submission to upload to DRS
+          example: 3
+          type: integer
+        resubmitted_submission:
+          description: total resubmitted submission to DRS
+          example: 1
+          type: integer
+        failure_details:
+          description: a list of submission IDs for the failure details
+          type: array
+          items:
+            $ref: '#/components/schemas/SubmissionId'
+security:
+  - sideCarProxySecurity : []

@@ -1,0 +1,164 @@
+{
+  "$id": "https://gitlab.com/dwp/health/pip-apply/schemas/health-and-disability/mobility.schema.1.0.0.json",
+  "title": "mobility schema",
+  "description": "Schema to describe the details needed for mobility section within the the pip-apply application",
+  "type": "object",
+  "properties": {
+    "planningNavigate": {
+      "description": "Supports the provision of details for the planning and following a journey section of a PIP2 claim",
+      "type": "object",
+      "properties": {
+        "conditionAffected": {
+          "$ref": "#/$defs/conditionAffected"
+        }
+      },
+      "oneOf": [
+        {
+          "properties": {
+            "conditionAffected": {
+              "const": false
+            }
+          },
+          "required": [ "conditionAffected" ],
+          "additionalProperties": false
+        },
+        {
+          "properties": {
+            "conditionAffected": {
+              "const": true
+            },
+            "planningNavigateDescription": {
+              "description": "Free text to hold details entered by a claimant about any difficulties they have with planning and following a journey.",
+              "type": "string",
+              "maxLength": 5000,
+              "examples": [
+                "All of the details the claimant wants to enter about their difficulties planning and following a journey."
+              ]
+            }
+          },
+          "required": [ "conditionAffected", "planningNavigateDescription" ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "movingAround": {
+      "description": "Supports the provision of details for the moving around section of a PIP2 claim",
+      "type": "object",
+      "properties": {
+        "conditionAffected": {
+          "$ref": "#/$defs/conditionAffected"
+        }
+      },
+      "oneOf": [
+        {
+          "properties": {
+            "conditionAffected": {
+              "const": false
+            }
+          },
+          "required": [ "conditionAffected" ],
+          "additionalProperties": false
+        },
+        {
+          "properties": {
+            "conditionAffected": {
+              "const": true
+            },
+            "movingAroundDescription": {
+              "description": "Free text to hold details entered by a claimant about any difficulties they have moving around.",
+              "type": "string",
+              "maxLength": 5000,
+              "examples": [
+                "All of the details the claimant wants to enter about their difficulties moving around."
+              ]
+            },
+            "severity": {
+              "description": "Indicates how far a claimant can walk",
+              "type": "object",
+              "oneOf": [
+                {
+                  "properties": {
+                    "grade": {
+                      "const": "cannotMove"
+                    }
+                  },
+                  "required": [ "grade" ],
+                  "additionalProperties": false
+                },
+                {
+                  "properties": {
+                    "grade": {
+                      "const": "lessThan20m"
+                    }
+                  },
+                  "required": [ "grade" ],
+                  "additionalProperties": false
+                },
+                {
+                  "properties": {
+                    "grade": {
+                      "const": "between20And50m"
+                    }
+                  },
+                  "required": [ "grade" ],
+                  "additionalProperties": false
+                },
+                {
+                  "properties": {
+                    "grade": {
+                      "const": "between50And200m"
+                    }
+                  },
+                  "required": [ "grade" ],
+                  "additionalProperties": false
+                },
+                {
+                  "properties": {
+                    "grade": {
+                      "const": "moreThan200m"
+                    }
+                  },
+                  "required": [ "grade" ],
+                  "additionalProperties": false
+                },
+                {
+                  "properties": {
+                    "grade": {
+                      "const": "varies"
+                    },
+                    "note": {
+                      "type": "string",
+                      "description": "Free text to hold details entered by a claimant about why their ability to move around varies.",
+                      "maxLength": 5000,
+                      "examples": [
+                        "All of the details the claimant wants to enter about their variable mobility."
+                      ]
+                    }
+                  },
+                  "required": [ "grade", "note" ],
+                  "additionalProperties": false
+                }
+              ]
+            }
+          },
+          "required": [ "conditionAffected", "movingAroundDescription", "severity" ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  "required": [
+    "planningNavigate",
+    "movingAround"
+  ],
+  "$defs": {
+    "conditionAffected": {
+      "description": "Indicates whether a claimant's condition affects a particular aspect of their mobility",
+      "type": "boolean",
+      "examples": [
+        true,
+        false
+      ]
+    }
+  }
+}

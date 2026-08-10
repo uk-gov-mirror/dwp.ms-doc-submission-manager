@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "$id": "https://gitlab.com/dwp/health/pip-apply/schemas/registration/motability-scheme.schema.1.0.0.json",
+  "title": "motability scheme schema",
+  "description": "The motability scheme section of the registration data",
+  "type": "object",
+  "properties": {
+    "receiveMotabilityInformation": {
+      "description": "Claimant response to If eligible, would you like the Motability Scheme to post you information about it?",
+      "type": "string",
+      "examples": [
+        "Yes",
+        "No"
+      ]
+    }
+  }
+}

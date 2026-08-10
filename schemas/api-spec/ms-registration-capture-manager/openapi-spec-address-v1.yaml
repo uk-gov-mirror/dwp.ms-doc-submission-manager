@@ -1,0 +1,81 @@
+openapi: '3.1.0'
+
+info:
+  title: DWP PIP Application Manager Service
+  description: Rest API for managing the application
+  version: '@project.version@'
+
+servers:
+  - url: 'https://localhost:8080'
+
+paths:
+  /v1/address/{addressId}:
+    get:
+      tags:
+        - address
+      summary: get address by address id
+      operationId: getAddressByAddressId
+      parameters:
+        - name: addressId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: ^[A-Z]{3}-\d{1,12}$
+            example: 'GBR-100062180903'
+      responses:
+        200:
+          description: OK - existing address data found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddressDto'
+
+  /v1/address:
+    get:
+      tags:
+        - address
+      summary: get address by postcode and search string
+      operationId: getAddressByPostcodeAndSearchString
+      parameters:
+        - name: postcode
+          in: query
+          required: false
+          schema:
+            type: string
+            pattern: ^([Gg][Ii][Rr] 0[Aa]{2})|((([A-Za-z][0-9]{1,2})|(([A-Za-z][A-Ha-hJ-Yj-y][0-9]{1,2})|(([A-Za-z][0-9][A-Za-z])|([A-Za-z][A-Ha-hJ-Yj-y][0-9][A-Za-z]?))))\s?[0-9][A-Za-z]{2})$
+            example: 'SW1A 1AA'
+        - name: searchString
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK - existing address data found
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AddressDto'
+
+components:
+  schemas:
+    AddressDto:
+      type: object
+      properties:
+        line1:
+          type: string
+        line2:
+          type: string
+        line3:
+          type: string
+        town:
+          type: string
+        county:
+          type: string
+        postcode:
+          type: string
+        country:
+          type: string

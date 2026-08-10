@@ -20,9 +20,6 @@ public class PdfGeneratorProperties {
   @NotBlank(message = "Version should not be blank")
   private String apiVersion;
 
-  @NotBlank(message = "Endpoint should not be blank")
-  private String pdfApiEndpoint;
-
   @NotBlank(message = "S3 Endpoint should not be blank")
   private String pdfS3ApiEndpoint;
 }

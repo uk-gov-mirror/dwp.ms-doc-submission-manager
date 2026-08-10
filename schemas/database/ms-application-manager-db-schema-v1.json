@@ -1,0 +1,142 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "$id": "https://gitlab.com/dwp/health/pip-apply/schemas/database/ms-application-manager-db-schema-v1.json",
+  "title": "ms-application-manager database json schema",
+  "description": "Schema describe PIP-apply ms-application-manager database",
+  "$defs": {
+    "FormData": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "string"
+        },
+        "meta": {},
+        "schemaVersion": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "REGISTRATION",
+            "HEALTH_DISABILITY",
+            "MOTABILITY"
+          ]
+        }
+      }
+    },
+    "State": {
+      "type": "object",
+      "properties": {
+        "current": {
+          "type": "string"
+        },
+        "history": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "state": {
+                "type": "string"
+              },
+              "timeStamp": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "type": "object",
+  "properties": {
+    "audit": {
+      "type": "object",
+      "properties": {
+        "created": {
+          "type": "string"
+        },
+        "lastModified": {
+          "type": "string"
+        }
+      }
+    },
+    "benefitCode": {
+      "type": "string"
+    },
+    "claimantId": {
+      "type": "string"
+    },
+    "dateRegistrationSubmitted": {
+      "type": "string"
+    },
+    "drsRequestId": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "drsRequestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "effectiveFrom": {
+      "type": "string"
+    },
+    "effectiveTo": {
+      "type": "string"
+    },
+    "healthDisabilityData": {
+      "$ref": "#/$defs/FormData"
+    },
+    "healthDisabilityState": {
+      "$ref": "#/$defs/State"
+    },
+    "id": {
+      "type": "string"
+    },
+    "instanceId": {
+      "type": "string"
+    },
+    "language": {
+      "type": "string",
+      "enum": [
+        "EN",
+        "CY"
+      ]
+    },
+    "legacyApplicationReference": {
+      "type": "object",
+      "properties": {
+        "applicationReference": {
+          "type": "string"
+        },
+        "system": {
+          "type": "string",
+          "const": "PIPCS"
+        }
+      }
+    },
+    "motabilityData": {
+      "$ref": "#/$defs/FormData"
+    },
+    "pipcsMotabilityState": {
+      "$ref": "#/$defs/State"
+    },
+    "pipcsRegistrationState": {
+      "$ref": "#/$defs/State"
+    },
+    "registrationData": {
+      "$ref": "#/$defs/FormData"
+    },
+    "state": {
+      "$ref": "#/$defs/State"
+    },
+    "submissionId": {
+      "type": "string"
+    }
+  }
+}

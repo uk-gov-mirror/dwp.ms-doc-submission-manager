@@ -1,0 +1,186 @@
+openapi: 3.1.0
+
+info:
+  title: DWP PIP Application Manager Service
+  description: Rest API for managing the application
+  version: '@project.version@'
+
+servers:
+  - url: 'https://localhost:8080'
+
+paths:
+
+  /v1/application/healthdisability/{state}:
+    get:
+      tags:
+        - "health and disability"
+      summary: get claimant data for applications in given state
+      operationId: getClaimantsWithState
+      parameters:
+        - in: query
+          description: return data in pages of this size
+          name: pageSize
+          required: true
+          schema:
+            type: integer
+            example: 2
+        - in: query
+          description: return page
+          name: page
+          required: true
+          schema:
+            type: integer
+            example: 2
+        - in: path
+          description: state of data to return
+          name: state
+          required: true
+          schema:
+            type: string
+            pattern: ^[A-Z_]*$
+            example: REGISTRATION
+        - in: query
+          description: constrain data in the given state since after this time
+          name: timestampFrom
+          required: true
+          schema:
+            type: string
+            pattern: ^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(\.\d+)?(([+-]\d\d:\d\d)|Z)?$
+            example: 2001-01-01T12:00:00.0+01:00Z
+        - in: query
+          description: constrain data in the given state since before this time
+          name: timestampTo
+          required: true
+          schema:
+            type: string
+            pattern: ^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(\.\d+)?(([+-]\d\d:\d\d)|Z)?$
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ClaimantObject'
+        400:
+          description: BAD REQUEST - badly formed json or invalid request
+
+components:
+  requestBodies:
+    ClaimCreateRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClaimCreateObject'
+    ClaimUpdateRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClaimUpdateObject'
+    ClaimCompleteRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClaimCompleteObject'
+
+  schemas:
+    ClaimCreateObject:
+      type: object
+      required:
+        - claimant_id
+        - benefit_type
+      allOf:
+        - $ref: 'includes/components.yaml#/components/schemas/ClaimantId'
+    ClaimantObject:
+      type: object
+      required:
+        - claimant_id
+      allOf:
+        - $ref: 'includes/components.yaml#/components/schemas/ClaimantId'
+    ClaimUpdateObject:
+      type: object
+      required:
+        - claimant_id
+        - benefit_type
+      allOf:
+        - $ref: '#/components/schemas/ClaimId'
+        - $ref: '#/components/schemas/FormData'
+    ClaimCompleteObject:
+      type: object
+      required:
+        - claim_id
+        - submission_id
+      allOf:
+        - $ref: '#/components/schemas/ClaimId'
+        - $ref: '#/components/schemas/SubmissionId'
+      properties:
+        drs_request_id:
+          type: string
+          description: drs request id
+          example: "5ed0d430716609122be7a4d6"
+          pattern: ^[a-z0-9]{24}
+    ClaimRecordReturn:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/ClaimId'
+        - $ref: '#/components/schemas/SubmissionId'
+        - $ref: '#/components/schemas/FormData'
+        - $ref: '#/components/schemas/ClaimStatus'
+    ErrorResponseObject:
+      type: object
+      required:
+        - message
+      allOf:
+        - $ref: '#/components/schemas/Details'
+    ClaimId:
+      type: object
+      description: claim id
+      properties:
+        claim_id:
+          example: "5ed0d430716609122be7a4d6"
+          type: string
+          pattern: ^[a-z0-9]{24}
+    SubmissionId:
+      type: object
+      description: submission id
+      properties:
+        submission_id:
+          example: "5ed0d430716609122be7a4d6"
+          type: string
+          pattern: ^[a-z0-9]{24}
+    ClaimStatus:
+      type: object
+      properties:
+        claim_status:
+          description: the status of the claim record
+          example: CLAIM_STARTED
+          type: string
+          enum:
+            - CLAIM_STARTED
+            - APPLICATION_SUBMITTED
+    FormData:
+      type: object
+      properties:
+        form_data:
+          description: the session data blob
+          type: object
+          example: "{\"data\", \"claim data\"}"
+    Details:
+      type: object
+      properties:
+        message:
+          description: detail description of fail/success
+          type: string
+    FormDataDto:
+      type: object
+      required:
+        - form_data
+      properties:
+        form_data:
+          type: object
+        meta:
+          type: object

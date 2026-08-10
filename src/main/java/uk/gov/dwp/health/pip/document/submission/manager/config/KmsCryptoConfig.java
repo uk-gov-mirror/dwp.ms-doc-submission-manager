@@ -1,13 +1,13 @@
 package uk.gov.dwp.health.pip.document.submission.manager.config;
 
-import com.amazonaws.regions.Regions;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import uk.gov.dwp.health.crypto.CryptoConfig;
-import uk.gov.dwp.health.crypto.CryptoDataManager;
-import uk.gov.dwp.health.crypto.exception.CryptoException;
+import software.amazon.awssdk.regions.Region;
+import uk.gov.dwp.crypto.CryptoConfig;
+import uk.gov.dwp.crypto.CryptoDataManager;
+import uk.gov.dwp.crypto.exception.CryptoException;
 import uk.gov.dwp.health.pip.document.submission.manager.config.properties.CryptoConfigProperties;
 
 import javax.crypto.IllegalBlockSizeException;
@@ -55,7 +55,7 @@ public class KmsCryptoConfig {
       config.setKmsEndpointOverride(this.properties.getKmsOverride());
     }
     if (this.properties.getRegion() != null && !this.properties.getRegion().isBlank()) {
-      config.setRegion(Regions.valueOf(this.properties.getRegion()));
+      config.setRegion(Region.of(this.properties.getRegion()));
     }
     config.setCacheKmsDataKeys(this.properties.isKmsKeyCache());
     return config;

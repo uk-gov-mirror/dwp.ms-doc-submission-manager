@@ -1,0 +1,177 @@
+openapi: '3.1.0'
+
+info:
+  title: DWP PIP Application Manager Service
+  description: Rest API for managing the application
+  version: '@project.version@'
+
+servers:
+  - url: 'https://localhost:8080'
+
+paths:
+
+  /v2/application/{application_id}/registration:
+    get:
+      tags:
+        - registration
+      summary: get registration data by application id. Deprecated as there is no support for invited digital applicants. Please use v4.
+      operationId: getRegistrationDataByApplicationId
+      deprecated: true
+      parameters:
+        - in: path
+          name: application_id
+          required: true
+          schema:
+            type: string
+            pattern: ^[a-z0-9]{24}
+            example: "5ed0d430716609122be7a4d6"
+      responses:
+        200:
+          description: OK - existing registration data found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegistrationDto'
+
+components:
+  schemas:
+    RegistrationDto:
+      type: object
+      properties:
+        submissionDate:
+          type: string
+          example: 2019-02-21
+        personalDetails:
+          $ref: '#/components/schemas/PersonalDetailsDto'
+        aboutYourHealth:
+          $ref: '#/components/schemas/AboutYourHealthDto'
+        residenceAndPresence:
+          $ref: '#/components/schemas/ResidenceAndPresenceDto'
+        additionalSupport:
+          $ref: '#/components/schemas/AdditionalSupportDto'
+    PersonalDetailsDto:
+      type: object
+      properties:
+        surname:
+          type: string
+        firstName:
+          type: string
+        nationalInsuranceNumber:
+          type: string
+        dateOfBirth:
+          type: string
+          example: 2019-12-31
+        address:
+          $ref: '#/components/schemas/AddressDto'
+        alternativeAddress:
+          $ref: '#/components/schemas/AddressDto'
+        contact:
+          $ref: '#/components/schemas/ContactDto'
+        alternateFormat:
+          $ref: '#/components/schemas/AlternateFormatDto'
+    AboutYourHealthDto:
+      type: object
+      properties:
+        conditions:
+          type: array
+          items:
+            type: string
+        careAccommodation:
+          $ref: '#/components/schemas/CareAccommodationDto'
+        hcpContactConsent:
+          type: boolean
+        hcpShareConsent:
+          type: boolean
+        healthProfessionals:
+          type: array
+          items:
+            $ref: '#/components/schemas/HealthProfessionalDto'
+    ResidenceAndPresenceDto:
+      type: object
+      properties:
+        nationality:
+          type: string
+        residentBeforeBrexit:
+          type: string
+        inUkTwoOutOfThreeYears:
+          type: string
+        receivingPensionsOrBenefitsFromEEA:
+          type: boolean
+        payingInsuranceEEA:
+          type: boolean
+    AdditionalSupportDto:
+      type: object
+      properties:
+        helpCommunicating:
+          type: boolean
+        helpUnderstandingLetters:
+          type: boolean
+        helper:
+          $ref: '#/components/schemas/HelperDto'
+    AddressDto:
+      type: object
+      properties:
+        line1:
+          type: string
+        line2:
+          type: string
+        line3:
+          type: string
+        town:
+          type: string
+        county:
+          type: string
+        postcode:
+          type: string
+        country:
+          type: string
+    ContactDto:
+      type: object
+      properties:
+        mobileNumber:
+          type: string
+        smsUpdates:
+          type: string
+        alternativeNumber:
+          type: string
+        textPhone:
+          type: string
+    CareAccommodationDto:
+      type: object
+      properties:
+        accommodationType:
+          $ref: 'includes/components.yaml#/components/schemas/AccommodationTypeEnum'
+        admissionDate:
+          type: string
+          example: 2021-01-01
+        address:
+          $ref: '#/components/schemas/AddressDto'
+    HealthProfessionalDto:
+      type: object
+      properties:
+        name:
+          type: string
+        profession:
+          type: string
+        phoneNumber:
+          type: string
+        address:
+          $ref: '#/components/schemas/AddressDto'
+        lastContact:
+          type: string
+    HelperDto:
+      type: object
+      properties:
+        firstName:
+          type: string
+        surname:
+          type: string
+    AlternateFormatDto:
+      type: object
+      properties:
+        formatType:
+          $ref: 'includes/components.yaml#/components/schemas/FormatTypeEnum'
+        option:
+          $ref: 'includes/components.yaml#/components/schemas/OptionEnum'
+        additionalInfo:
+          type: string

@@ -7,7 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.dwp.health.crypto.CryptoDataManager;
+import uk.gov.dwp.crypto.CryptoDataManager;
 import uk.gov.dwp.health.pip.document.submission.manager.config.properties.CryptoConfigProperties;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -32,7 +32,7 @@ class KmsCryptoConfigTest {
       when(cryptoConfigProperties.getMessageDataKeyId()).thenReturn("event-mock-key-id");
       when(cryptoConfigProperties.isKmsKeyCache()).thenReturn(true);
       when(cryptoConfigProperties.getKmsOverride()).thenReturn("http://localhost");
-      when(cryptoConfigProperties.getRegion()).thenReturn("EU_WEST_2");
+      when(cryptoConfigProperties.getRegion()).thenReturn("eu-west-2");
       assertThat(cut.cryptoDataManager()).isNotNull().isExactlyInstanceOf(CryptoDataManager.class);
       verify(cryptoConfigProperties, times(3)).getKmsOverride();
       verify(cryptoConfigProperties, times(3)).getRegion();

@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "title": "trigger-event-schema",
+  "description": "Event sent from doc submission mgr to appco for additional support health information gather autosubmission",
+  "required": [
+    "application_id",
+    "submission_id"
+  ],
+  "properties": {
+    "application_id": {
+      "$ref": "#/$defs/application_id_def"
+    },
+    "submission_id": {
+      "$ref": "#/$defs/submission_id_def"
+    }
+  },
+  "$defs": {
+    "application_id_def": {
+      "type": "string",
+      "pattern": "^[a-z0-9]{24}$",
+      "description": "Application ID"
+    },
+    "submission_id_def": {
+      "type": "string",
+      "pattern": "^[a-z0-9]{24}$",
+      "description": "Submission ID"
+    }
+  }
+}

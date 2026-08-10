@@ -1,0 +1,74 @@
+openapi: 3.1.0
+
+info:
+  title: DWP Account Manager Service - PIP
+  description: Rest API for managing user account for save and resume user journey
+  version: 8.0.0
+
+servers:
+  - url: 'https://localhost:8080'
+
+paths:
+  /v8/account/claimantdetails:
+    patch:
+      tags:
+        - patch
+      summary: PATCH an account with claimant details
+      description: PATCH to request updating claimant details
+      operationId: updateClaimantDetails
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/V8UpdateClaimantDetailsRequest'
+      responses:
+        202:
+          description: ACCEPTED - Claimant details update accepted
+          content:
+            application/json:
+              schema:
+                $ref: 'openapi-spec-v7.yaml#/components/schemas/V7AccountDetails'
+        400:
+          description: BAD REQUEST - badly formed json
+        401:
+          description: UNAUTHORIZED - Account does not exist with given REF
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+
+components:
+  securitySchemes:
+    sideCarProxySecurity:
+      type: mutualTLS
+      description: "Security is enforced by an external side car proxy using mTLS, not directly by this API"
+      x-sidecar-implementation: true
+  schemas:
+    V8UpdateClaimantDetailsRequest:
+      type: object
+      required:
+        - ref
+        - current_nino
+        - new_nino
+        - current_email
+        - new_email
+        - dob
+        - forename
+        - surname
+        - mobile_phone
+        - postcode
+        - researchContact
+        - user_journey
+      allOf:
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/ref'
+        - $ref: 'openapi-spec-v3.yaml#/components/schemas/CurrentNationalInsurance'
+        - $ref: 'openapi-spec-v3.yaml#/components/schemas/NewNationalInsurance'
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/CurrentEmail'
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/NewEmail'
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/DateOfBirth'
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/Surname'
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/Forename'
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/Postcode'
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/MobilePhoneNumber'
+        - $ref: 'openapi-spec-v4.yaml#/components/schemas/ResearchContact'
+        - $ref: 'openapi-spec-v7.yaml#/components/schemas/UserJourney'
+security:
+  - sideCarProxySecurity : []

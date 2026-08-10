@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "deprecated": true,
+  "$id": "decision-made-event-v1.json",
+  "type": "object",
+  "title": "decision-made-v1",
+  "description": "This schema is deprecated. Please use the updated version 'decision-made-event-v2'",
+  "required": [
+    "application_id",
+    "decision_id",
+    "outcome",
+    "daily_living",
+    "mobility"
+  ],
+  "properties": {
+    "application_id": {
+      "type": "string",
+      "description": "The application id for which decision has been made"
+    },
+    "decision_id": {
+      "type": "string",
+      "description": "The id for decision"
+    },
+    "nino": {
+      "type": "string",
+      "description": "The nino for the application"
+    },
+    "outcome": {
+      "$ref": "common/decision-outcome.json"
+    },
+    "daily_living": {
+      "$ref": "common/award-rate.json"
+    },
+    "mobility": {
+      "$ref": "common/award-rate.json"
+    },
+    "review_period": {
+      "$ref": "common/review-period.json"
+    },
+    "light_touch_review": {
+      "type": "boolean",
+      "description": "Set to true if review period is to be light touch"
+    },
+    "review_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Award review date if decision outcome is allowed"
+    },
+    "award_start_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Award start date if decision outcome is allowed"
+    },
+    "award_end_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Award end date if decision outcome is allowed. In case award is ongoing, this date is set to 2099-12-12"
+    },
+    "payable_from_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Payable from date if decision outcome is allowed"
+    },
+    "decision_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date when a decision has been made"
+    },
+    "frequency": {
+      "$ref": "common/payment-frequency.json"
+    }
+  }
+}

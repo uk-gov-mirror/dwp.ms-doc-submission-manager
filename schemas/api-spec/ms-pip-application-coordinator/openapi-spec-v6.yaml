@@ -1,0 +1,89 @@
+openapi: '3.1.0'
+
+info:
+  title: DWP PIP Application Coordinator Service
+  description: Version 6 Rest API for operations relating to the application coordinator
+  version: '@project.version@'
+
+servers:
+  - url: 'https://localhost:8080'
+
+paths:
+  /v6/applications/{application_id}/additional-support:
+    patch:
+      summary: Confirm whether additional support is required or not
+      operationId: updateAdditionalSupport
+      parameters:
+        - in: path
+          name: application_id
+          required: true
+          schema:
+            type: string
+            pattern: ^[a-z0-9]{24}
+            example: "5ed0d430716609122be7a4d6"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdditionalSupportUpdateDto'
+      responses:
+        202:
+          description: ACCEPTED - additional support change accepted
+
+  /v6/applications:
+    get:
+      summary: Gets a list of applications for the passed parameter. Exactly one of the following parameters must be provided - application_id, submission_id or nino.
+      operationId: fetchApplications
+      description: Please note only one of application_id, submission_id or nino is allowed in request.
+      parameters:
+        - in: query
+          name: application_id
+          schema:
+            type: string
+            pattern: ^[a-z0-9]{24}
+            example: "5ed0d430716609122be7a4d6"
+        - in: query
+          name: submission_id
+          schema:
+            type: string
+            pattern: ^[a-z0-9]{24}
+            example: "5ed0d430716609122be7a4d6"
+        - in: header
+          name: nino
+          schema:
+            type: string
+            pattern: ^(?!BG|GB|NK|KN|TN|NT|ZZ)[ABCEGHJ-PRSTW-Z][ABCEGHJ-NPRSTW-Z]\d{6}[A-D]
+            example: "NS212121D"
+      responses:
+        200:
+          description: OK - applications returned
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: 'includes/components.yaml#/components/schemas/ApplicationCoordinatorV6Dto'
+        404:
+          description: No applications found with the given parameter
+        400:
+          description: Bad request - exactly one of nino, application_id or submission_id should be passed
+
+components:
+  schemas:
+    AdditionalSupportUpdateDto:
+      type: object
+      properties:
+        staff_id:
+          type: string
+          pattern: ^[0-9]{8}
+          example: "35436896"
+        additional_support:
+          type: string
+          pattern: ^(?:yes|no)$
+          example: yes
+        notes:
+          type: string
+          example: "Note (for context)."
+          maxLength: 2000
+      required: [ staff_id, additional_support ]

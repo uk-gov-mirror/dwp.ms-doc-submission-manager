@@ -1,0 +1,51 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "https://gitlab.com/dwp/health/pip-apply/schemas/identity/pipcs-idv-update-request-schema-v1.json",
+    "type": "object",
+    "title": "PIPCS request identity update schema",
+    "description": "Schema describes how PIPCS-gw request identity update message should be formulated",
+    "default": {},
+    "examples": [
+      {
+        "pip_apply_application_id": "61db48e403c1799df028",
+        "idv_states": "verified",
+        "identity_id": "be91d738-b76c-11ed-afa1-0242ac120002"
+      }
+    ],
+    "required": [
+      "pip_apply_application_id",
+      "idv_states",
+      "identity_id"
+    ],
+    "properties": {
+      "pip_apply_application_id": {
+        "$id": "#/properties/pip_apply_application_id",
+        "type": "string",
+        "title": "The applicationId schema",
+        "description": "An unique ID for correlation purpose",
+        "examples": [
+          "61db48e403c1799df028"
+        ]
+      },
+      "idv_states": {
+        "$id": "#/properties/idv_states",
+        "type": "string",
+        "title": "The IDV status schema",
+        "description": "The IDV status to update the record with",
+        "enum": [
+          "verified",
+          "unverified"
+        ]
+      },
+      "identity_id": {
+        "$id": "#/properties/identity_id",
+        "type": "string",
+        "format": "uuid",
+        "title": "The IdentityId schema",
+        "description": "An unique UUID for Identity",
+        "examples": [
+          "be91d738-b76c-11ed-afa1-0242ac120002"
+        ]
+      }
+    }
+  }

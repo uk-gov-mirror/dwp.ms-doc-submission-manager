@@ -1,0 +1,20 @@
+components:
+  schemas:
+    DocumentUsed:
+      title: DocumentUsed
+      type: object
+      properties:
+        key:
+          type: string
+        value:
+          type: string
+
+    ReviewDocumentsUsed:
+      title: ReviewDocumentsUsed
+      type: object
+      description: List of document keys and values used in review.
+      properties:
+        documents_used:
+          type: array
+          items:
+            $ref: '#/components/schemas/DocumentUsed'

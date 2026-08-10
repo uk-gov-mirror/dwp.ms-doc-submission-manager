@@ -31,7 +31,6 @@ import uk.gov.dwp.health.pip.document.submission.manager.service.impl.DataServic
 import uk.gov.dwp.health.pip.document.submission.manager.service.impl.EventPublisherImpl;
 import uk.gov.dwp.health.pip.document.submission.manager.service.impl.S3UrlResolverImpl;
 
-import java.text.DateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -46,20 +45,19 @@ import static uk.gov.dwp.health.pip.document.submission.manager.openapi.model.Re
 
 @Slf4j
 @AllArgsConstructor
-public abstract class SubmissionServiceAbstract {
+public class SubmissionServiceAbstract {
 
   private final EventPublisherImpl publisher;
   private final DrsMetaProperties drsMetaProperties;
   private final EventConfigProperties eventConfigProperties;
   private final DataServiceImpl dataService;
-  private final DateFormat dateFormat;
   private final S3UrlResolverImpl s3UrlResolver;
 
-  public boolean submissionExist(final String claimantId, String claimId) {
+  protected boolean submissionExist(final String claimantId, String claimId) {
     return Objects.nonNull(dataService.findSubmissionByClaimantIdAndClaimId(claimantId, claimId));
   }
 
-  public SubmissionResponseObjectV1 createSubmission(
+  protected SubmissionResponseObjectV1 createSubmission(
       String claimantId,
       String applicationId,
       DrsMetadata meta,
@@ -98,129 +96,15 @@ public abstract class SubmissionServiceAbstract {
     }
   }
 
-  public Record processDocuments(
-      String claimantId, String applicationId, List<S3RequestDocumentObject> documents) {
-
-    var drsDocuments = new ArrayList<Document>();
-    var mongoDocuments = new ArrayList<Documentation>();
-
-    documents.forEach(
-        doc -> {
-          var s3ref = doc.getS3Ref();
-          var url = s3UrlResolver.resolve(doc.getBucket(), s3ref);
-          var drsDocType = doc.getDrsDocType().getValue();
-          var dateTime = doc.getDateTime();
-          drsDocuments.add(
-              Document.builder()
-                  .date(dateTime.format(DateTimeFormatter.ISO_DATE_TIME))
-                  .type(drsDocType)
-                  .comment(doc.getName())
-                  .url(url)
-                  .build());
-          mongoDocuments.add(
-              Documentation.builder()
-                  .applicationId(applicationId)
-                  .claimantId(claimantId)
-                  .filename(doc.getName())
-                  .documentType(DrsDocumentTypeEnum.get(drsDocType).identifier())
-                  .sizeKb(doc.getSize())
-                  .timestamp(dateTime)
-                  .storage(
-                      Collections.singletonList(
-                          Storage.builder().type("S3").uniqueId(s3ref).url(url).build()))
-                  .build());
-        });
-    return Record.builder().mongoDocuments(mongoDocuments).drsDocuments(drsDocuments).build();
-  }
-
-  public List<DocumentId> saveDocumentInMongo(List<Documentation> documentations) {
-    return documentations.stream()
-        .map(
-            d ->
-                DocumentId.builder()
-                    .documentId(dataService.createUpdateDocumentation(d).getId())
-                    .build())
-        .collect(Collectors.toList());
-  }
-
-  public String saveSubmissionInMongo(
-      String claimantId,
-      String applicationId,
-      List<DocumentId> documentIdList,
-      LocalDate applicationStartDate,
-      LocalDate applicationCompleteDate) {
-
-    var submission =
-        Submission.builder()
-            .documentIdIds(documentIdList)
-            .started(applicationStartDate)
-            .completed(applicationCompleteDate)
-            .claimantId(claimantId)
-            .applicationId(applicationId)
-            .build();
-
-    return dataService.createUpdateSubmission(submission).getId();
-  }
-
-  public String createDrsAuditTrailInMongo(String submissionId, List<DocumentId> documentIds) {
-    var drsUpload =
-        DrsUpload.builder()
-            .submissionId(submissionId)
-            .documentIdIds(documentIds)
-            .status(DrsStatusEnum.RECEIVED.status)
-            .submittedAt(LocalDateTime.now())
-            .build();
-    return dataService.createUpdateDrsRequestAudit(drsUpload).getId();
-  }
-
-  public void publishDrsEvent(DrsUploadRequest request) {
-    publisher.publishEvent(request);
-  }
-
-  public DrsUploadRequest prepareDrsUploadRequest(
-      String requestId, List<Document> documents, PipDrsMeta meta, String region) {
-
-    meta.setDocumentList(documents);
-    var businessUnit =
-        drsMetaProperties.findBusinessUnitByRegionCode(region == null ? GB.name() : region);
-
-    return DrsUploadRequest.builder()
-        .callerId(businessUnit.getCallerId())
-        .correlationId(Optional.ofNullable(businessUnit.getCorrelationId()).orElse(""))
-        .requestId(requestId)
-        .responseRoutingKey(eventConfigProperties.getIncomingRoutingKey())
-        .metas(Collections.singletonList(meta))
-        .build();
-  }
-
-  public void findUpdateDrsAuditStatus(String requestId, DrsStatusEnum statusEnum) {
-    Optional.ofNullable(dataService.findDrsRequestByRequestId(requestId))
-        .ifPresentOrElse(
-            request -> {
-              request.setStatus(statusEnum.status);
-              request.setCompletedAt(LocalDateTime.now());
-              dataService.createUpdateDrsRequestAudit(request);
-            },
-            () ->
-                log.warn(
-                    "REQUEST {} NOT FOUND, UNABLE TO UPDATE STATUS TO {}",
-                    requestId,
-                    statusEnum.status));
-  }
-
-  public AttachDocumentResponseObjectV1 attachToExisting(
+  protected AttachDocumentResponseObjectV1 attachToExisting(
       String submissionId,
       List<S3RequestDocumentObject> documents,
       DrsMetadata metadata,
       String region) {
+    log.info("About to attach to existing submission id {}", submissionId);
 
-    var mongoSubmission = dataService.findSubmissionById(submissionId);
+    var mongoSubmission = getSubmissionById(submissionId);
 
-    if (mongoSubmission == null) {
-      final var msg = String.format("Submission [%s] not found", submissionId);
-      log.info(msg);
-      throw new SubmissionNotFoundException(msg);
-    }
     try {
       var record =
           processDocuments(
@@ -231,11 +115,15 @@ public abstract class SubmissionServiceAbstract {
       var drsUploadRequest =
           prepareDrsUploadRequest(
               requestId, record.getDrsDocuments(), mapDrsMetaToPipDrsMeta(metadata), region);
+      log.info("About to publish drs event for submission id {}", submissionId);
       publishDrsEvent(drsUploadRequest);
+      log.info("Published drs event for submission id {}", submissionId);
       findUpdateDrsAuditStatus(requestId, DrsStatusEnum.PUBLISHED);
 
       var response = new AttachDocumentResponseObjectV1();
       response.setDrsRequestIds(List.of(new RequestId().requestId(requestId)));
+      log.info("Attached to existing submission id {}", submissionId);
+
       return response;
     } catch (TaskException ex) {
       log.error("Error submitting the attachment {}", ex.getMessage());
@@ -243,29 +131,18 @@ public abstract class SubmissionServiceAbstract {
     }
   }
 
-  public void attachDocumentToSubmission(
-      Submission mongoSubmission, List<DocumentId> mongoDocumentation) {
-    log.info(
-        "Attach [{}] documents to Submission [{}]",
-        mongoDocumentation.size(),
-        mongoSubmission.getId());
-    if (mongoSubmission.getDocumentIdIds().addAll(mongoDocumentation)) {
-      dataService.createUpdateSubmission(mongoSubmission);
+  protected Submission getSubmissionById(final String submissionId) {
+    var mongoSubmission = dataService.findSubmissionById(submissionId);
+
+    if (mongoSubmission == null) {
+      final var msg = String.format("Submission [%s] not found", submissionId);
+      log.info(msg);
+      throw new SubmissionNotFoundException(msg);
     }
+    return mongoSubmission;
   }
 
-  public PipDrsMeta mapDrsMetaToPipDrsMeta(DrsMetadata drsMetadata) {
-    return PipDrsMeta.builder()
-        .surname(drsMetadata.getSurname())
-        .forename(drsMetadata.getForename())
-        .dob(drsMetadata.getDob().toString())
-        .ninoBody(drsMetadata.getNino().substring(0, 8))
-        .ninoSuffix(drsMetadata.getNino().substring(drsMetadata.getNino().length() - 1))
-        .postcode(drsMetadata.getPostcode())
-        .build();
-  }
-
-  public ResubmitResponseObject resubmitResponseObject(
+  protected ResubmitResponseObject resubmitResponseObject(
       DrsMetadata drsMetadata, List<RequestId> requestIds, String region) {
 
     var responseObject = new ResubmitResponseObject();
@@ -307,7 +184,62 @@ public abstract class SubmissionServiceAbstract {
     return responseObject;
   }
 
-  public Document transformToDocumentForResubmission(DocumentId documentId) {
+  List<DocumentId> saveDocumentInMongo(List<Documentation> documentations) {
+    return documentations.stream()
+        .map(
+            d ->
+                DocumentId.builder()
+                    .documentId(dataService.createUpdateDocumentation(d).getId())
+                    .build())
+        .collect(Collectors.toList());
+  }
+
+  String saveSubmissionInMongo(
+      String claimantId,
+      String applicationId,
+      List<DocumentId> documentIdList,
+      LocalDate applicationStartDate,
+      LocalDate applicationCompleteDate) {
+
+    var submission =
+        Submission.builder()
+            .documentIdIds(documentIdList)
+            .started(applicationStartDate)
+            .completed(applicationCompleteDate)
+            .claimantId(claimantId)
+            .applicationId(applicationId)
+            .build();
+
+    return dataService.createUpdateSubmission(submission).getId();
+  }
+
+  String createDrsAuditTrailInMongo(String submissionId, List<DocumentId> documentIds) {
+    var drsUpload =
+        DrsUpload.builder()
+            .submissionId(submissionId)
+            .documentIdIds(documentIds)
+            .status(DrsStatusEnum.RECEIVED.status)
+            .submittedAt(LocalDateTime.now())
+            .build();
+    return dataService.createUpdateDrsRequestAudit(drsUpload).getId();
+  }
+
+  void publishDrsEvent(DrsUploadRequest request) {
+    publisher.publishEvent(request);
+  }
+
+  PipDrsMeta mapDrsMetaToPipDrsMeta(DrsMetadata drsMetadata) {
+    return PipDrsMeta.builder()
+        .surname(drsMetadata.getSurname())
+        .forename(drsMetadata.getForename())
+        .dob(drsMetadata.getDob().toString())
+        .ninoBody(drsMetadata.getNino().substring(0, 8))
+        .ninoSuffix(drsMetadata.getNino().substring(drsMetadata.getNino().length() - 1))
+        .postcode(drsMetadata.getPostcode())
+        .build();
+  }
+
+  Document transformToDocumentForResubmission(DocumentId documentId) {
     var documentation = dataService.findDocumentById(documentId.getDocumentId());
     return Document.builder()
         .comment(documentation.getFilename())
@@ -315,5 +247,82 @@ public abstract class SubmissionServiceAbstract {
         .url(documentation.getStorage().get(0).getUrl())
         .type(documentation.getDocumentType())
         .build();
+  }
+
+  private Record processDocuments(
+      String claimantId, String applicationId, List<S3RequestDocumentObject> documents) {
+
+    var drsDocuments = new ArrayList<Document>();
+    var mongoDocuments = new ArrayList<Documentation>();
+
+    documents.forEach(
+        doc -> {
+          var s3ref = doc.getS3Ref();
+          var url = s3UrlResolver.resolve(doc.getBucket(), s3ref);
+          var drsDocType = doc.getDrsDocType().getValue();
+          var dateTime = doc.getDateTime();
+          drsDocuments.add(
+              Document.builder()
+                  .date(dateTime.format(DateTimeFormatter.ISO_DATE_TIME))
+                  .type(drsDocType)
+                  .comment(doc.getName())
+                  .url(url)
+                  .build());
+          mongoDocuments.add(
+              Documentation.builder()
+                  .applicationId(applicationId)
+                  .claimantId(claimantId)
+                  .filename(doc.getName())
+                  .documentType(DrsDocumentTypeEnum.get(drsDocType).identifier())
+                  .sizeKb(doc.getSize())
+                  .timestamp(dateTime)
+                  .storage(
+                      Collections.singletonList(
+                          Storage.builder().type("S3").uniqueId(s3ref).url(url).build()))
+                  .build());
+        });
+    return Record.builder().mongoDocuments(mongoDocuments).drsDocuments(drsDocuments).build();
+  }
+
+  private DrsUploadRequest prepareDrsUploadRequest(
+      String requestId, List<Document> documents, PipDrsMeta meta, String region) {
+
+    meta.setDocumentList(documents);
+    var businessUnit =
+        drsMetaProperties.findBusinessUnitByRegionCode(region == null ? GB.name() : region);
+
+    return DrsUploadRequest.builder()
+        .callerId(businessUnit.getCallerId())
+        .correlationId(Optional.ofNullable(businessUnit.getCorrelationId()).orElse(""))
+        .requestId(requestId)
+        .responseRoutingKey(eventConfigProperties.getIncomingRoutingKey())
+        .metas(Collections.singletonList(meta))
+        .build();
+  }
+
+  private void findUpdateDrsAuditStatus(String requestId, DrsStatusEnum statusEnum) {
+    Optional.ofNullable(dataService.findDrsRequestByRequestId(requestId))
+        .ifPresentOrElse(
+            request -> {
+              request.setStatus(statusEnum.status);
+              request.setCompletedAt(LocalDateTime.now());
+              dataService.createUpdateDrsRequestAudit(request);
+            },
+            () ->
+                log.warn(
+                    "REQUEST {} NOT FOUND, UNABLE TO UPDATE STATUS TO {}",
+                    requestId,
+                    statusEnum.status));
+  }
+
+  private void attachDocumentToSubmission(
+      Submission mongoSubmission, List<DocumentId> mongoDocumentation) {
+    log.info(
+        "Attach [{}] documents to Submission [{}]",
+        mongoDocumentation.size(),
+        mongoSubmission.getId());
+    if (mongoSubmission.getDocumentIdIds().addAll(mongoDocumentation)) {
+      dataService.createUpdateSubmission(mongoSubmission);
+    }
   }
 }

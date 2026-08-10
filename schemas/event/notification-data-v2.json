@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "notification-data-v2.json",
+  "type": "object",
+  "javaName": "NotificationDataV2",
+  "description": "Data required to update placeholders in the template",
+  "properties": {
+    "custRef": {
+      "javaName": "nino",
+      "type": "string",
+      "description": "Customer reference (NINO)"
+    },
+    "addrForename": {
+      "type": "string",
+      "javaName": "firstName",
+      "description": "Firstname of customer"
+    },
+    "addrSurname": {
+      "type": "string",
+      "javaName": "surName",
+      "description": "Surname of customer"
+    }
+  },
+  "additionalProperties": true
+}

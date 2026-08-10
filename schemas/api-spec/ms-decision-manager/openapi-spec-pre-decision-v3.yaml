@@ -1,0 +1,62 @@
+openapi: '3.1.0'
+
+info:
+  title: DWP PIP Decision Service
+  description: Rest API for operations relating to the pre decision
+  version: '@project.version@'
+
+servers:
+  - url: 'https://localhost:8080'
+
+paths:
+  /v3/pre-decision:
+    get:
+      tags:
+        - pre-decision
+      summary: Get pre decisions by application id
+      operationId: getPreDecisionsByApplicationId
+      parameters:
+        - name: applicationId
+          in: query
+          description: applicationId for pre decisions
+          required: true
+          schema:
+            type: string
+            example: "6ed1d430716609122be7a4d6"
+      responses:
+        200:
+          description: OK - pre decisions exist for application id
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PreDecisionDetails'
+        400:
+          description: BAD REQUEST - badly formed request
+        404:
+          description: NOT FOUND - pre decision does not exist for provided application id
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+
+components:
+  securitySchemes:
+    sideCarProxySecurity:
+      type: mutualTLS
+      description: "Security is enforced by an external side car proxy using mTLS, not directly by this API"
+      x-sidecar-implementation: true
+  schemas:
+
+    PreDecisionDetails:
+      type: object
+      allOf:
+        - $ref: 'includes/pre-decision-components.yaml#/components/schemas/PreDecisionId'
+        - $ref: 'includes/pre-decision-components.yaml#/components/schemas/ApplicationId'
+        - $ref: 'includes/pre-decision-components.yaml#/components/schemas/PreDecisionType'
+        - $ref: 'includes/pre-decision-components.yaml#/components/schemas/PreDecisionOutcome'
+        - $ref: 'includes/pre-decision-components.yaml#/components/schemas/PreDecisionOutcomeDate'
+        - $ref: 'includes/pre-decision-components.yaml#/components/schemas/UserWhoCreatedPreDecisionOutcome'
+        - $ref: 'includes/pre-decision-components.yaml#/components/schemas/PreDecisionQuestionAnswer'
+
+security:
+  - sideCarProxySecurity : []

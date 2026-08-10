@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "title": "update-award-with-event-v1",
+  "description": "Update award in award manager based on event",
+  "required": [
+    "award_id",
+    "event_type",
+    "event"
+  ],
+  "properties": {
+    "award_id": {
+      "$ref": "#/$defs/award_id_def"
+    },
+    "event_type": {
+      "$ref": "common/award-event-types.json"
+    },
+    "event": {
+      "$ref": "common/award-events.json"
+    },
+    "notes": {
+      "$ref": "#/$defs/notes_def"
+    },
+    "eject_reason": {
+      "description": "Optional field that for REQUEST_EJECTION can be populated, its not required though even in that state",
+      "$ref": "common/eject-reason.json"
+    },
+    "agent_id": {
+      "$ref": "#/$defs/agent_id_def"
+    }
+  },
+  "$defs": {
+    "award_id_def": {
+      "type": "string",
+      "description": "Award ID"
+    },
+    "notes_def": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Notes field"
+    },
+    "agent_id_def": {
+      "type": "string",
+      "description": "Agent ID"
+    }
+  }
+}

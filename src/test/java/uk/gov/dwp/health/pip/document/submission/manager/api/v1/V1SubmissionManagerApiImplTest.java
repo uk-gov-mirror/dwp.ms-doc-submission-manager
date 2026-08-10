@@ -1,5 +1,13 @@
 package uk.gov.dwp.health.pip.document.submission.manager.api.v1;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.List;
+import java.util.Objects;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,7 +18,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import uk.gov.dwp.health.pip.document.submission.manager.openapi.model.AttachDocumentResponseObjectV1;
-import uk.gov.dwp.health.pip.document.submission.manager.openapi.model.PipApplicationV1;
 import uk.gov.dwp.health.pip.document.submission.manager.openapi.model.QueryRequestResponseObject;
 import uk.gov.dwp.health.pip.document.submission.manager.openapi.model.ReportingResponseObject;
 import uk.gov.dwp.health.pip.document.submission.manager.openapi.model.RequestId;
@@ -19,18 +26,8 @@ import uk.gov.dwp.health.pip.document.submission.manager.openapi.model.ResubmitD
 import uk.gov.dwp.health.pip.document.submission.manager.openapi.model.ResubmitResponseObject;
 import uk.gov.dwp.health.pip.document.submission.manager.openapi.model.SubmissionAttachObjectV1;
 import uk.gov.dwp.health.pip.document.submission.manager.openapi.model.SubmissionId;
-import uk.gov.dwp.health.pip.document.submission.manager.openapi.model.SubmissionResponseObjectV1;
 import uk.gov.dwp.health.pip.document.submission.manager.service.impl.QueryServiceImpl;
 import uk.gov.dwp.health.pip.document.submission.manager.service.impl.V1SubmissionServiceImpl;
-
-import java.util.List;
-import java.util.Objects;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class V1SubmissionManagerApiImplTest {
@@ -42,31 +39,18 @@ class V1SubmissionManagerApiImplTest {
   @Mock private V1SubmissionServiceImpl submissionService;
 
   @Test
-  void testApplyPIPEndpoint() {
-    var pipApplication = mock(PipApplicationV1.class);
-    var response = new SubmissionResponseObjectV1();
-    response.setSubmissionId("pip_submission_id");
-    response.setDrsRequestIds(List.of(new RequestId().requestId("drs_request_id")));
-
-    when(submissionService.createNewSubmission(pipApplication)).thenReturn(response);
-    var actual = cut.applyPIP(pipApplication);
-    assertThat(actual.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
-    assertThat(Objects.requireNonNull(actual.getBody())).isEqualTo(response);
-    verify(submissionService).createNewSubmission(pipApplication);
-  }
-
-  @Test
   void testAttachToExistingEndpoint() {
     var submissionAttachObject = mock(SubmissionAttachObjectV1.class);
     var response = new AttachDocumentResponseObjectV1();
     response.setDrsRequestIds(List.of(new RequestId().requestId("drs_request_id")));
 
-    when(submissionService.attachDocumentToExistingSubmission(submissionAttachObject))
+    when(submissionService.attachDocumentToExistingSubmission("userId", submissionAttachObject))
         .thenReturn(response);
-    var actual = cut.attachToExisting(submissionAttachObject);
+    var actual = cut.attachToExisting("userId",
+        submissionAttachObject);
     assertThat(actual.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
     assertThat(Objects.requireNonNull(actual.getBody())).isEqualTo(response);
-    verify(submissionService).attachDocumentToExistingSubmission(submissionAttachObject);
+    verify(submissionService).attachDocumentToExistingSubmission("userId", submissionAttachObject);
   }
 
   @Test

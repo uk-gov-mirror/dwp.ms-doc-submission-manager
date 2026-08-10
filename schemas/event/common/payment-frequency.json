@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "title": "PaymentFrequency",
+  "required": [
+    "value",
+    "unit"
+  ],
+  "description": "Frequency at which the claimant will be paid",
+  "properties": {
+    "value": {
+      "type": "integer"
+    },
+    "unit": {
+      "type": "string",
+      "enum": [
+        "WEEKS"
+      ]
+    }
+  }
+}

@@ -1,0 +1,221 @@
+components:
+  schemas:
+    ApplicationId:
+      title: ApplicationId
+      type: object
+      description: application id
+      properties:
+        application_id:
+          example: "5ed0d430716609122be7a4d6"
+          type: string
+          pattern: ^[a-z0-9]{24}
+    Nino:
+      title: Nino
+      type: object
+      description: nino
+      properties:
+        nino:
+          type: string
+          pattern: ^(?!BG|GB|NK|KN|TN|NT|ZZ)[ABCEGHJ-PRSTW-Z][ABCEGHJ-NPRSTW-Z]\d{6}[A-D]
+          example: AA000000A
+    ErrorResponseDto:
+      title: ErrorResponseDto
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          description: detail description of fail/success
+          type: string
+    BenefitType:
+      title: BenefitType
+      type: object
+      properties:
+        benefit_type:
+          description: the type of benefit PIP, ESA etc..
+          example: PIP
+          type: string
+          enum:
+            - PIP
+    LanguageEnum:
+      title: LanguageEnum
+      type: string
+      enum:
+        - EN
+        - CY
+        - INFORMATION
+    Language:
+      title: Language
+      type: object
+      properties:
+        language:
+          $ref: '#/components/schemas/LanguageEnum'
+    ClaimantId:
+      title: ClaimantId
+      type: object
+      description: claimant id (account reference)
+      properties:
+        claimant_id:
+          example: "6ed1d430716609122be7a4d6"
+          type: string
+          pattern: ^[a-z0-9]{24}
+    SubmissionId:
+      title: SubmissionId
+      type: object
+      description: submission id
+      properties:
+        submission_id:
+          example: "5ed0d430716609122be7a4d6"
+          type: string
+          pattern: ^[a-z0-9]{24}
+    ApplicationStatus:
+      title: ApplicationStatus
+      type: object
+      properties:
+        application_status:
+          description: the status of the application
+          example: REGISTRATION
+          type: string
+          enum:
+            - REGISTRATION
+            - HEALTH_AND_DISABILITY
+            - SUBMITTED
+    ApplicationCoordinatorStatus:
+      title: ApplicationCoordinatorStatus
+      type: object
+      properties:
+        application_status:
+          $ref: '#/components/schemas/ApplicationCoordinatorStatusEnum'
+    ApplicationCoordinatorStatusEnum:
+      title: ApplicationCoordinatorStatusEnum
+      description: the status of the application
+      example: REGISTRATION
+      type: string
+      enum:
+        - REGISTRATION
+        - HEALTH_AND_DISABILITY
+        - SUBMITTED
+        - DISALLOWED_NON_RETURN
+        - DISALLOWED_NOT_ELIGIBLE
+        - WITHDRAWN
+        - REFERRED_TO_ASSESSMENT
+        - RETURNED_FROM_ASSESSMENT
+        - READY_FOR_DECISION
+        - DECISION_AWARDED
+        - DECISION_NOT_AWARDED
+        - ROUTED_TO_PIPCS
+        - REBUILT_IN_PIPCS
+    StateDto:
+      title: StateDto
+      type: object
+      properties:
+        currentState:
+          description: the status of the application
+          $ref: '#/components/schemas/CurrentStateEnum'
+        history:
+          type: array
+          items:
+            $ref: '#/components/schemas/HistoryDto'
+    HistoryDto:
+      title: HistoryDto
+      type: object
+      properties:
+        state:
+          $ref: '#/components/schemas/CurrentStateEnum'
+        timestamp:
+          description: Timestamp in format yyyy-MM-dd'T'HH:mm:ss.SSS'Z'
+          example: 2023-05-09T11:00:25.954Z
+          type: string
+    ApplicationDto:
+      title: ApplicationDto
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/ApplicationId'
+    AccommodationTypeEnum:
+      title: AccommodationTypeEnum
+      type: string
+      enum:
+        - hospital
+        - hospice
+        - carehome
+        - residentialCollege
+        - shelteredHousing
+        - other
+        - none
+    CostsPaidEnum:
+      title: CostsPaidEnum
+      type: string
+      enum:
+        - localAuthority
+        - healthAuthority
+        - educationAuthority
+        - jobcentrePlus
+        - governmentDepartment
+        - charity
+        - healthAndSocialCareTrust
+    ReceiveMotabilityInformationEnum:
+      title: ReceiveMotabilityInformationEnum
+      type: string
+      enum:
+        - "Yes"
+        - "No"
+    OptionEnum:
+      title: OptionEnum
+      type: string
+      enum:
+        - type1Uncontracted
+        - type2Contracted
+        - britishDvd
+        - britishMpeg
+        - irishDvd
+        - irishMpeg
+        - cassette
+        - cd
+        - dvd
+        - mp3
+        - colouredPaper
+        - largePrint16Font
+        - largePrintCustomFont
+        - accessiblePDF
+        - email
+        - other
+    FormatTypeEnum:
+      title: FormatTypeEnum
+      type: string
+      enum:
+        - braille
+        - signLanguage
+        - audio
+        - other
+    ChannelTypeEnum:
+      title: ChannelTypeEnum
+      type: string
+      enum:
+        - Digital
+        - Phone
+        - Paper
+        - In-Person
+        - Telephony-Digital
+        - Telephony-Paper
+    IdentityConfirmedEnum:
+      title: IdentityConfirmedEnum
+      type: string
+      enum:
+        - "Yes"
+        - "No"
+    CurrentStateEnum:
+      title: CurrentStateEnum
+      description: the status of the application
+      example: REGISTRATION
+      type: string
+      enum:
+        - REGISTRATION
+        - HEALTH_AND_DISABILITY
+        - SUBMITTED
+    SeverityEnum:
+      title: SeverityEnum
+      type: string
+      enum:
+        - ERROR
+        - WARNING
+        - INFORMATION

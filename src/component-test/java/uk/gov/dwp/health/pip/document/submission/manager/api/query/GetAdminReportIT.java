@@ -4,66 +4,113 @@ import io.restassured.response.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.HttpStatus;
 import uk.gov.dwp.health.pip.document.submission.manager.api.ApiTest;
 import uk.gov.dwp.health.pip.document.submission.manager.config.MongoClientConnection;
-import uk.gov.dwp.health.pip.document.submission.manager.dto.requests.submission.SubmissionRequest;
 import uk.gov.dwp.health.pip.document.submission.manager.dto.responses.ErrorResponse;
 import uk.gov.dwp.health.pip.document.submission.manager.dto.responses.query.AdminReportResponse;
-import uk.gov.dwp.health.pip.document.submission.manager.dto.responses.submission.SubmissionResponse;
-import uk.gov.dwp.health.pip.document.submission.manager.utils.RandomStringUtil;
+import uk.gov.dwp.health.pip.document.submission.manager.entity.DocumentId;
+import uk.gov.dwp.health.pip.document.submission.manager.entity.Documentation;
+import uk.gov.dwp.health.pip.document.submission.manager.entity.DrsUpload;
+import uk.gov.dwp.health.pip.document.submission.manager.entity.Storage;
+import uk.gov.dwp.health.pip.document.submission.manager.entity.Submission;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.dwp.health.pip.document.submission.manager.utils.UrlBuilderUtil.getReportUrl;
-import static uk.gov.dwp.health.pip.document.submission.manager.utils.UrlBuilderUtil.postApplyUrl;
 
 @Slf4j
-public class GetAdminReportIT extends ApiTest {
+class GetAdminReportIT extends ApiTest {
 
   @BeforeEach
   public void testSetup() {
     MongoClientConnection.emptyMongoCollections();
-    SubmissionRequest submissionRequest =
-        SubmissionRequest.builder().claimantId(RandomStringUtil.generate(24)).build();
-    postRequest(postApplyUrl(), submissionRequest).as(SubmissionResponse.class);
+    setupData();
   }
 
   @Test
-  public void shouldReturn200StatusCodeForReportRetrievalLastDay() {
+  void shouldReturn200StatusCodeForReportRetrievalLastDay() {
     Response response = getRequest(getReportUrl("day"));
     AdminReportResponse adminReportResponse = response.as(AdminReportResponse.class);
 
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK.value());
     assertThat(adminReportResponse.getSubmissionTotal()).isEqualTo(1);
-    assertThat(adminReportResponse.getSuccessfulSubmission()).isEqualTo(0);
-    assertThat(adminReportResponse.getFailedSubmission()).isEqualTo(0);
+    assertThat(adminReportResponse.getSuccessfulSubmission()).isZero();
+    assertThat(adminReportResponse.getFailedSubmission()).isZero();
     assertThat(adminReportResponse.getInflightSubmission()).isEqualTo(1);
-    assertThat(adminReportResponse.getReceivedSubmission()).isEqualTo(0);
-    assertThat(adminReportResponse.getResubmittedSubmission()).isEqualTo(0);
+    assertThat(adminReportResponse.getReceivedSubmission()).isZero();
+    assertThat(adminReportResponse.getResubmittedSubmission()).isZero();
     assertThat(adminReportResponse.getFailureDetails()).isEmpty();
   }
 
   @Test
-  public void shouldReturn200StatusCodeForReportRetrievalLastWeek() {
+  void shouldReturn200StatusCodeForReportRetrievalLastWeek() {
     Response response = getRequest(getReportUrl("week"));
     AdminReportResponse adminReportResponse = response.as(AdminReportResponse.class);
 
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK.value());
     assertThat(adminReportResponse.getSubmissionTotal()).isEqualTo(1);
-    assertThat(adminReportResponse.getSuccessfulSubmission()).isEqualTo(0);
-    assertThat(adminReportResponse.getFailedSubmission()).isEqualTo(0);
+    assertThat(adminReportResponse.getSuccessfulSubmission()).isZero();
+    assertThat(adminReportResponse.getFailedSubmission()).isZero();
     assertThat(adminReportResponse.getInflightSubmission()).isEqualTo(1);
-    assertThat(adminReportResponse.getReceivedSubmission()).isEqualTo(0);
-    assertThat(adminReportResponse.getResubmittedSubmission()).isEqualTo(0);
+    assertThat(adminReportResponse.getReceivedSubmission()).isZero();
+    assertThat(adminReportResponse.getResubmittedSubmission()).isZero();
     assertThat(adminReportResponse.getFailureDetails()).isEmpty();
   }
 
   @Test
-  public void shouldReturn404StatusCodeForInvalidValue() {
+  void shouldReturn404StatusCodeForInvalidValue() {
     Response response = getRequest(getReportUrl("abc"));
     ErrorResponse errorResponse = response.as(ErrorResponse.class);
 
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND.value());
     assertThat(errorResponse.getMessage()).isEqualTo("Illegal method argument passed");
+  }
+
+  private void setupData() {
+    Documentation documentation =
+        Documentation.builder()
+            .id("68d5408131afc4f728c92152")
+            .applicationId("6ab2e541827710233ad6b5c5")
+            .claimantId("89276856bdbb8f83b5fd2474")
+            .filename("medical-evidence.jpg")
+            .sizeKb(5000)
+            .timestamp(LocalDateTime.of(2020, 9, 8, 14, 30))
+            .documentType("1274")
+            .storage(
+                List.of(
+                    Storage.builder()
+                        .type("S3")
+                        .uniqueId("123_TEST.jpg.2020.08.06")
+                        .url("http://localstack:4566/pip_bucket/123_TEST.jpg.2020.08.06")
+                        .build()))
+            .build();
+
+    DrsUpload drsUpload =
+        DrsUpload.builder()
+            .id("68d5408131afc4f728c92154")
+            .submissionId("68d5408131afc4f728c92153")
+            .documentIdIds(
+                List.of(DocumentId.builder().documentId("68d5408131afc4f728c92152").build()))
+            .status("PUBLISHED")
+            .submittedAt(LocalDateTime.now())
+            .build();
+
+    Submission submission =
+        Submission.builder()
+            .id("68d5408131afc4f728c92153")
+            .claimantId("89276856bdbb8f83b5fd2474")
+            .applicationId("6ab2e541827710233ad6b5c5")
+            .documentIdIds(
+                List.of(DocumentId.builder().documentId("68d5408131afc4f728c92152").build()))
+            .build();
+
+    MongoTemplate mongoTemplate = MongoClientConnection.getMongoTemplate();
+    mongoTemplate.save(documentation, "document");
+    mongoTemplate.save(drsUpload, "drs_upload");
+    mongoTemplate.save(submission, "submission");
   }
 }

@@ -1,0 +1,213 @@
+openapi: '3.1.0'
+
+info:
+  title: DWP PIP Application Coordinator Service
+  description: Rest API for operations relating to the application coordinator
+  version: '@project.version@'
+
+servers:
+  - url: 'https://localhost:8080'
+
+paths:
+
+  /v1/applications:
+    post:
+      summary: Create an application
+      operationId: createApplication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: 'includes/components.yaml#/components/schemas/ApplicationCoordinatorDto'
+      responses:
+        201:
+          description: Created - application created
+          content:
+            application/json:
+              schema:
+                $ref: 'includes/components.yaml#/components/schemas/ApplicationCoordinatorDto'
+    put:
+      summary: Update the application for a given application id
+      operationId: updateApplication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: 'includes/components.yaml#/components/schemas/ApplicationCoordinatorDto'
+      responses:
+        200:
+          description: OK - application updated
+        404:
+          description: An application with the given id was not found
+        403:
+          description: Cannot update application with same state
+    get:
+      summary: Get the application for a given id, only pass one ID or nino
+      operationId: getApplication
+      description: Please note only one query parameter is allowed
+      parameters:
+        - in: query
+          name: application_id
+          schema:
+            type: string
+            pattern: ^[a-z0-9]{24}
+            example: "5ed0d430716609122be7a4d6"
+        - in: query
+          name: claimant_id
+          deprecated: true
+          description: Deprecated to support the notion of multiple applications per claimant, as such there is the potential of more than one result being found in this case the active or latest (based on latest state change timestamp)application will be returned.
+          schema:
+            type: string
+            pattern: ^[a-z0-9]{24}
+            example: "5ed0d430716609122be7a4d6"
+        - in: query
+          name: nino
+          deprecated: true
+          description: Deprecated to support the notion of multiple applications per claimant, as such there is the potential of more than one result being found in this case the active or latest (based on latest state change timestamp) application will be returned.
+          schema:
+            type: string
+            pattern: ^(?!BG|GB|NK|KN|TN|NT|ZZ)[ABCEGHJ-PRSTW-Z][ABCEGHJ-NPRSTW-Z]\d{6}[A-D]
+            example: "NS212121D"
+        - in: query
+          name: submission_id
+          schema:
+            type: string
+            pattern: ^[a-z0-9]{24}
+            example: "5ed0d430716609122be7a4d6"
+      responses:
+        200:
+          description: OK - application returned
+          content:
+            application/json:
+              schema:
+                $ref: 'includes/components.yaml#/components/schemas/ApplicationCoordinatorDto'
+        404:
+          description: An application with the given id was not found
+        400:
+          description: Bad request, either zero or more than one id is passed
+
+  /v1/applications/timeline:
+    post:
+      summary: Create a Timeline Event
+      operationId: createTimelineEvent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: 'includes/components.yaml#/components/schemas/ManualEventDto'
+      responses:
+        201:
+          description: Created - Timeline Event created
+    get:
+      summary: Get the Timeline for a given application_id
+      operationId: getTimeline
+      parameters:
+        - in: query
+          name: application_id
+          schema:
+            type: string
+            pattern: ^[a-z0-9]{24}
+            example: "5ed0d430716609122be7a4d6"
+      responses:
+        200:
+          description: OK - timeline returned
+          content:
+            application/json:
+              schema:
+                $ref: 'includes/components.yaml#/components/schemas/TimelineDto'
+        404:
+          description: No timeline events found for this application_id
+
+  /v1/applications/active:
+    post:
+      summary: Indicates whether there are active applications included in the given list
+      operationId: getActiveApplications
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              description: all application ids to check on active applications
+              type: array
+              items:
+                type: String
+      responses:
+        200:
+          description:
+            OK - response model returned with boolean
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActiveApplicationsDto'
+
+  /v1/applications/registration:
+    post:
+      summary: Indicates whether there are applications in registration state included in the given list
+      operationId: getRegistrationApplications
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              description: all application ids to check on active applications
+              type: array
+              items:
+                type: String
+      responses:
+        200:
+          description:
+            OK - response model returned with boolean
+          content:
+            application/json:
+              schema:
+                description: all application ids to check on active applications
+                type: array
+                items:
+                  type: String
+
+  /v1/applications/{application_id}/healthdisability/submission/{submission_id}:
+    put:
+      tags:
+        - "health and disability"
+      summary: submit health and disability data
+      operationId: submitHealthDisabilityData
+      parameters:
+        - in: path
+          name: application_id
+          required: true
+          schema:
+            type: string
+            pattern: ^[a-z0-9]{24}
+            example: "5ed0d430716609122be7a4d6"
+        - in: path
+          name: submission_id
+          required: true
+          schema:
+            type: string
+            pattern: ^[a-z0-9]{24}
+            example: "5ed0d430716609122be7a4d6"
+      responses:
+        202:
+          description: ACCEPTED - health and disability data submitted
+        400:
+          description: BAD REQUEST - invalid request
+        404:
+          description: NOT FOUND - application does not exist
+
+components:
+  securitySchemes:
+    sideCarProxySecurity:
+      type: mutualTLS
+      description: "Security is enforced by an external side car proxy using mTLS, not directly by this API"
+      x-sidecar-implementation: true
+  schemas:
+    ActiveApplicationsDto:
+      type: object
+      properties:
+        active_applications:
+          type: boolean
+security:
+  - sideCarProxySecurity : []

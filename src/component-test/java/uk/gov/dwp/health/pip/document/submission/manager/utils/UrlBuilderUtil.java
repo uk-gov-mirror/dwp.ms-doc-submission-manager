@@ -4,8 +4,8 @@ import static io.restassured.RestAssured.baseURI;
 
 public class UrlBuilderUtil {
 
-  public static String postApplyUrl() {
-    return baseURI + "/v1/apply/";
+  public static String postApplyUrlV3() {
+    return baseURI + "/v3/apply";
   }
 
   public static String postAttachUrl() {

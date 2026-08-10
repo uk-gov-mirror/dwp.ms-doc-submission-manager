@@ -1,0 +1,62 @@
+openapi: 3.1.0
+info:
+  title: DWP File Processor
+  description: REST APIs to receive and process Carers Allowance (CA) input files and the PIPCS response file
+  version: 1.0.0
+servers:
+  - url: 'https://localhost:8080'
+
+paths:
+  /v1/cacsr/carers-input/process:
+    post:
+      security:
+        - {}
+      operationId: submitCacsrInputFile
+      description: Submit for processing the CA input file containing claimant (carer) details and the person who they care for
+      tags:
+        - cacsr-v1
+      requestBody:
+        description: CACS-R input file content
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/FileDto'
+      responses:
+        200:
+          description: CA input file received and processed
+        400:
+          description: Error processing CA input file
+
+  /v1/cacsr/pipcs-response/process:
+    post:
+      security:
+        - {}
+      operationId: submitPipCsResponseFile
+      description: Submit for processing the PIPCS to CA response file
+      tags:
+        - cacsr-v1
+      requestBody:
+        description: PIP CS response file content
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/FileDto'
+      responses:
+        200:
+          description: PIPCS response file received and processed
+        400:
+          description: Error processing PIPCS response file
+
+security:
+  - sideCarProxySecurity : []
+components:
+  schemas:
+    FileDto:
+      type: object
+      properties:
+        file:
+          type: string
+          format: binary
+      required:
+        - file
+

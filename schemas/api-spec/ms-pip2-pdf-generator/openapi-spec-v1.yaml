@@ -1,0 +1,163 @@
+openapi: 3.1.0
+
+info:
+  title: DWP PDF Form Generator Service - PIP
+  description: Rest API for converting PIP2 application form to PDF_A document
+  version: '@project.version@'
+
+servers:
+  - url: 'https://localhost:8080'
+
+paths:
+  /v1/pdf/createpdf:
+    post:
+      tags:
+        - create
+      summary: POST call to create a pdf from pip form json
+      description: POST call to create new pdf from pip application form json containing the claim details
+      deprecated: true
+      operationId: createPDF
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePdfRequest'
+      responses:
+        201:
+          description: A PDF file
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        400:
+          description: BAD REQUEST - badly formed json or application failed to valid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FailureResponse'
+        500:
+          description: INTERNAL SERVER ERROR - an unknown internal error occurred
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FailureResponse'
+
+  /v1/pdf/s3createpdf:
+    post:
+      tags:
+        - create
+      summary: POST call to create a pdf from pip form json data
+      description: POST call to create new pdf from pip form json data containing the claim details and upload it to s3
+      deprecated: true
+      operationId: s3CreatePDF
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePdfRequestS3'
+      responses:
+        201:
+          description: CREATED - new Pdf created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/S3PdfReturn'
+        400:
+          description: BAD REQUEST - badly formed json or application failed to valid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FailureResponse'
+        500:
+          description: INTERNAL SERVER ERROR - an unknown internal error occurred
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FailureResponse'
+
+components:
+  securitySchemes:
+    sideCarProxySecurity:
+      type: mutualTLS
+      description: "Security is enforced by an external side car proxy using mTLS, not directly by this API"
+      x-sidecar-implementation: true
+  schemas:
+    CreatePdfRequestS3:
+      type: object
+      required:
+        - claim_id
+        - form_data
+        - bucket
+      allOf:
+        - $ref: '#/components/schemas/ClaimId'
+        - $ref: '#/components/schemas/FormData'
+        - $ref: '#/components/schemas/Bucket'
+    CreatePdfRequest:
+      type: object
+      required:
+        - claim_id
+        - form_data
+      allOf:
+        - $ref: '#/components/schemas/ClaimId'
+        - $ref: '#/components/schemas/FormData'
+
+    S3PdfReturn:
+      allOf:
+        - $ref: '#/components/schemas/s3Ref'
+        - $ref: '#/components/schemas/Bucket'
+        - $ref: '#/components/schemas/fileSizeKb'
+
+    ClaimId:
+      type: object
+      properties:
+        claim_id:
+          type: string
+          description: PIP claim id
+          example: "b0a0d4fb-e6c8-419e-8cb9-af45914bd1a6"
+          minLength: 1
+
+    FormData:
+      type: object
+      properties:
+        form_data:
+          type: string
+          description: PIP application JSON data
+          minLength: 1
+
+    FailureResponse:
+      allOf:
+        - $ref: '#/components/schemas/Message'
+
+    Message:
+      type: object
+      properties:
+        message:
+          description: detail description
+          type: string
+
+    s3Ref:
+      type: object
+      properties:
+        s3Ref:
+          description: AWS S3 unique file key
+          example: 123_PRESCRIPTION.JPG.2020
+          type: string
+
+    Bucket:
+      type: object
+      properties:
+        bucket:
+          description: AWS S3 bucket name
+          example: "pip-bucket"
+          type: string
+
+    fileSizeKb:
+      type: object
+      properties:
+        file_size_kb:
+          description: unencrypted data size in kb
+          example: 1024
+          type: integer
+security:
+  - sideCarProxySecurity : []

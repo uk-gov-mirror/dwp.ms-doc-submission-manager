@@ -14,16 +14,11 @@ public class PdfGeneratorConfig {
     this.pdfGeneratorProperties = pdfGeneratorProperties;
   }
 
-  public String getGeneratePdfUri() {
-    return getBaseUriAndVersionUri() + this.pdfGeneratorProperties.getPdfApiEndpoint();
-  }
-
   public String getGeneratePdfS3Uri() {
-    return getBaseUriAndVersionUri() + this.pdfGeneratorProperties.getPdfS3ApiEndpoint();
+    return getBaseUriAndVersionUri() + pdfGeneratorProperties.getPdfS3ApiEndpoint();
   }
 
   private String getBaseUriAndVersionUri() {
-    return this.pdfGeneratorProperties.getBaseUri() + "/"
-        + this.pdfGeneratorProperties.getApiVersion() + "/";
+    return pdfGeneratorProperties.getBaseUri() + "/" + pdfGeneratorProperties.getApiVersion() + "/";
   }
 }

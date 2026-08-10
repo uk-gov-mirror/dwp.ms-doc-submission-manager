@@ -19,4 +19,13 @@ public class MsIdentityStatusConfig {
         + this.msIdentityStatusProperties.getApiVersion() + "/"
         + this.msIdentityStatusProperties.getApiEndpoint();
   }
+
+  public String getIdentityByUserIdUrl() {
+    return this.msIdentityStatusProperties.getBaseUri()
+        + "/"
+        + this.msIdentityStatusProperties.getApiVersionOne()
+        + "/"
+        + this.msIdentityStatusProperties.getGetByIdApiEndpoint()
+        + "/";
+  }
 }

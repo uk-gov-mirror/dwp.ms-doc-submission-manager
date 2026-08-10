@@ -17,9 +17,9 @@ public class MsApplicationCoordinatorProperties {
   @NotBlank(message = "Application coordinator base uri should not be blank")
   private String baseUri;
 
-  @NotBlank(message = "Application coordinator version should not be blank")
+  @NotBlank(message = "Application coordinator get endpoint version should not be blank")
   private String apiVersion;
 
-  @NotBlank(message = "Application coordinator endpoint should not be blank")
+  @NotBlank(message = "Application coordinator get endpoint should not be blank")
   private String apiEndpoint;
 }

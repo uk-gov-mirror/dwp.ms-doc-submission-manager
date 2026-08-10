@@ -1,0 +1,82 @@
+openapi: '3.1.0'
+
+info:
+  title: DWP PIP Application Manager Service
+  description: Rest API for operations relating to the claimant's application as a whole
+  version: '@project.version@'
+
+servers:
+  - url: 'https://localhost:8080'
+
+paths:
+
+  /v1/application:
+    post:
+      deprecated: true
+      tags:
+        - application
+      summary: Create new application data
+      operationId: createApplication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplicationCreateDto'
+      responses:
+        201:
+          description: CREATED - initial application data created
+          content:
+            application/json:
+              schema:
+                $ref: 'includes/components.yaml#/components/schemas/ApplicationDto'
+        400:
+          description: BAD REQUEST - badly formed json or values not valid
+          content:
+            application/json:
+              schema:
+                $ref: 'includes/components.yaml#/components/schemas/ErrorResponseDto'
+        409:
+          description: Conflict - active applications already exist
+
+  /v1/application/matcher:
+    post:
+      tags:
+        - application
+      summary: Return application id for passed nino if the application is considered active
+      operationId: getApplicationIdByNino
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NinoDto'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: 'includes/components.yaml#/components/schemas/ApplicationId'
+        409:
+          description: Conflict - may occur if multiple applications found for given NINO
+
+components:
+  schemas:
+    ApplicationCreateDto:
+      type: object
+      required:
+        - claimant_id
+        - benefit_type
+        - language
+      allOf:
+        - $ref: 'includes/components.yaml#/components/schemas/ClaimantId'
+        - $ref: 'includes/components.yaml#/components/schemas/BenefitType'
+        - $ref: 'includes/components.yaml#/components/schemas/Language'
+    NinoDto:
+      type: object
+      required:
+        - nino
+      properties:
+        nino:
+          type: string
+          pattern: ^(?!BG|GB|NK|KN|TN|NT|ZZ)[ABCEGHJ-PRSTW-Z][ABCEGHJ-NPRSTW-Z]\d{6}[A-D]

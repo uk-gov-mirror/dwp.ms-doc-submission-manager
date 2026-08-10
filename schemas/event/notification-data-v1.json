@@ -1,0 +1,280 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "notification-data-v1.json",
+  "type": "object",
+  "javaName": "notificationData",
+  "description": "Data required to update placeholders in the template",
+  "required": [
+    "custRef",
+    "supportingEvidence",
+    "dlScore",
+    "prepFoodScore",
+    "eatingDrinkingScore",
+    "manageTreatmentScore",
+    "washingBathingScore",
+    "manageToiletNeedsScore",
+    "dressingUndressingScore",
+    "communicatingScore",
+    "readingScore",
+    "mixingPeopleScore",
+    "makingBudgetDecisionScore",
+    "mobScore",
+    "planningJourneyScore",
+    "movingAroundScore",
+    "dlDescriptorText1",
+    "dlJustificationText1",
+    "dlDescriptorText2",
+    "dlJustificationText2",
+    "dlDescriptorText3",
+    "dlJustificationText3",
+    "dlDescriptorText4",
+    "dlJustificationText4",
+    "dlDescriptorText5",
+    "dlJustificationText5",
+    "dlDescriptorText6",
+    "dlJustificationText6",
+    "dlDescriptorText7",
+    "dlJustificationText7",
+    "dlDescriptorText8",
+    "dlJustificationText8",
+    "dlDescriptorText9",
+    "dlJustificationText9",
+    "dlDescriptorText10",
+    "dlJustificationText10",
+    "mobDescriptorText1",
+    "mobJustificationText1",
+    "mobDescriptorText2",
+    "mobJustificationText2"
+  ],
+  "properties": {
+    "custRef": {
+      "javaName": "nino",
+      "type": "string"
+    },
+    "addrForename": {
+      "type": "string",
+      "javaName": "firstName",
+      "description": "Firstname of customer"
+    },
+    "addrSurname": {
+      "type": "string",
+      "javaName": "surName",
+      "description": "Surname of customer"
+    },
+    "supportingEvidence": {
+      "javaName": "documentsUsed",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "dlScore": {
+      "javaName": "dailyLivingTotalScore",
+      "type": "integer"
+    },
+    "prepFoodScore": {
+      "javaName": "preparingFoodScore",
+      "type": "integer"
+    },
+    "eatingDrinkingScore": {
+      "javaName": "takingNutritionScore",
+      "type": "integer"
+    },
+    "manageTreatmentScore": {
+      "javaName": "managingTherapyMonitoringHealthScore",
+      "type": "integer"
+    },
+    "washingBathingScore": {
+      "javaName": "washingBathingScore",
+      "type": "integer"
+    },
+    "manageToiletNeedsScore": {
+      "javaName": "managingToiletNeedsScore",
+      "type": "integer"
+    },
+    "dressingUndressingScore": {
+      "javaName": "dressingUndressingScore",
+      "type": "integer"
+    },
+    "communicatingScore": {
+      "javaName": "communicatingVerballyScore",
+      "type": "integer"
+    },
+    "readingScore": {
+      "javaName": "readingSignsSymbolsWordsScore",
+      "type": "integer"
+    },
+    "mixingPeopleScore": {
+      "javaName": "engagingWithPeopleScore",
+      "type": "integer"
+    },
+    "makingBudgetDecisionScore": {
+      "javaName": "makingBudgetingDecisionsScore",
+      "type": "integer"
+    },
+    "mobScore": {
+      "javaName": "mobilityTotalScore",
+      "type": "integer"
+    },
+    "planningJourneyScore": {
+      "javaName": "planningJourneysScore",
+      "type": "integer"
+    },
+    "movingAroundScore": {
+      "javaName": "movingAroundScore",
+      "type": "integer"
+    },
+    "dlDescriptorText1": {
+      "javaName": "preparingFoodDescriptor",
+      "type": "string"
+    },
+    "dlJustificationText1": {
+      "javaName": "preparingFoodJustification",
+      "type": "string"
+    },
+    "dlDescriptorText2": {
+      "javaName": "takingNutritionDescriptor",
+      "type": "string"
+    },
+    "dlJustificationText2": {
+      "javaName": "takingNutritionJustification",
+      "type": "string"
+    },
+    "dlDescriptorText3": {
+      "javaName": "managingTherapyMonitoringHealthDescriptor",
+      "type": "string"
+    },
+    "dlJustificationText3": {
+      "javaName": "managingTherapyMonitoringHealthJustification",
+      "type": "string"
+    },
+    "dlDescriptorText4": {
+      "javaName": "washingBathingDescriptor",
+      "type": "string"
+    },
+    "dlJustificationText4": {
+      "javaName": "washingBathingJustification",
+      "type": "string"
+    },
+    "dlDescriptorText5": {
+      "javaName": "managingToiletNeedsDescriptor",
+      "type": "string"
+    },
+    "dlJustificationText5": {
+      "javaName": "managingToiletNeedsJustification",
+      "type": "string"
+    },
+    "dlDescriptorText6": {
+      "javaName": "dressingUndressingDescriptor",
+      "type": "string"
+    },
+    "dlJustificationText6": {
+      "javaName": "dressingUndressingJustification",
+      "type": "string"
+    },
+    "dlDescriptorText7": {
+      "javaName": "communicatingVerballyDescriptor",
+      "type": "string"
+    },
+    "dlJustificationText7": {
+      "javaName": "communicatingVerballyJustification",
+      "type": "string"
+    },
+    "dlDescriptorText8": {
+      "javaName": "readingSignsSymbolsWordsDescriptor",
+      "type": "string"
+    },
+    "dlJustificationText8": {
+      "javaName": "readingSignsSymbolsWordsJustification",
+      "type": "string"
+    },
+    "dlDescriptorText9": {
+      "javaName": "engagingWithPeopleDescriptor",
+      "type": "string"
+    },
+    "dlJustificationText9": {
+      "javaName": "engagingWithPeopleJustification",
+      "type": "string"
+    },
+    "dlDescriptorText10": {
+      "javaName": "makingBudgetingDecisionsDescriptor",
+      "type": "string"
+    },
+    "dlJustificationText10": {
+      "javaName": "makingBudgetingDecisionsJustification",
+      "type": "string"
+    },
+    "mobDescriptorText1": {
+      "javaName": "planningJourneysDescriptor",
+      "type": "string"
+    },
+    "mobJustificationText1": {
+      "javaName": "planningJourneysJustification",
+      "type": "string"
+    },
+    "mobDescriptorText2": {
+      "javaName": "movingAroundDescriptor",
+      "type": "string"
+    },
+    "mobJustificationText2": {
+      "javaName": "movingAroundJustification",
+      "type": "string"
+    },
+    "dlRateType": {
+      "javaName": "dailyLivingRate",
+      "type": "string"
+    },
+    "dlAmount": {
+      "javaName": "dailyLivingAmount",
+      "type": "string"
+    },
+    "dlStartDate": {
+      "javaName": "dailyLivingStartDate",
+      "type": "string"
+    },
+    "dlEndDate": {
+      "javaName": "dailyLivingEndDate",
+      "type": "string"
+    },
+    "mobAmount": {
+      "javaName": "mobilityAmount",
+      "type": "string"
+    },
+    "mobStartDate": {
+      "javaName": "mobilityStartDate",
+      "type": "string"
+    },
+    "mobEndDate": {
+      "javaName": "mobilityEndDate",
+      "type": "string"
+    },
+    "arrearsPaymentAmount": {
+      "javaName": "arrearsPaymentAmount",
+      "type": "string"
+    },
+    "arrearsPeriodStartDate": {
+      "javaName": "arrearsPeriodStartDate",
+      "type": "string"
+    },
+    "arrearsPeriodEndDate": {
+      "javaName": "arrearsPeriodEndDate",
+      "type": "string"
+    },
+    "frequency": {
+      "javaName": "frequency",
+      "type": "string"
+    },
+    "payDay": {
+      "javaName": "payDay",
+      "type": "string"
+    },
+    "reviewDate": {
+      "javaName": "reviewDate",
+      "type": "string"
+    },
+    "serialNumber": {
+      "javaName": "serialNumber",
+      "type": "string"
+    }
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "https://gitlab.com/dwp/health/pip-apply/schemas/pipcs-api/pipcs-api-check-claim-success-response-v1.json",
+  "type": "object",
+  "title": "PIPCS-API check claim success response body",
+  "description": "Schema describe how PIPCS-api sends back check claim success response",
+  "name": "CheckClaimResponse",
+  "examples": [
+    {
+      "responseMessage": "yes",
+      "nino": "RN000010A"
+    }
+  ],
+  "properties": {
+    "responseMessage": {
+      "$id": "#/properties/responseMessage",
+      "type": "string",
+      "title": "The PIPCS check claim response message",
+      "description": "PIPCS check claim response message"
+    },
+    "nino": {
+      "$id": "#/properties/nino",
+      "type": "string",
+      "title": "The nino",
+      "description": "The NINO looked up in PIPCS",
+      "examples": [
+        "RN000010A"
+      ]
+    }
+  },
+  "additionalProperties": false
+}

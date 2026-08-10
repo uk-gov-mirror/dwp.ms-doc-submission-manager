@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "javaType" : "uk.gov.dwp.health.pip.common.model.events.v1.decision.DecisionOutcome",
+  "title": "DecisionOutcome",
+  "type": "string",
+  "enum": [
+    "AWARDED",
+    "DISALLOWED"
+  ],
+  "description": "The outcome for decision."
+}

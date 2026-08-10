@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "$id": "https://gitlab.com/dwp/health/pip-apply/schemas/registration/additional-support.schema.1.0.0.json",
+  "title": "additional support schema",
+  "description": "The additional support section of the registration data",
+  "type": "object",
+  "properties": {
+    "helpCommunicating": {
+      "description": "Do you need help from someone else to communicate with us?",
+      "type": "boolean",
+      "examples": [
+        true,
+        false
+      ]
+    },
+    "helpUnderstandingLetters": {
+      "description": "Do you need help to fill in forms or understand letters?",
+      "type": "boolean",
+      "examples": [
+        true,
+        false
+      ]
+    },
+    "helperDetails": {
+      "$ref": "#/$defs/helperDetails100"
+    },
+    "anyoneToHelp": {
+      "description": "Anyone to help?",
+      "type": "boolean",
+      "examples": [
+        true,
+        false
+      ]
+    },
+    "writeInWelsh": {
+      "description": "Write in Welsh?",
+      "type": "boolean",
+      "examples": [
+        true,
+        false
+      ]
+    },
+    "speakInWelsh": {
+      "description": "Speak in Welsh?",
+      "type": "boolean",
+      "examples": [
+        true,
+        false
+      ]
+    }
+  },
+  "required": [
+    "helpCommunicating"
+  ],
+  "$defs": {
+    "helperDetails100": {
+      "description": "The details of the person helping the claimant fill in the form, including first name, surname, whether they can complete forms or manage post.",
+      "type": "object",
+      "properties": {
+        "surname": {
+          "type": "string",
+          "pattern": "^[ -~]+$",
+          "maxLength": 100,
+          "examples": [
+            "Helper Joe",
+            "Helper Jane"
+          ]
+        },
+        "firstname": {
+          "type": "string",
+          "pattern": "^[ -~]+$",
+          "maxLength": 100,
+          "examples": [
+            "Helper Bloggs"
+          ]
+        },
+        "canCompleteForms": {
+          "type": "boolean",
+          "description": "Are you able to complete forms?",
+          "examples": [
+            true,
+            false
+          ]
+        },
+        "canManagePost": {
+          "type": "boolean",
+          "description": "Are you able to manage your post and return information by post?",
+          "examples": [
+            true,
+            false
+          ]
+        }
+      },
+      "required": [
+        "firstname"
+      ]
+    }
+  }
+}

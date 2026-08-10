@@ -1,0 +1,45 @@
+components:
+  schemas:
+    HealthCondition:
+      type: object
+      title: HealthCondition
+      required:
+        - health_condition_id
+        - health_condition_name
+      properties:
+        health_condition_id:
+          type: string
+          example: "J61"
+        health_condition_name:
+          type: string
+          example: "Aortic valve disease"
+        health_condition_category:
+          type: string
+          example: "Cardiovascular disease"
+        health_condition_subcategory:
+          type: string
+          example: "Valve disease J61 – J70"
+
+    SupportingHealthConditionsId:
+      type: object
+      title: SupportingHealthConditionsId
+      description: supporting health conditions id
+      properties:
+        supporting_health_conditions_id:
+          example: "662bab3052490c0dd2a42d21"
+          type: string
+          pattern: ^[a-zA-Z0-9]{24}
+
+    SupportingHealthConditions:
+      type: object
+      title: SupportingHealthConditions
+      description: Health Conditions to support the decision made against the claim
+      required:
+        - primary_condition
+      properties:
+        primary_condition:
+          $ref: '#/components/schemas/HealthCondition'
+        secondary_conditions:
+          type: array
+          items:
+            $ref: '#/components/schemas/HealthCondition'

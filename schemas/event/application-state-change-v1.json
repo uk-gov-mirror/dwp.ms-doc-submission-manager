@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "title": "application-state-change-schema",
+  "description": "Notification of a change in Application State Schema (Thin Event Payload)",
+  "required": [
+    "application_id",
+    "state",
+    "timestamp"
+  ],
+  "properties": {
+    "application_id": {
+      "$ref": "#/$defs/application_id_def"
+    },
+    "state": {
+      "$ref": "#/$defs/state_def"
+    },
+    "timestamp": {
+      "$ref": "#/$defs/timestamp_def"
+    },
+    "nino": {
+      "$ref": "#/$defs/nino_def"
+    }
+  },
+  "$defs": {
+    "application_id_def": {
+      "type": "string",
+      "description": "Application ID"
+    },
+    "state_def": {
+      "type": "string",
+      "enum": [
+        "REGISTRATION",
+        "HEALTH_AND_DISABILITY",
+        "HIG_COMPLETE",
+        "SUBMITTED",
+        "DISALLOWED",
+        "DISALLOWED_NON_RETURN",
+        "DISALLOWED_NOT_ELIGIBLE",
+        "WITHDRAWN",
+        "READY_FOR_DECISION",
+        "REFERRED_TO_ASSESSMENT",
+        "RETURNED_FROM_ASSESSMENT",
+        "DECISION_AWARDED",
+        "DECISION_NOT_AWARDED",
+        "ROUTED_TO_PIPCS",
+        "REBUILT_IN_PIPCS"
+      ],
+      "description": "New State of the Application."
+    },
+    "timestamp_def": {
+      "type": "string",
+      "description": "ISO8601 date string. Date of the State change."
+    },
+    "nino_def": {
+      "type": "string",
+      "description": "Citizen nino associated with the application"
+    }
+  }
+}

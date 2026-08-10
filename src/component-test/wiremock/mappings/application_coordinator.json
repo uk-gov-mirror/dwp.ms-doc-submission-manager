@@ -1,0 +1,68 @@
+{
+  "mappings": [
+    {
+      "request": {
+        "urlPath": "/v5/applications",
+        "method": "GET",
+        "queryParameters": {
+          "application_id": {
+            "matches": "^.*$"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "bodyFileName": "appcoord_GET_v5_applications_200.json"
+      }
+    },
+    {
+      "priority": 1,
+      "request": {
+        "urlPattern": "/v1/applications/000000000000000000000002/healthdisability/submission/([\\w]+)",
+        "method": "PUT"
+      },
+      "response": {
+        "status": 502
+      }
+    },
+    {
+      "scenarioName": "application_submission_retry_success",
+      "requiredScenarioState": "Started",
+      "request": {
+        "urlPattern": "/v1/applications/([\\w]+)/healthdisability/submission/([\\w]+)",
+        "method": "PUT"
+      },
+      "response": {
+        "status": 502
+      },
+      "newScenarioState": "return_504"
+    },
+    {
+      "scenarioName": "application_submission_retry_success",
+      "requiredScenarioState": "return_504",
+      "request": {
+        "urlPattern": "/v1/applications/([\\w]+)/healthdisability/submission/([\\w]+)",
+        "method": "PUT"
+      },
+      "response": {
+        "status": 504
+      },
+      "newScenarioState": "return_202"
+    },
+    {
+      "scenarioName": "application_submission_retry_success",
+      "requiredScenarioState": "return_202",
+      "request": {
+        "urlPattern": "/v1/applications/([\\w]+)/healthdisability/submission/([\\w]+)",
+        "method": "PUT"
+      },
+      "response": {
+        "status": 202
+      },
+      "newScenarioState": "Started"
+    }
+  ]
+}

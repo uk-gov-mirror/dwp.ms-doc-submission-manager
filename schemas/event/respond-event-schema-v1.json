@@ -1,0 +1,77 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "https://gitlab.com/dwp/health/pip-apply/schemas/event/respond-event-schema-v1.json",
+  "type": "object",
+  "title": "Respond event message schema",
+  "description": "Schema describe how PIPCS-gw respond event message should be formulated",
+  "default": {},
+  "examples": [
+    {
+      "applicationId": "application-id-from-application-manager",
+      "applicationRef": "application-id-from-pipcs",
+      "state": "SUBMITTED/DISALLOW/REJECTED",
+      "message": "message",
+      "timestamp": "2021-09-29T01:00:00.000+00:00"
+    }
+  ],
+  "required": [
+    "applicationId",
+    "applicationRef",
+    "state",
+    "message",
+    "timestamp"
+  ],
+  "properties": {
+    "applicationId": {
+      "$id": "#/properties/applicationId",
+      "type": "string",
+      "title": "The applicationId schema",
+      "description": "An explanation about the purpose of this instance.",
+      "default": "",
+      "examples": [
+        "application-id-from-application-manager"
+      ]
+    },
+    "applicationRef": {
+      "$id": "#/properties/applicationRef",
+      "type": "string",
+      "title": "The applicationRef schema",
+      "description": "An explanation about the purpose of this instance.",
+      "default": "",
+      "examples": [
+        "application-id-from-pipcs"
+      ]
+    },
+    "state": {
+      "$id": "#/properties/state",
+      "type": "string",
+      "title": "The state schema",
+      "description": "An explanation about the purpose of this instance.",
+      "default": "",
+      "examples": [
+        "SUBMITTED/DISALLOW/REJECTED"
+      ]
+    },
+    "message": {
+      "$id": "#/properties/message",
+      "type": "string",
+      "title": "The message schema",
+      "description": "An explanation about the purpose of this instance.",
+      "default": "",
+      "examples": [
+        "message"
+      ]
+    },
+    "timestamp": {
+      "$id": "#/properties/timestamp",
+      "type": "string",
+      "title": "The timestamp schema",
+      "description": "An explanation about the purpose of this instance.",
+      "default": "",
+      "examples": [
+        "2021-09-29T01:00:00.000+00:00"
+      ]
+    }
+  },
+  "additionalProperties": false
+}

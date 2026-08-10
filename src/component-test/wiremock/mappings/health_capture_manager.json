@@ -1,0 +1,74 @@
+{
+  "mappings": [
+    {
+      "priority": 1,
+      "request": {
+        "urlPath": "/v2/applications/000000000000000000000001",
+        "method": "GET"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "bodyFileName": "hcm_GET_v2_applications_000000000000000000000001_200.json"
+      }
+    },
+    {
+      "priority": 1,
+      "request": {
+        "urlPath": "/v2/applications/000000000000000000000002",
+        "method": "GET"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "bodyFileName": "hcm_GET_v2_applications_000000000000000000000002_200.json"
+      }
+    },
+    {
+      "priority": 1,
+      "request": {
+        "urlPath": "/v2/applications/707f1f77bcf86cd659439021",
+        "method": "GET"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "bodyFileName": "hcm_GET_v2_applications_707f1f77bcf86cd659439021_200.json"
+      }
+    },
+    {
+      "priority": 1,
+      "request": {
+        "urlPath": "/v2/applications/88e3e1d04f99b152240e72e0",
+        "method": "GET"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json;charset=UTF-8"
+        },
+        "bodyFileName": "hcm_GET_v2_applications_88e3e1d04f99b152240e72e0_200.json"
+      }
+    },
+    {
+      "priority": 99,
+      "request": {
+        "method": "GET",
+        "urlPattern": "/v2/applications/([\\w]+)"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json;charset=UTF-8"
+        },
+        "bodyFileName": "hcm_GET_v2_applications_4bce57c491efc3ac3bc3e6f5_200.json"
+      }
+    }
+  ]
+}

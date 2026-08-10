@@ -1,0 +1,54 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "https://gitlab.com/dwp/health/pip-apply/schemas/pipcs-api/pipcs-api-check-claim-failure-response-v1.json",
+  "type": "object",
+  "title": "PIPCS-API check claim failure response body",
+  "description": "Schema describe how PIPCS-api sends back check claim failure response",
+  "properties": {
+    "errors": {
+      "$id": "#/properties/errors",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "name": "errors",
+        "required": [
+          "code",
+          "message",
+          "level"
+        ],
+        "properties": {
+          "code": {
+            "$id": "#/properties/code",
+            "type": "integer",
+            "title": "Problem code",
+            "description": "A machine readable code identifying the problem. This will not vary with the Accept-Language setting",
+            "format": "int32"
+          },
+          "message": {
+            "$id": "#/properties/message",
+            "type": "string",
+            "title": "Message",
+            "description": "A human readable message. This message text is localized based on the Accept-Language setting of the request. The contents of this message text may change over time"
+          },
+          "message_id": {
+            "$id": "#/properties/message_id",
+            "type": "string",
+            "title": "Message Identifier",
+            "description": "The unique string identifier of the error message, if one exists for the underlying cause of the error"
+          },
+          "level": {
+            "$id": "#/properties/level",
+            "type": "string",
+            "title": "Error level",
+            "description": "The level of the error"
+          }
+        },
+        "additionalProperties": false
+      },
+      "title": "The PIPCS check claim Errors messages",
+      "description": "PIPCS check claim Errors messages",
+      "default": ""
+    }
+  },
+  "additionalProperties": false
+}

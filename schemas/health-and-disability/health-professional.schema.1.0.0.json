@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "$id": "https://gitlab.com/dwp/health/pip-apply/schemas/health-and-disability/health-professional.schema.1.0.0.json",
+  "title": "health professional schema",
+  "description": "Schema to describe the details needed for health professionals within the the pip-apply application",
+  "type": "object",
+  "properties": {
+    "fullName": {
+      "description": "Full name of the health professional",
+      "type": "string",
+      "maxLength": 56,
+      "examples": [
+        "Miss Medic"
+      ]
+    },
+    "profession": {
+      "description": "identifies the profession of the named health care professional",
+      "type": "string",
+      "examples": [
+        "GP"
+      ]
+    },
+    "phoneNumber": {
+      "description": "identifies the contact telephone number of the named health care professional",
+      "type": "string",
+      "maxLength": 15,
+      "examples": [
+        "01234123123"
+      ]
+    },
+    "address": {
+      "description": "identifies the address of the named health care professional",
+      "$ref": "../registration/address.schema.1.0.0.json"
+    },
+    "lastSeenMonth": {
+      "description": "identifies the month when the claimant last saw the named health care professional",
+      "type": "string",
+      "examples": [
+        "10",
+        "3"
+      ]
+    },
+    "lastSeenYear": {
+      "description": "identifies the year when the claimant last saw the named health care professional",
+      "type": "string",
+      "examples": [
+        "2021",
+        "2003"
+      ]
+    }
+  },
+  "required": [
+    "fullName",
+    "profession",
+    "phoneNumber",
+    "address",
+    "lastSeenMonth",
+    "lastSeenYear"
+  ]
+}

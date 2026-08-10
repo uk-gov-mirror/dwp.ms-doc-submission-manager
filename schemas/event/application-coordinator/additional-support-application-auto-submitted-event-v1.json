@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "title": "trigger-event-schema",
+  "description": "Event sent from application coordinator to document submission manager for additional support health information gather automatic submission",
+  "required": [
+    "application_id",
+    "claimant_id"
+  ],
+  "properties": {
+    "application_id": {
+      "$ref": "#/$defs/application_id_def"
+    },
+    "claimant_id": {
+      "$ref": "#/$defs/claimant_id_def"
+    }
+  },
+  "$defs": {
+    "application_id_def": {
+      "type": "string",
+      "pattern": "^[a-z0-9]{24}$",
+      "description": "Application ID"
+    },
+    "claimant_id_def": {
+      "type": "string",
+      "pattern": "^[a-z0-9]{24}$",
+      "description": "Claimant ID"
+    }
+  }
+}

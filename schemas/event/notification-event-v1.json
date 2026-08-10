@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "notification-event-v1.json",
+  "type": "object",
+  "title": "NotificationEventV1",
+  "description": "Event to provide data for letter in order to trigger notification event for notification lambda",
+  "required": [
+    "template",
+    "notificationData"
+  ],
+  "properties": {
+    "template": {
+      "$ref": "common/notification-template.json",
+      "description": "The notification template details"
+    },
+    "notificationData": {
+      "$ref": "notification-data-v2.json"
+    }
+  }
+}

@@ -1,0 +1,2 @@
+include:
+ - component: $CI_SERVER_HOST/dwp/engineering/pipeline-solutions/gitlab/components/dwp-place-change-verification/verification@2.2.1

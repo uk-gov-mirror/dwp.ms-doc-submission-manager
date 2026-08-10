@@ -1,0 +1,160 @@
+openapi: 3.1.0
+info:
+  title: Bank Validation API
+  description: RESTful API for bank validation
+  termsOfService: >-
+    https://gitlab.com/dwp/payments/bank-validation/bank-validation-api/-/blob/develop/TOS.md
+  contact:
+    email: manchester.paymentsdeliveryteam@dwp.gov.uk
+  license:
+    name: License
+    url: >-
+      https://gitlab.com/dwp/payments/bank-validation/bank-validation-api/-/blob/develop/LICENSE.md
+  version: '1.0'
+servers:
+  - url: https://bankval-dev.payments-dev-future.dwpcloud.uk/bank-validation/api/
+    description: Dev instance
+  - url: http://localhost:8083/api/
+    description: Local dev
+paths:
+  /v2/validate:
+    post:
+      description: >-
+        Endpoint used to get details.<br/>Correlation Id (UUID) and Consumer Id
+        (issued to API user during onboarding process) are required headers.
+      operationId: validate
+      parameters:
+        - name: X-Correlation-Id
+          in: header
+          required: true
+          schema:
+            pattern: >-
+              [0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}
+            type: string
+          example: aea45fc6-9ace-4fd9-b9a4-f78cdf1126a7
+        - name: X-Consumer-Id
+          in: header
+          required: true
+          schema:
+            pattern: ^([a-zA-Z0-9_\s\-]{1,8}$)
+            type: string
+          example: BVAL-UI
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountDetails'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResultDto'
+        '400':
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+components:
+  schemas:
+    ErrorResponseDto:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+        subMessages:
+          type: array
+          items:
+            $ref: '#/components/schemas/ValidationMessageDto'
+    ValidationMessageDto:
+      type: object
+      properties:
+        field:
+          type: string
+        message:
+          type: string
+    AdditionalInformationDto:
+      type: object
+      properties:
+        code:
+          type: string
+        customMessage:
+          type: string
+        severity:
+          $ref: 'includes/components.yaml#/components/schemas/SeverityEnum'
+    BranchAddressDto:
+      type: object
+      properties:
+        addressLine:
+          type: object
+          additionalProperties:
+            type: string
+        postCode:
+          type: string
+    BranchDataDto:
+      type: object
+      properties:
+        institutionName:
+          type: string
+        branchName:
+          type: string
+        telephoneNumber:
+          type: string
+        faxNumber:
+          type: string
+        branchAddress:
+          $ref: '#/components/schemas/BranchAddressDto'
+        redirectTo:
+          type: string
+        subBranchNumber:
+          type: integer
+    ValidationResultDto:
+      type: object
+      properties:
+        iban:
+          type: string
+        sortCode:
+          type: string
+        accountNumber:
+          type: string
+        rollNumber:
+          type: string
+        validDetails:
+          type: boolean
+        accountCategory:
+          type: string
+        branchDetails:
+          $ref: '#/components/schemas/BranchDataDto'
+        transactionsSupported:
+          type: array
+          items:
+            type: string
+            enum:
+              - DIRECT_DEBIT
+              - DIRECT_CREDIT
+              - FPS
+              - AUDDIS
+        additionalInformation:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdditionalInformationDto'
+    AccountDetails:
+      type: object
+      properties:
+        sortCode:
+          type: string
+        accountNumber:
+          type: string
+        rollNumber:
+          type: string

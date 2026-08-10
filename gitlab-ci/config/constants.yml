@@ -1,14 +1,17 @@
 variables:
   # Repo
-  REPO_OWNER: "Team Goldcrest"
+  REPO_OWNER: "pip-apply"
   REPO_PATTERN: "V3.1 CI"
   # Product
   PRODUCT: pip-apply
   # Config
   BUILD_TYPE: MAVEN
-  MAVEN_IMAGE: "maven:3.8.3-openjdk-17"
-  MVN_OPTS: "-DLOG_LEVEL=INFO -Dde.flapdoodle.os.override=Linux|X86_64|Oracle|Oracle_8"
-  MVN_CLI_OPTS: "--batch-mode"
+  GIT_SUBMODULE_STRATEGY: recursive
+  MAVEN_IMAGE: "nexus.nonprod.dwpcloud.uk/docker/maven:3.9.9-eclipse-temurin-21@sha256:70591cb7a67e12414b16603c6e89d95625e802667f2a0932d5362c459f362fff"
+  MVN_OPTS: "-DLOG_LEVEL=INFO"
+  MVN_CLI_OPTS: "--batch-mode -ntp"
+  PIP_APPLY_MOCKS_BRANCH: develop
+  PIP_APPLY_MOCKS_IMAGE: "registry.gitlab.com/dwp/health/pip-apply/components/pip-apply-mocks"
   PIP_APPLY_MOCKS_NAME: pip-apply-mocks
   MOCK_IMAGE: "develop"
   GITHUB_REPO_NAME: ms-doc-submission-manager

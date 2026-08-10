@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "$id": "https://gitlab.com/dwp/health/pip-apply/schemas/health-and-disability/health-condition.schema.1.0.0.json",
+  "title": "health condition schema",
+  "description": "Schema to describe the details needed for health conditions within the the pip-apply application",
+  "type": "object",
+  "properties": {
+    "healthCondition": {
+      "description": "Name of the condition or disability",
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 200,
+      "examples": [
+        "diabetes",
+        "kidney failure"
+      ]
+    },
+    "approxStartDate": {
+      "description": "Indicates approximately when the condition or disability started",
+      "type": "string",
+      "examples": [
+        "Yesterday",
+        "about 5 years ago",
+        "20/1/2021"
+      ]
+    },
+    "conditionDescription": {
+      "description": "Free text giving details about the condition, treatments etc",
+      "type": "string",
+      "maxLength": 5000,
+      "examples": [
+        "All of the details the claimant wants to enter about their condition."
+      ]
+    }
+  },
+  "required": [
+    "healthCondition",
+    "approxStartDate",
+    "conditionDescription"
+  ]
+}

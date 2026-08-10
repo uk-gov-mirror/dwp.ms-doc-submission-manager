@@ -1,0 +1,225 @@
+openapi: '3.1.0'
+
+info:
+  title: DWP PIP Decision Manager Service
+  description: Rest API for operations relating to the review for a claim
+  version: '@project.version@'
+
+servers:
+  - url: 'https://localhost:8080'
+
+paths:
+
+  /v1/reviews/{reviewId}/activities:
+    get:
+      tags:
+        - activities
+      summary: Get all review activities
+      operationId: reviewActivitiesByReviewId
+      parameters:
+        - name: reviewId
+          in: path
+          description: unique reviewId
+          required: true
+          schema:
+            type: string
+            example: "6ed1d430716609122be7a4d6"
+      responses:
+        200:
+          description: OK - activities for review exist for review ID
+          content:
+            application/json:
+              schema:
+                $ref: 'includes/components.yaml#/components/schemas/ReviewActivitiesDetails'
+        400:
+          description: BAD REQUEST - badly formed request
+        404:
+          description: NOT FOUND - activities do not exist for provided review ID
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+
+  /v1/reviews/{reviewId}/outcome:
+    get:
+      tags:
+        - review
+      summary: Get review outcome by review id
+      operationId: getReviewOutcomeByReviewId
+      parameters:
+        - name: reviewId
+          in: path
+          description: unique review id
+          required: true
+          schema:
+            type: string
+            example: "6ed1d430716609122be7a4d6"
+      responses:
+        200:
+          description: OK - review outcome returned based on the activity scores
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewOutcome'
+        400:
+          description: BAD REQUEST - badly formed request
+        404:
+          description: NOT FOUND - review does not exist for provided review id
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+
+  /v1/reviews/{reviewId}/activities/{group}/{activity}:
+    get:
+      tags:
+        - activities
+      summary: Get one review activity
+      operationId: reviewActivityByReviewIdGroupAndActivity
+      parameters:
+        - name: reviewId
+          in: path
+          description: unique application id
+          required: true
+          schema:
+            type: string
+            example: "6ed1d430716609122be7a4d6"
+        - name: group
+          in: path
+          description: group of activities
+          required: true
+          schema:
+            type: string
+            example: "dailyLiving"
+        - name: activity
+          in: path
+          description: specific activity
+          required: true
+          schema:
+            type: string
+            example: "preparingAMeal"
+
+      responses:
+        200:
+          description: OK - activity for review exists for reviewId, group and activity
+          content:
+            application/json:
+              schema:
+                $ref: 'includes/components.yaml#/components/schemas/ReviewActivitiesActivity'
+        400:
+          description: BAD REQUEST - badly formed request
+        404:
+          description: NOT FOUND - activity does not exist for provided review, group and activity IDs
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+
+    patch:
+      tags:
+        - activities
+      summary: Update one review activity
+      operationId: updateReviewActivityByReviewIdGroupAndActivity
+      parameters:
+        - name: reviewId
+          in: path
+          description: unique reviewId
+          required: true
+          schema:
+            type: string
+            example: "6ed1d430716609122be7a4d6"
+        - name: group
+          in: path
+          description: group of activities
+          required: true
+          schema:
+            type: string
+            example: "dailyLiving"
+        - name: activity
+          in: path
+          description: specific activity
+          required: true
+          schema:
+            type: string
+            example: "preparingAMeal"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: 'includes/components.yaml#/components/schemas/UpdateReviewActivityRequest'
+
+      responses:
+        200:
+          description: OK - activity for review exists for reviewId, group and activity
+          content:
+            application/json:
+              schema:
+                $ref: 'includes/components.yaml#/components/schemas/ReviewActivitiesActivity'
+        400:
+          description: BAD REQUEST - badly formed request
+        404:
+          description: NOT FOUND - activity does not exist for provided reviewId, group and activity ID
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+
+  /v1/reviews/{reviewId}/qualifying-period-prospective-test:
+    patch:
+      tags:
+        - qualifying-period-prospective-test
+      summary: Create or update qualifying period and prospective test for review
+      operationId: createOrUpdateQpPt
+      parameters:
+        - name: reviewId
+          in: path
+          description: unique reviewId
+          required: true
+          schema:
+            type: string
+            example: "6ed1d430716609122be7a4d6"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QpPtDetailsDto'
+      responses:
+        200:
+          description: OK - Created or updated qualifying period and prospective test for review.
+        400:
+          description: BAD REQUEST - badly formed request.
+        404:
+          description: NOT FOUND - review does not exist for provided id.
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+
+components:
+  securitySchemes:
+    sideCarProxySecurity:
+      type: mutualTLS
+      description: "Security is enforced by an external side car proxy using mTLS, not directly by this API"
+      x-sidecar-implementation: true
+  schemas:
+    CreateReviewRequest:
+      type: object
+      required:
+        - application_id
+        - user_who_created_the_review
+      allOf:
+        - $ref: 'includes/components.yaml#/components/schemas/ApplicationId'
+        - $ref: 'includes/components.yaml#/components/schemas/UserWhoCreatedTheReview'
+
+    ReviewQpPtDto:
+      type: object
+      properties:
+        qualifying_period_prospective_test:
+          $ref: '#/components/schemas/QpPtDetailsDto'
+
+    ReviewOutcome:
+      type: object
+      allOf:
+        - $ref: 'includes/components.yaml#/components/schemas/ReviewId'
+        - $ref: 'includes/components.yaml#/components/schemas/ReviewOutcome'
+
+    QpPtDetailsDto:
+      title: QpPtDetailsDto
+      type: object
+      properties:
+        daily_living:
+          $ref: 'includes/components.yaml#/components/schemas/QpPtDto'
+        mobility:
+          $ref: 'includes/components.yaml#/components/schemas/QpPtDto'
+security:
+  - sideCarProxySecurity : []

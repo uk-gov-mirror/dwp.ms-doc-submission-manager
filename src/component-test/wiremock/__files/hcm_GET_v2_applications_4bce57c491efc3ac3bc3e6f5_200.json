@@ -1,0 +1,179 @@
+{
+  "application_id": "4bce57c491efc3ac3bc3e6f5",
+  "claimant_id": "000000000000000000000001",
+  "state": {
+    "current": "HEALTH_AND_DISABILITY",
+    "history": [
+      {
+        "state": "HEALTH_AND_DISABILITY",
+        "timestamp": "2023-05-09T10:57:58.657Z"
+      },
+      {
+        "state": "REGISTRATION",
+        "timestamp": "2023-05-09T10:00:00.657Z"
+      }
+    ]
+  },
+  "registration_details": {
+    "personal_details": {
+      "surname": "Smith",
+      "firstName": "Ruth",
+      "national_insurance_number": "AB123456C",
+      "postcode": "AB123CD",
+      "date_of_birth": "2000-01-01",
+      "email": "test@email.com"
+    },
+    "health_details": {
+      "health_professionals" : [
+        {
+          "name": "",
+          "profession": "",
+          "phone_number": "",
+          "address": {
+            "line1": "",
+            "line2": "",
+            "line3": "",
+            "town": "",
+            "county": "",
+            "postcode": "",
+            "country": ""
+          },
+          "last_contact": ""
+        }
+      ]
+    }
+  },
+  "submission_date": "Thu Aug 17 01:00:00 UTC 2023",
+  "application_timeframe": {
+    "effective_from": "2023-05-08",
+    "effective_to": "2023-08-09"
+  },
+  "form_data": {
+    "journeyContexts": {},
+    "appName": "app-name",
+    "version": "1",
+    "mappedData": {
+      "aboutYourHealth": {
+        "conditions": [
+          {
+            "order": 1,
+            "condition": "C1",
+            "approximateStartDate": "12 months ago",
+            "description": "This is the details about C1"
+          },
+          {
+            "order": 2,
+            "condition": "C2",
+            "approximateStartDate": "12 months ago",
+            "description": "This is the details about C2"
+          }
+        ],
+        "hcpDetails": [
+          {
+            "order": 1,
+            "name": "Jim",
+            "profession": "GP",
+            "phoneNumber": "07808555876",
+            "address": {
+              "line1": "123",
+              "line2": "Testing Street",
+              "townOrCity": "Newcastle",
+              "postCode": "NE6 5DX"
+            },
+            "lastContact": "October 2019"
+          },
+          {
+            "order": 2,
+            "name": "Jim",
+            "profession": "GP",
+            "phoneNumber": "07808555876",
+            "address": {
+              "line1": "123",
+              "line2": "Testing Street",
+              "townOrCity": "Newcastle",
+              "postCode": "NE6 5DX"
+            },
+            "lastContact": "October 2019"
+          }
+        ]
+      },
+      "dailyLiving": {
+        "preparingFood": {
+          "isAffected": "Yes",
+          "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Felis donec et odio pellentesque diam volutpat commodo sed egestas. Eget velit aliquet sagittis id consectetur purus ut faucibus."
+        },
+        "eatingDrinking": {
+          "isAffected": "Yes",
+          "useFeedingTube": "Yes",
+          "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Felis donec et odio pellentesque diam volutpat commodo sed egestas. Eget velit aliquet sagittis id consectetur purus ut faucibus."
+        },
+        "managingTreatments": {
+          "isAffected": "No"
+        },
+        "washingBathing": {
+          "isAffected": "No"
+        },
+        "toiletIncontinence": {
+          "isAffected": "Yes",
+          "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Felis donec et odio pellentesque diam volutpat commodo sed egestas. Eget velit aliquet sagittis id consectetur purus ut faucibus."
+        },
+        "dressingUndressing": {
+          "isAffected": "No"
+        },
+        "talkingListening": {
+          "isAffected": "No"
+        },
+        "reading": {
+          "isAffected": "No"
+        },
+        "mixingPeople": {
+          "isAffected": "No"
+        },
+        "managingMoney": {
+          "isAffected": "No"
+        }
+      },
+      "mobility": {
+        "planningFollowing": {
+          "isAffected": "No"
+        },
+        "movingAround": {
+          "isAffected": "Yes",
+          "severity": {
+            "distance": "varies",
+            "notes": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Felis donec et odio pellentesque diam volutpat commodo sed egestas. Eget velit aliquet sagittis id consectetur purus ut faucibus."
+          },
+          "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Felis donec et odio pellentesque diam volutpat commodo sed egestas. Eget velit aliquet sagittis id consectetur purus ut faucibus."
+        }
+      },
+      "other": {
+        "additionalInformation": "Yes",
+        "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Felis donec et odio pellentesque diam volutpat commodo sed egestas. Eget velit aliquet sagittis id consectetur purus ut faucibus."
+      }
+    }
+  },
+  "files": [
+    {
+      "sanitised_name": "Test.pdf",
+      "id": "649ea751f8c69031b429dbcd",
+      "display_size": "1 MB",
+      "size": 1024,
+      "s3_ref": "docTest.doc",
+      "bucket": "pip-bucket",
+      "mime_type": "application/pdf",
+      "date_time": "2023-06-30T09:58:41.373Z",
+      "drs_doc_type": "PIP2_EVIDENCE"
+    },
+    {
+      "sanitised_name": "Test.pdf",
+      "id": "649ea8c9f8c69031b429dbce",
+      "display_size": "1 MB",
+      "size": 1024,
+      "s3_ref": "docTest.doc",
+      "bucket": "pip-bucket",
+      "mime_type": "application/pdf",
+      "date_time": "2023-06-30T10:04:57.934Z",
+      "drs_doc_type": "PIP2_EVIDENCE"
+    }
+  ]
+}

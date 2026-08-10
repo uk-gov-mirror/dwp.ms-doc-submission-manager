@@ -1,3 +1,72 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
+    <suppress>
+        <notes><![CDATA[file name: bc-fips-2.1.2.jar]]></notes>
+        <cve>CVE-2026-33540</cve>
+        <cve>CVE-2026-35172</cve>
+        <cve>CVE-2026-41888</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[file name: micrometer-registry-prometheus-1.16.5.jar]]></notes>
+        <cve>CVE-2026-42154</cve>
+    </suppress>
+     <suppress>
+        <notes><![CDATA[file name: tomcat-embed-core-11.0.24.jar]]></notes>
+        <cve>CVE-2026-66299</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[file name: prometheus-metrics-core-1.4.3.jar CVE-2019-3826 affects Prometheus server UI, not prometheus-metrics-core (Java client)]]></notes>
+        <cve>CVE-2019-3826</cve>
+    </suppress>
+    <suppress>
+        <notes>
+            Apache HttpCore 4.4.16 is a transitive dependency of
+            Rest Assured 5.5.7 and AWS SDK v2 apache-client.
+
+            No newer HttpCore 4.x release exists.
+            Migration requires upstream library changes.
+
+            Jira: BUZ-1320
+        </notes>
+
+        <packageUrl regex="true">
+            ^pkg:maven/org\.apache\.httpcomponents/httpcore@4\.4\.16$
+        </packageUrl>
+
+        <cve>CVE-2026-54399</cve>
+        <cve>CVE-2026-54428</cve>
+    </suppress>
+    <suppress>
+        <notes>
+            False positive.
+            Dependency-Check maps spring-boot-data-mongodb to the
+            spring_data_mongodb CPE using the Spring Boot module version.
+
+            Actual resolved dependency:
+            org.springframework.data:spring-data-mongodb:5.1.0
+
+            CVE-2026-41696 and CVE-2026-41717 affect earlier versions
+            of Spring Data MongoDB only.
+        </notes>
+
+        <gav regex="true">
+            ^org\.springframework\.boot:spring-boot-data-mongodb:.*$
+        </gav>
+
+        <cve>CVE-2026-41696</cve>
+    </suppress>
+
+    <suppress>
+        <notes>
+            False positive.
+            Actual runtime dependency is
+            org.springframework.data:spring-data-mongodb:5.1.0.
+        </notes>
+
+        <gav regex="true">
+            ^org\.springframework\.boot:spring-boot-data-mongodb:.*$
+        </gav>
+
+        <cve>CVE-2026-41717</cve>
+    </suppress>
 </suppressions>

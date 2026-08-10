@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "prequest-assessment-event-v1.json",
+  "type": "object",
+  "title": "request-assessment-v1",
+  "description": "Event used to request an assessment from eligibility to coordinator",
+  "required": [
+    "application_id"
+  ],
+  "properties": {
+    "application_id": {
+      "type": "string",
+      "description": "The application id to request an assessment for"
+    },
+    "agent_id": {
+      "type": "string",
+      "description": "The id of the agent making the request"
+    }
+  }
+}

@@ -1,0 +1,12 @@
+stages:
+  - validate
+
+validate-schemas:
+  stage: validate
+  tags:
+    - dwp-aws-x86-linux-l
+  image: node:24-alpine@sha256:cd6fb7efa6490f039f3471a189214d5f548c11df1ff9e5b181aa49e22c14383e
+  script:
+    - npm config set registry https://nexus.nonprod.dwpcloud.uk/repository/npm/
+    - npm --prefix utilities install --ignore-scripts 
+    - npm --prefix utilities run validate

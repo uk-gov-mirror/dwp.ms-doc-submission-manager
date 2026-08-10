@@ -1,0 +1,93 @@
+openapi: '3.1.0'
+
+info:
+  title: DWP PIP Registration Capture Manager Service
+  description: Rest API for capturing registration data (PIP1)
+  version: '@project.version@'
+
+servers:
+  - url: 'https://localhost:8080'
+
+paths:
+  /v6/registration/{application_id}:
+    get:
+      tags:
+        - registration
+      summary: get registration data by application id
+      operationId: getRegistrationDataByApplicationId
+      parameters:
+        - in: path
+          name: application_id
+          required: true
+          schema:
+            type: string
+            pattern: ^[a-z0-9]{24}
+            example: "5ed0d430716609122be7a4d6"
+      responses:
+        200:
+          description: OK - existing registration data found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegistrationV2Dto'
+        404:
+          description: NOT FOUND - registration data doesn't exist for {application_id}
+  /v6/registration:
+    post:
+      tags:
+        - registration
+      summary: create registration data
+      operationId: createRegistrationData
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegistrationCreateDto'
+      responses:
+        201:
+          description: CREATED - registration data for {application_id} created
+        400:
+          description: BAD REQUEST - badly formed json or invalid request
+        409:
+          description: CONFLICT - application id already exists
+          content:
+            application/json:
+              schema:
+                $ref: 'includes/components.yaml#/components/schemas/ErrorResponseDto'
+        403:
+          description: FORBIDDEN - prohibited action
+          content:
+            application/json:
+              schema:
+                $ref: 'includes/components.yaml#/components/schemas/ErrorResponseDto'
+
+components:
+  schemas:
+    RegistrationV2Dto:
+      type: object
+      allOf:
+        - $ref: 'includes/components.yaml#/components/schemas/ApplicationId'
+        - $ref: '#/components/schemas/FormDataDto'
+    RegistrationCreateDto:
+      type: object
+      required:
+        - application_id
+        - claimant_id
+      allOf:
+        - $ref: 'includes/components.yaml#/components/schemas/ApplicationId'
+        - $ref: 'includes/components.yaml#/components/schemas/ClaimantId'
+    FormDataDto:
+      type: object
+      properties:
+        form_data:
+          type: object
+        meta:
+          type: object
+  securitySchemes:
+    sideCarProxySecurity:
+      type: mutualTLS
+      description: "Security is enforced by an external side car proxy using mTLS, not directly by this API"
+      x-sidecar-implementation: true
+security:
+  - sideCarProxySecurity : []

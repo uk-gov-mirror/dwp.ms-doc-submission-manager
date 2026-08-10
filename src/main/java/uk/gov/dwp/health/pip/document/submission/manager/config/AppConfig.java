@@ -1,22 +1,22 @@
 package uk.gov.dwp.health.pip.document.submission.manager.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.json.JsonMapper;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.retry.annotation.EnableRetry;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import uk.gov.dwp.health.pip.document.submission.manager.utils.RequestPartition;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.Clock;
 import java.util.Base64;
 import java.util.TimeZone;
 
 @Configuration
+@EnableRetry
 @Slf4j
 public class AppConfig {
 
@@ -32,11 +32,7 @@ public class AppConfig {
 
   @Bean
   public ObjectMapper objectMapper() {
-    return JsonMapper.builder()
-        .addModule(new ParameterNamesModule())
-        .addModule(new Jdk8Module())
-        .addModule(new JavaTimeModule())
-        .build();
+    return JsonMapper.builder().build();
   }
 
   @Bean
@@ -53,5 +49,10 @@ public class AppConfig {
       @Value("${drs.max.number.file.per.batch:-1}") int fc) {
     log.info("Create request partition bean disk size kb [{}] file per batch [{}]", vol, fc);
     return new RequestPartition(vol, fc);
+  }
+
+  @Bean
+  public Clock clock() {
+    return Clock.systemUTC();
   }
 }

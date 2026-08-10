@@ -1,0 +1,109 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "https://gitlab.com/dwp/health/pip-apply/schemas/identity/request-update-schema-v1.json",
+  "type": "object",
+  "title": "PIP IDV outcome message body",
+  "description": "Schema to describe the PIP IDV outcome message request",
+  "default": {},
+  "examples": [
+    {
+      "channel": "oidv",
+      "timestamp": "2017-07-21 17:32:28",
+      "identity_id": "4fb4275c-a7f5-11ed-afa1-0242ac120002",
+      "idv_outcome": "verified",
+      "nino": "AA123456C",
+      "subject_id": "test@test.com",
+      "kbv_status": "verified"
+    }
+  ],
+  "required": [
+    "channel",
+    "timestamp",
+    "identity_id",
+    "subject_id",
+    "nino"
+  ],
+  "properties": {
+    "channel": {
+      "$id": "#/properties/Channel",
+      "type": "string",
+      "title": "Channel schema",
+      "enum": [
+        "oidv",
+        "aidv",
+        "seeded"
+      ],
+      "examples": [
+        "oidv"
+      ]
+    },
+    "timestamp": {
+      "$id": "#/properties/DateTime",
+      "type": "string",
+      "title": "Date and time schema",
+      "examples": [
+        "2017-07-21 17:32:28"
+      ]
+    },
+    "identity_id": {
+      "$id": "#/properties/IdentityId",
+      "type": "string",
+      "format": "uuid",
+      "title": "The identity id schema",
+      "examples": [
+        "4fb4275c-a7f5-11ed-afa1-0242ac120002"
+      ]
+    },
+    "idv_outcome": {
+      "$id": "#/properties/IdvOutcome",
+      "type": "string",
+      "title": "IDV status schema",
+      "enum": [
+        "verified",
+        "unverified"
+      ],
+      "examples": [
+        "verified"
+      ]
+    },
+    "nino": {
+      "$id": "#/properties/Nino",
+      "type": "string",
+      "title": "Nino schema",
+      "pattern": "(^(?!BG)(?!GB)(?!NK)(?!KN)(?!TN)(?!NT)(?!ZZ)[A-Z&&[^DFIQUV]][A-Z&&[^DFIOQUV]][0-9]{6}[A-D]$)",
+      "examples": [
+        "AA123456C"
+      ]
+    },
+    "subject_id": {
+      "$id": "#/properties/SubjectId",
+      "type": "string",
+      "title": "Subject id schema",
+      "pattern": "(^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$)",
+      "examples": [
+        "test@test.com"
+      ]
+    },
+    "vot": {
+      "$id": "#/properties/Vot",
+      "type": "string",
+      "title": "Vector of Trust status",
+      "enum": [
+        "P0.Cl.Cm",
+        "P1.Cl.Cm",
+        "P2.Cl.Cm"
+      ],
+      "examples": [
+        "P0.Cl.Cm",
+        "P1.Cl.Cm",
+        "P2.Cl.Cm"
+      ]
+    },
+    "kbv_status": {
+      "type": "string",
+      "enum": ["verified", "unverified"],
+      "description": "The status of KBV"
+    }
+  },
+  "additionalProperties": false
+}

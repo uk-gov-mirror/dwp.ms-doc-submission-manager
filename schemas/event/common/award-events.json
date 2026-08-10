@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "string",
+  "javaType" : "uk.gov.dwp.health.pip.common.model.events.v1.award.AwardEvents",
+  "title": "Award Events",
+  "description": "Events that may or may not trigger state changes in Award Manager",
+  "enum": [
+    "AWARDED",
+    "PAYMENT_CREATED",
+    "EJECTED_PAYMENT_STOPPED",
+    "EJECTED_REBUILT_IN_PIPCS",
+    "SUSPEND",
+    "STOP",
+    "FINISH",
+    "REQUEST_EJECTION",
+    "UPRATED",
+    "OTHER"
+  ]
+}

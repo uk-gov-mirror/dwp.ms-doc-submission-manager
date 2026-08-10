@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "pre-decision-check-passed-event-v1.json",
+  "type": "object",
+  "title": "pre-decision-check-passed-v1",
+  "description": "Event used to publish pre-decision check passed.",
+  "required": [
+    "application_id",
+    "outcome",
+    "outcome_date",
+    "outcome_created_by"
+  ],
+  "properties": {
+    "application_id": {
+      "type": "string",
+      "description": "The application id for which pre-decision check has been made"
+    },
+    "outcome": {
+      "$ref": "#/$defs/outcome"
+    },
+    "outcome_date": {
+      "type": "string",
+      "description": "Date when pre-decision check happened"
+    },
+    "outcome_created_by": {
+      "type": "string",
+      "description": "User who created the outcome"
+    }
+  },
+  "$defs": {
+    "outcome": {
+      "type": "string",
+      "enum": [
+        "CONTINUE_TO_MAKE_DECISION",
+        "MOVE_TO_PIPCS",
+        "DISALLOW",
+        "WITHDRAW"
+      ],
+      "description": "The outcome for pre-decision."
+    }
+  }
+}

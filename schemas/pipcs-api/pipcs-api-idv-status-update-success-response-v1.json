@@ -1,0 +1,57 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "https://gitlab.com/dwp/health/pip-apply/schemas/pipcs-api/pipcs-api-idv-status-udpate-success-response-v1.json",
+  "type": "object",
+  "title": "PIPCS-API idv status update success response body",
+  "description": "Schema describe how PIPCS-api sends back idv status update success response",
+  "default": {},
+  "examples": [
+    {
+      "pipApplyApplicationId": "string",
+      "state": "IDV Updated",
+      "timestamp": "string"
+    }
+  ],
+  "required": [
+    "pipApplyApplicationId",
+    "state",
+    "timestamp"
+  ],
+  "properties": {
+    "pipApplyApplicationId": {
+      "$id": "#/properties/pipApplyApplicationId",
+      "type": "string",
+      "title": "The pipApplyApplicationId schema",
+      "description": "PIP-apply application id",
+      "default": "",
+      "examples": [
+        "string"
+      ]
+    },
+    "state": {
+      "$id": "#/properties/state",
+      "type": "string",
+      "title": "The state schema",
+      "description": "Current application states in PIPCS",
+      "default": "",
+      "examples": [
+        "IDV Updated"
+      ],
+      "enum": [
+        "IDV Updated",
+        "IDV Update Failed"
+      ]
+    },
+    "timestamp": {
+      "$id": "#/properties/timestamp",
+      "type": "string",
+      "title": "The timestamp schema",
+      "description": "Application state timestamp",
+      "default": "",
+      "examples": [
+        "string"
+      ]
+    }
+  },
+  "additionalProperties": false
+}

@@ -2,9 +2,15 @@ package uk.gov.dwp.health.pip.document.submission.manager.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import tools.jackson.core.JacksonException;
+import uk.gov.dwp.health.pip.application.coordinator.openapi.coordinator.dto.ApplicationDetails;
 import uk.gov.dwp.health.pip.document.submission.manager.config.properties.DrsMetaProperties;
 import uk.gov.dwp.health.pip.document.submission.manager.config.properties.EventConfigProperties;
-import uk.gov.dwp.health.pip.document.submission.manager.exception.DuplicateException;
+import uk.gov.dwp.health.pip.document.submission.manager.config.restclient.model.V7AccountDetails.LanguageEnum;
+import uk.gov.dwp.health.pip.document.submission.manager.config.restclient.model.V7AccountDetails.UserJourneyEnum;
+import uk.gov.dwp.health.pip.document.submission.manager.entity.Submission;
+import uk.gov.dwp.health.pip.document.submission.manager.exception.DuplicateSubmissionException;
+import uk.gov.dwp.health.pip.document.submission.manager.model.application.ResultWrapper;
 import uk.gov.dwp.health.pip.document.submission.manager.openapi.model.AttachDocumentResponseObjectV1;
 import uk.gov.dwp.health.pip.document.submission.manager.openapi.model.DrsMetadata;
 import uk.gov.dwp.health.pip.document.submission.manager.openapi.model.PipApplicationV1;
@@ -13,6 +19,7 @@ import uk.gov.dwp.health.pip.document.submission.manager.openapi.model.ResubmitD
 import uk.gov.dwp.health.pip.document.submission.manager.openapi.model.ResubmitResponseObject;
 import uk.gov.dwp.health.pip.document.submission.manager.openapi.model.SubmissionAttachObjectV1;
 import uk.gov.dwp.health.pip.document.submission.manager.openapi.model.SubmissionResponseObjectV1;
+import uk.gov.dwp.health.pip.document.submission.manager.service.ApplicationCoordinatorService;
 import uk.gov.dwp.health.pip.document.submission.manager.service.ResubmissionService;
 import uk.gov.dwp.health.pip.document.submission.manager.service.SubmissionService;
 import uk.gov.dwp.health.pip.document.submission.manager.service.SubmissionServiceAbstract;
@@ -20,10 +27,10 @@ import uk.gov.dwp.health.pip.document.submission.manager.service.SubmissionSuppl
 import uk.gov.dwp.health.pip.document.submission.manager.utils.Batch;
 import uk.gov.dwp.health.pip.document.submission.manager.utils.RequestPartition;
 
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -36,17 +43,25 @@ public class V1SubmissionServiceImpl extends SubmissionServiceAbstract
         ResubmissionService<ResubmitDrsRequestObjectV1, ResubmitResponseObject> {
 
   private final RequestPartition partitionUtil;
+  private final ApplicationCoordinatorService applicationCoordinatorService;
+  private final GetClaimantEmailService getClaimantEmailService;
+  private final EmailNotificationServiceImpl emailNotificationService;
 
   public V1SubmissionServiceImpl(
       EventPublisherImpl publisher,
       S3UrlResolverImpl s3UrlResolver,
       DataServiceImpl dataService,
-      DateFormat dateFormat,
       DrsMetaProperties properties,
       EventConfigProperties eventConfigProperties,
-      RequestPartition partition) {
-    super(publisher, properties, eventConfigProperties, dataService, dateFormat, s3UrlResolver);
+      RequestPartition partition,
+      GetClaimantEmailService getClaimantEmailService,
+      ApplicationCoordinatorService applicationCoordinatorService,
+      EmailNotificationServiceImpl emailNotificationService) {
+    super(publisher, properties, eventConfigProperties, dataService, s3UrlResolver);
     this.partitionUtil = partition;
+    this.getClaimantEmailService = getClaimantEmailService;
+    this.applicationCoordinatorService = applicationCoordinatorService;
+    this.emailNotificationService = emailNotificationService;
   }
 
   @Override
@@ -58,7 +73,7 @@ public class V1SubmissionServiceImpl extends SubmissionServiceAbstract
               "Submission already exist for claimant [%s] and claim [%s]",
               submission.getClaimantId(), applicationId);
       log.info(message);
-      throw new DuplicateException(message);
+      throw new DuplicateSubmissionException(message);
     }
     var subRespObjV2 = new SubmissionResponseObjectV1();
     List<RequestId> requestIds = new ArrayList<>();
@@ -110,7 +125,7 @@ public class V1SubmissionServiceImpl extends SubmissionServiceAbstract
 
   @Override
   public AttachDocumentResponseObjectV1 attachDocumentToExistingSubmission(
-      SubmissionAttachObjectV1 attachObjectV2) {
+      String userId, SubmissionAttachObjectV1 attachObjectV2) {
     final List<Batch> batches = partitionUtil.partition(attachObjectV2.getDocuments());
     log.info(
         "Further evidence upload file count [{}] to be partition in [{}]",
@@ -129,9 +144,74 @@ public class V1SubmissionServiceImpl extends SubmissionServiceAbstract
                   return resp.getDrsRequestIds().get(0);
                 })
             .collect(Collectors.toList());
+
+    sendEmailNotification(userId, attachObjectV2);
+
     var resp = new AttachDocumentResponseObjectV1();
     resp.setDrsRequestIds(collect);
     return resp;
+  }
+
+  private void sendEmailNotification(String userId, SubmissionAttachObjectV1 attachObjectV1) {
+    log.info("Send email notification for submission id [{}]", attachObjectV1.getSubmissionId());
+
+    final Submission submission = getSubmissionById(attachObjectV1.getSubmissionId());
+    final String applicationId = submission.getApplicationId();
+    String email;
+    // Default to region in request from account manager.
+    String region = attachObjectV1.getRegion().getValue();
+    // Default to Strategic application.
+    String journeyType = UserJourneyEnum.STRATEGIC.getValue();
+    // Default to EN.
+    String language = LanguageEnum.EN.getValue();
+
+    final ResultWrapper<ApplicationDetails> applicationCoordinatorResult =
+        getCoordinatorApplicationDetails(applicationId);
+
+    if (applicationCoordinatorResult.isSuccess()) {
+      final ApplicationDetails applicationDetails = applicationCoordinatorResult.getValue();
+      region =
+          Optional.ofNullable(applicationDetails.getRegion())
+              .map(ApplicationDetails.RegionEnum::getValue)
+              .orElse(region);
+      journeyType =
+          Optional.ofNullable(applicationDetails.getJourneyType())
+              .map(ApplicationDetails.JourneyTypeEnum::getValue)
+              .orElse(journeyType);
+      language =
+          Optional.ofNullable(applicationDetails.getLanguage())
+              .map(ApplicationDetails.LanguageEnum::getValue)
+              .orElse(language);
+
+      email = getEmailFromIdentity(userId);
+
+      emailNotificationService.sendAttachDocsEmailNotification(
+          email, region, language, journeyType, applicationId);
+
+    } else {
+      throw new RuntimeException(
+          "Failed to get application details from application coordinator for application id "
+              + applicationId);
+    }
+  }
+
+  private ResultWrapper<ApplicationDetails> getCoordinatorApplicationDetails(String applicationId) {
+    ResultWrapper<ApplicationDetails> applicationCoordinatorResult;
+    try {
+      applicationCoordinatorResult = applicationCoordinatorService.getApplication(applicationId);
+    } catch (JacksonException exception) {
+      throw new RuntimeException("Failed to get application details from application coordinator");
+    }
+
+    return applicationCoordinatorResult;
+  }
+
+  private String getEmailFromIdentity(String userId) {
+    try {
+      return getClaimantEmailService.getEmailFromIdentityByUserId(userId);
+    } catch (JacksonException e) {
+      throw new RuntimeException("Failed to get email from identity service for user id " + userId);
+    }
   }
 
   @Override

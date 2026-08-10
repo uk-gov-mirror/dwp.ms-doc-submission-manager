@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "javaType" : "uk.gov.dwp.health.pip.common.model.events.v1.decision.DecisionType",
+  "title": "DecisionType",
+  "type": "string",
+  "enum": [
+    "ORIGINAL",
+    "MANDATORY_RECONSIDERATION"
+  ],
+  "description": "The type for decision."
+}
+

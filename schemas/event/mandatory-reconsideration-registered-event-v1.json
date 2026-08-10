@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "deprecated": true,
+  "$id": "mandatory-reconsideration-registered-event-v1.json",
+  "type": "object",
+  "title": "mandatory-reconsideration-registered-v1",
+  "description": "Event used to notify coordinator that a mandatory reconsideration has been registered to challenge a decision",
+  "required": [
+    "application_id",
+    "decision_id",
+    "mandatory_reconsideration_id",
+    "nino"
+  ],
+  "properties": {
+    "application_id": {
+      "type": "string",
+      "description": "The application id for which decision has been made"
+    },
+    "decision_id": {
+      "type": "string",
+      "description": "The id for decision being challenged"
+    },
+    "mandatory_reconsideration_id": {
+      "type": "string",
+      "description": "The id for mandatory reconsideration"
+    },
+    "nino": {
+      "type": "string",
+      "description": "Citizen nino"
+    }
+  }
+}

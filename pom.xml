@@ -6,79 +6,97 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.4.5</version>
+    <version>4.1.0</version>
     <relativePath /> <!-- lookup parent from repository -->
   </parent>
   <groupId>uk.gov.dwp.health</groupId>
   <artifactId>ms-document-submission-manager</artifactId>
-  <version>2.11.0</version>
+  <version>2.34.0</version>
   <name>ms-document-submission-manager</name>
   <description>Micro service support claim submission</description>
 
   <properties>
-    <java.version>17</java.version>
+    <allure.version>2.34.0</allure.version>
+    <client.base.package.name>uk.gov.dwp.health.pip.document.submission.manager</client.base.package.name>
+    <cloudwatch.version>2.44.7</cloudwatch.version>
+    <commons-io.version>2.22.0</commons-io.version>
+    <dwp.encoded.log.version>4.0.0-8cb9f7f5</dwp.encoded.log.version>
+    <dwp.message-broker.version>5.4.0-42e9be18</dwp.message-broker.version>
+    <dwp-meta-data-logger.version>5.0.0-65836c01</dwp-meta-data-logger.version>
+    <dwp-mongo-change-stream-starter.version>5.0.0-e7295422</dwp-mongo-change-stream-starter.version>
+    <exec.maven.plugin.version>3.6.3</exec.maven.plugin.version>
+    <extentreport-allure-annotation.version>1.0.2</extentreport-allure-annotation.version>
+    <flapdoodle.version>4.24.0</flapdoodle.version>
+    <jackson-databind-nullable.version>0.2.10</jackson-databind-nullable.version>
+    <jacoco.version>0.8.14</jacoco.version>
+    <java.version>21</java.version>
+    <lidalia.version>1.2.0</lidalia.version>
+    <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
+    <maven.compiler.version>3.15.0</maven.compiler.version>
+    <micrometer-registry-prometheus.version>1.16.5</micrometer-registry-prometheus.version>
+    <notifications-java-client.version>5.2.1-RELEASE</notifications-java-client.version>
+    <opentelemetry-aws-sdk.version>2.13.0-alpha</opentelemetry-aws-sdk.version>
+    <owasp.version>12.2.2</owasp.version>
+    <plugin.failsafe.version>3.5.5</plugin.failsafe.version>
+    <plugin.jsonschema2pojo-maven.version>1.3.3</plugin.jsonschema2pojo-maven.version>
+    <plugin.jxr.version>3.6.0</plugin.jxr.version>
+    <plugin.maven-openapi-generator.version>7.22.0</plugin.maven-openapi-generator.version>
+    <plugin.pitest.version>1.23.1</plugin.pitest.version>
+    <plugin.pitest-junit5.version>1.2.3</plugin.pitest-junit5.version>
+    <pitest-history-plugin.version>0.0.1</pitest-history-plugin.version>
+    <plugin.pmd.version>3.28.0</plugin.pmd.version>
+    <plugin.projectinfo.version>3.9.0</plugin.projectinfo.version>
+    <plugin.spotbugs.version>4.9.8.3</plugin.spotbugs.version>
+    <plugin.surefire.version>3.5.5</plugin.surefire.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <client.base.package.name>uk.gov.dwp.health.pip.document.submission.manager</client.base.package.name>
-    <dwp.encoded.log.version>2.3.0-c5d6b343</dwp.encoded.log.version>
-    <dwp.message-broker.version>3.10.0-253f3e8b</dwp.message-broker.version>
-    <dwp-meta-data-logger.version>3.0.0-ca1c3364</dwp-meta-data-logger.version>
-    <dwp-mongo-change-stream-starter.version>4.2.0-25280f8d</dwp-mongo-change-stream-starter.version>
-    <exec.maven.plugin.version>3.5.0</exec.maven.plugin.version>
-    <aws.s3.version>2.31.9</aws.s3.version>
-    <jackson-databind-nullable.version>0.2.6</jackson-databind-nullable.version>
-    <jackson-bom.version>2.18.2</jackson-bom.version>
-    <amazon.sdk.version>1.12.782</amazon.sdk.version>
-    <lidalia.version>1.2.0</lidalia.version>
-    <maven.compiler.version>3.14.0</maven.compiler.version>
-    <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
-    <jacoco.version>0.8.12</jacoco.version>
-    <owasp.version>12.1.0</owasp.version>
-    <plugin.maven-openapi-generator.version>7.12.0</plugin.maven-openapi-generator.version>
-    <plugin.jsonschema2pojo-maven.version>1.2.2</plugin.jsonschema2pojo-maven.version>
-    <plugin.spotbugs.version>4.9.3.0</plugin.spotbugs.version>
-    <spotbugs.version>4.9.3</spotbugs.version>
-    <plugin.projectinfo.version>3.9.0</plugin.projectinfo.version>
-    <plugin.surefire.version>3.5.2</plugin.surefire.version>
-    <plugin.failsafe.version>3.5.2</plugin.failsafe.version>
-    <plugin.pmd.version>3.26.0</plugin.pmd.version>
-    <plugin.jxr.version>3.6.0</plugin.jxr.version>
-    <plugin.pitest.version>1.19.0</plugin.pitest.version>
-    <plugin.pitest-junit5.version>1.2.2</plugin.pitest-junit5.version>
-    <plugin.maven.checkstyle.version>10.7.0</plugin.maven.checkstyle.version>
-    <plugin.maven-checkstyle.version>3.2.0</plugin.maven-checkstyle.version>
-    <flapdoodle.version>4.11.0</flapdoodle.version>
-    <snakeyaml.version>2.0</snakeyaml.version>
-    <spring-integration-core.version>6.4.3</spring-integration-core.version>
-    <netty.version>4.1.118.Final</netty.version>
-
-    <restassured.version>5.5.1</restassured.version>
-    <restassured.extent.report.plugin.version>2.2.0</restassured.extent.report.plugin.version>
     <qa-tools-properties.version>2.0.RC6</qa-tools-properties.version>
-    <allure.version>2.29.1</allure.version>
-    <extentreport-allure-annotation.version>1.0.2</extentreport-allure-annotation.version>
-    <opentelemetry-aws-sdk.version>2.13.0-alpha</opentelemetry-aws-sdk.version>
-    <swagger-annotations.version>2.2.29</swagger-annotations.version>
-    <bc-fips.version>2.1.0</bc-fips.version>
-    <form-specification-model.version>1.6.0-3b12bd2e</form-specification-model.version>
-    <plugin.jsonschema2pojo-maven.version>1.2.2</plugin.jsonschema2pojo-maven.version>
+    <restassured.version>6.0.0</restassured.version>
+    <restassured.extent.report.plugin.version>2.2.0</restassured.extent.report.plugin.version>
+    <snakeyaml.version>2.0</snakeyaml.version>
+    <spotbugs.version>4.9.8</spotbugs.version>
+    <spring-integration-core.version>6.5.8</spring-integration-core.version>
+    <swagger-annotations.version>2.2.50</swagger-annotations.version>
+    <s3.version>2.44.7</s3.version>
+    <tomcat.version>11.0.24</tomcat.version>
+    <netty.version>4.2.16.Final</netty.version>
   </properties>
 
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>com.amazonaws</groupId>
-        <artifactId>aws-java-sdk-bom</artifactId>
-        <version>${amazon.sdk.version}</version>
+        <groupId>org.apache.logging.log4j</groupId>
+        <artifactId>log4j-bom</artifactId>
+        <version>2.25.5</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <!-- for GHSA-72hv-8253-57qq -->
+      <dependency>
+        <groupId>com.fasterxml.jackson</groupId>
+        <artifactId>jackson-bom</artifactId>
+        <version>2.22.1</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
       <dependency>
-        <groupId>software.amazon.awssdk</groupId>
-        <artifactId>bom</artifactId>
-        <version>${aws.s3.version}</version>
+        <groupId>io.netty</groupId>
+        <artifactId>netty-bom</artifactId>
+        <version>4.2.16.Final</version>
         <type>pom</type>
         <scope>import</scope>
+      </dependency>
+      <!-- used by uk.gov.dwp.health.monitoring:dwp-springboot-starter-meta-data-tracer:jar:3.0.0 -->
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-lang3</artifactId>
+        <version>3.20.0</version>
+      </dependency>
+      <!-- used by uk.gov.dwp.health.integration:message-broker-integration-autoconfigure:jar:3.13.0 -->
+      <dependency>
+        <groupId>org.bouncycastle</groupId>
+        <artifactId>bc-fips</artifactId>
+        <version>2.1.2</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -96,18 +114,6 @@
       <version>${dwp-meta-data-logger.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.fasterxml.jackson.module</groupId>
-      <artifactId>jackson-module-parameter-names</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.datatype</groupId>
-      <artifactId>jackson-datatype-jdk8</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.datatype</groupId>
-      <artifactId>jackson-datatype-jsr310</artifactId>
-    </dependency>
-    <dependency>
       <groupId>uk.gov.dwp.logging</groupId>
       <artifactId>encoded-logger-output</artifactId>
       <version>${dwp.encoded.log.version}</version>
@@ -123,7 +129,15 @@
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-web</artifactId>
+      <artifactId>spring-boot-starter-jackson</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-webmvc</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-restclient</artifactId>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -131,16 +145,32 @@
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-aspectj</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-data-mongodb</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-mongodb-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-restclient-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-webmvc-test</artifactId>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>io.micrometer</groupId>
       <artifactId>micrometer-registry-prometheus</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>uk.gov.dwp.health.pip</groupId>
-      <artifactId>form-specification-model</artifactId>
-      <version>${form-specification-model.version}</version>
+      <version>${micrometer-registry-prometheus.version}</version>
     </dependency>
     <dependency>
       <groupId>org.projectlombok</groupId>
@@ -158,20 +188,10 @@
       <artifactId>spring-boot-starter-validation</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.bouncycastle</groupId>
-      <artifactId>bc-fips</artifactId>
-      <version>${bc-fips.version}</version>
-    </dependency>
-
-    <dependency>
       <groupId>software.amazon.awssdk</groupId>
       <artifactId>s3</artifactId>
+      <version>${s3.version}</version>
     </dependency>
-    <dependency>
-      <groupId>software.amazon.awssdk</groupId>
-      <artifactId>aws-query-protocol</artifactId>
-    </dependency>
-
     <dependency>
       <groupId>uk.gov.dwp.health</groupId>
       <artifactId>mongo-changestream-data-stater</artifactId>
@@ -188,42 +208,23 @@
       <version>${swagger-annotations.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.amazonaws</groupId>
-      <artifactId>aws-java-sdk-cloudwatch</artifactId>
-      <version>${amazon.sdk.version}</version>
+      <groupId>software.amazon.awssdk</groupId>
+      <artifactId>cloudwatch</artifactId>
+      <version>${cloudwatch.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>jakarta.validation</groupId>
+      <artifactId>jakarta.validation-api</artifactId>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>junit</groupId>
-          <artifactId>junit</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.junit.vintage</groupId>
-          <artifactId>junit-vintage-engine</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <!-- remove when flapdoodle upgrades apache commons -->
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-compress</artifactId>
-      <version>1.26.0</version>
-      <scope>test</scope>
     </dependency>
     <dependency>
-      <artifactId>de.flapdoodle.embed.mongo.spring30x</artifactId>
       <groupId>de.flapdoodle.embed</groupId>
+      <artifactId>de.flapdoodle.embed.mongo.spring4x</artifactId>
       <version>${flapdoodle.version}</version>
-      <exclusions>
-        <exclusion>
-          <groupId>org.apache.commons</groupId>
-          <artifactId>commons-compress</artifactId>
-        </exclusion>
-      </exclusions>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -240,12 +241,6 @@
     <dependency>
       <groupId>io.rest-assured</groupId>
       <artifactId>json-schema-validator</artifactId>
-      <version>${restassured.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>io.rest-assured</groupId>
-      <artifactId>spring-mock-mvc</artifactId>
       <version>${restassured.version}</version>
       <scope>test</scope>
     </dependency>
@@ -274,11 +269,28 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>
+      <groupId>uk.gov.service.notify</groupId>
+      <artifactId>notifications-java-client</artifactId>
+      <version>${notifications-java-client.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>commons-io</groupId>
+          <artifactId>commons-io</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>${commons-io.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
+
   <build>
     <resources>
       <resource>
@@ -352,14 +364,6 @@
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>repackage</id>
-            <configuration>
-              <loaderImplementation>CLASSIC</loaderImplementation>
-            </configuration>
-          </execution>
-        </executions>
       </plugin>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -376,6 +380,7 @@
         <version>${owasp.version}</version>
         <configuration>
           <failBuildOnCVSS>4</failBuildOnCVSS>
+          <ossindexAnalyzerEnabled>false</ossindexAnalyzerEnabled>
           <suppressionFile>src/main/resources/DependencySuppression.xml</suppressionFile>
         </configuration>
         <executions>
@@ -464,6 +469,40 @@
             </configuration>
           </execution>
           <execution>
+            <id>generate-v3-api</id>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+            <configuration>
+              <generatorName>spring</generatorName>
+              <inputSpec>
+                ${project.basedir}/schemas/api-spec/ms-doc-submission-manager/openapi-spec-v3.yaml</inputSpec>
+              <generateSupportingFiles>true</generateSupportingFiles>
+              <modelPackage>${client.base.package.name}.openapi.v3.model</modelPackage>
+              <apiPackage>${client.base.package.name}.openapi.v3.api</apiPackage>
+              <configOptions>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>${project.artifactId}</artifactId>
+                <artifactVersion>${project.version}</artifactVersion>
+                <bigDecimalAsString>true</bigDecimalAsString>
+                <dateLibrary>java8</dateLibrary>
+                <interfaceOnly>true</interfaceOnly>
+                <java8>true</java8>
+                <useBeanValidation>true</useBeanValidation>
+                <delegatePattern>true</delegatePattern>
+                <useJakartaEe>true</useJakartaEe>
+              </configOptions>
+              <typeMappings>
+                <typeMapping>DateTime=Instant</typeMapping>
+                <typeMapping>Date=LocalDate</typeMapping>
+              </typeMappings>
+              <importMappings>
+                <importMapping>Instant=java.time.Instant</importMapping>
+                <importMapping>LocalDate=java.time.LocalDate</importMapping>
+              </importMappings>
+            </configuration>
+          </execution>
+          <execution>
             <id>generate-accountMgr-api-v7</id>
             <goals>
               <goal>generate</goal>
@@ -516,16 +555,16 @@
             </configuration>
           </execution>
           <execution>
-            <id>generate-pdf-generator-v2</id>
+            <id>generate-identity-api-v2</id>
             <goals>
               <goal>generate</goal>
             </goals>
             <configuration>
               <generatorName>spring</generatorName>
-              <inputSpec>${project.basedir}/schemas/api-spec/ms-pip2-pdf-generator/openapi-spec-v2.yaml</inputSpec>
+              <inputSpec>${project.basedir}/schemas/api-spec/ms-identity-status/openapi-spec-v2.yaml</inputSpec>
               <library>spring-boot</library>
               <output>${project.basedir}/target/generated-sources/</output>
-              <modelPackage>${client.base.package.name}.openapi.model</modelPackage>
+              <modelPackage>${client.base.package.name}.config.restclient.model</modelPackage>
               <generateApis>false</generateApis>
               <generateSupportingFiles>false</generateSupportingFiles>
               <generateModelTests>false</generateModelTests>
@@ -542,15 +581,176 @@
             </configuration>
           </execution>
           <execution>
+            <id>generate-identity-v1-api-models</id>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+            <configuration>
+              <generatorName>spring</generatorName>
+              <inputSpec>${project.basedir}/schemas/api-spec/ms-identity-status/openapi-spec-v1.yaml</inputSpec>
+              <library>spring-boot</library>
+              <output>${project.basedir}/target/generated-sources/</output>
+              <modelPackage>${client.base.package.name}.config.restclient.model</modelPackage>
+              <generateApis>false</generateApis>
+              <generateSupportingFiles>false</generateSupportingFiles>
+              <generateModelTests>false</generateModelTests>
+              <generateModelDocumentation>false</generateModelDocumentation>
+              <configOptions>
+                <booleanGetterPrefix>is</booleanGetterPrefix>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>${project.artifactId}</artifactId>
+                <artifactVersion>${project.version}</artifactVersion>
+                <dateLibrary>java8</dateLibrary>
+                <java8>true</java8>
+                <useJakartaEe>true</useJakartaEe>
+              </configOptions>
+            </configuration>
+          </execution>
+          <execution>
+            <id>generate-pdf-generator-v4</id>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+            <configuration>
+              <generatorName>spring</generatorName>
+              <inputSpec>${project.basedir}/schemas/api-spec/ms-pip2-pdf-generator/openapi-spec-v4.yaml</inputSpec>
+              <library>spring-boot</library>
+              <modelPackage>${client.base.package.name}.openapi.pdfgenerator.v4.dto</modelPackage>
+              <generateApis>false</generateApis>
+              <generateSupportingFiles>false</generateSupportingFiles>
+              <generateModelTests>false</generateModelTests>
+              <generateModelDocumentation>false</generateModelDocumentation>
+              <configOptions>
+                <booleanGetterPrefix>is</booleanGetterPrefix>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>${project.artifactId}</artifactId>
+                <artifactVersion>${project.version}</artifactVersion>
+                <dateLibrary>java8</dateLibrary>
+                <java8>true</java8>
+                <useJakartaEe>true</useJakartaEe>
+              </configOptions>
+            </configuration>
+          </execution>
+          <execution>
+            <id>generate-application-coordinator-api-client-v1</id>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+            <configuration>
+              <configOptions>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>${project.artifactId}</artifactId>
+                <artifactVersion>${project.version}</artifactVersion>
+                <apiPackage>uk.gov.dwp.health.pip.application.coordinator.openapi.v1.api</apiPackage>
+                <modelPackage>uk.gov.dwp.health.pip.application.coordinator.openapi.v1.model</modelPackage>
+                <invokerPackage>uk.gov.dwp.health.pip.application.coordinator.openapi.v1</invokerPackage>
+                <bigDecimalAsString>true</bigDecimalAsString>
+                <booleanGetterPrefix>is</booleanGetterPrefix>
+                <library>resttemplate</library>
+                <useJakartaEe>true</useJakartaEe>
+              </configOptions>
+              <apiNameSuffix>ApiClientV1</apiNameSuffix>
+              <generateApiTests>false</generateApiTests>
+              <generateModelTests>false</generateModelTests>
+              <generatorName>java</generatorName>
+              <inputSpec>${project.basedir}/schemas/api-spec/ms-pip-application-coordinator/openapi-spec-v1.yaml</inputSpec>
+            </configuration>
+          </execution>
+          <execution>
             <id>generate-coordinator-api</id>
             <goals>
               <goal>generate</goal>
             </goals>
             <configuration>
-              <inputSpec>${project.basedir}/schemas/api-spec/ms-pip-application-coordinator/openapi-spec-v1.yaml</inputSpec>
+              <inputSpec>${project.basedir}/schemas/api-spec/ms-pip-application-coordinator/openapi-spec-v5.yaml</inputSpec>
               <modelPackage>uk.gov.dwp.health.pip.application.coordinator.openapi.coordinator.dto</modelPackage>
               <apiPackage>uk.gov.dwp.health.pip.application.coordinator.openapi.coordinator</apiPackage>
               <generatorName>spring</generatorName>
+              <generateApis>false</generateApis>
+              <configOptions>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>${project.artifactId}</artifactId>
+                <artifactVersion>${project.version}</artifactVersion>
+                <bigDecimalAsString>true</bigDecimalAsString>
+                <booleanGetterPrefix>is</booleanGetterPrefix>
+                <interfaceOnly>true</interfaceOnly>
+                <java8>true</java8>
+                <useBeanValidation>true</useBeanValidation>
+                <delegatePattern>true</delegatePattern>
+                <useJakartaEe>true</useJakartaEe>
+              </configOptions>
+            </configuration>
+          </execution>
+          <!-- @deprecated (when: 2025-11-24; why: this is using the spring generator; -->
+          <!-- refactoring advice: remove this execution and use the java generator included -->
+          <!-- below - <id>generate-registration-capture-manager-api-client-v4</id> ) -->
+          <execution>
+            <id>generate-registration-api-v4</id>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+            <configuration>
+              <inputSpec>${project.basedir}/schemas/api-spec/ms-registration-capture-manager/openapi-spec-registration-v4.yaml</inputSpec>
+              <generatorName>spring</generatorName>
+              <generateApis>false</generateApis>
+              <generateSupportingFiles>false</generateSupportingFiles>
+              <generateModels>true</generateModels>
+              <generateModelTests>false</generateModelTests>
+              <generateApiTests>false</generateApiTests>
+              <modelPackage>${client.base.package.name}.openapi.registration.v4.dto</modelPackage>
+              <configOptions>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>${project.artifactId}</artifactId>
+                <artifactVersion>${project.version}</artifactVersion>
+                <bigDecimalAsString>true</bigDecimalAsString>
+                <booleanGetterPrefix>is</booleanGetterPrefix>
+                <interfaceOnly>true</interfaceOnly>
+                <java8>true</java8>
+                <useBeanValidation>true</useBeanValidation>
+                <delegatePattern>true</delegatePattern>
+                <useJakartaEe>true</useJakartaEe>
+              </configOptions>
+            </configuration>
+          </execution>
+          <execution>
+            <id>generate-registration-capture-manager-api-client-v4</id>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+            <configuration>
+              <configOptions>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>${project.artifactId}</artifactId>
+                <artifactVersion>${project.version}</artifactVersion>
+                <apiPackage>uk.gov.dwp.health.pip.registration.capture.openapi.v4.api</apiPackage>
+                <modelPackage>uk.gov.dwp.health.pip.registration.capture.openapi.v4.model</modelPackage>
+                <invokerPackage>uk.gov.dwp.health.pip.registration.capture.openapi.v4</invokerPackage>
+                <bigDecimalAsString>true</bigDecimalAsString>
+                <booleanGetterPrefix>is</booleanGetterPrefix>
+                <library>resttemplate</library>
+                <useJakartaEe>true</useJakartaEe>
+              </configOptions>
+              <apiNameSuffix>ApiClientV4</apiNameSuffix>
+              <generateApiTests>false</generateApiTests>
+              <generateModelTests>false</generateModelTests>
+              <generatorName>java</generatorName>
+              <inputSpec>${project.basedir}/schemas/api-spec/ms-registration-capture-manager/openapi-spec-registration-v4.yaml</inputSpec>
+            </configuration>
+          </execution>
+          <execution>
+            <id>generate-health-capture-manager-api</id>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+            <configuration>
+              <inputSpec>${project.basedir}/schemas/api-spec/ms-pip2-health-capture-manager/openapi-spec-healthinformation-v2.yaml</inputSpec>
+              <generatorName>spring</generatorName>
+              <generateApis>false</generateApis>
+              <generateSupportingFiles>false</generateSupportingFiles>
+              <generateModels>true</generateModels>
+              <generateModelTests>false</generateModelTests>
+              <generateApiTests>false</generateApiTests>
+              <modelPackage>${client.base.package.name}.openapi.healthinformation.v2.dto</modelPackage>
               <configOptions>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>${project.artifactId}</artifactId>
@@ -573,16 +773,41 @@
         <version>${plugin.jsonschema2pojo-maven.version}</version>
         <executions>
           <execution>
-            <id>application-submitted</id>
+            <id>application-coordinator-additional-support-hig-auto-submitted-event</id>
             <configuration>
               <annotationStyle>jackson2</annotationStyle>
-              <includeAdditionalProperties>true</includeAdditionalProperties>
-              <includeJsr303Annotations>true</includeJsr303Annotations>
-              <useJakartaValidation>true</useJakartaValidation>
+              <includeAdditionalProperties>false</includeAdditionalProperties>
               <sourcePaths>
-                <sourcePath>${project.basedir}/schemas/event/application-submitted-v1.json</sourcePath>
+                <sourcePath>
+                  ${project.basedir}/schemas/event/application-coordinator/additional-support-application-auto-submitted-event-v1.json
+                </sourcePath>
               </sourcePaths>
-              <targetPackage>uk.gov.dwp.health.pip.document.submission.manager.model</targetPackage>
+              <targetPackage>
+                uk.gov.dwp.health.pip.application.coordinator.generated.event
+              </targetPackage>
+              <classNameSuffix>Payload</classNameSuffix>
+              <generateBuilders>true</generateBuilders>
+              <useJakartaValidation>true</useJakartaValidation>
+            </configuration>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>document-submission-manager-additional-support-hig-auto-submitted-event</id>
+            <configuration>
+              <annotationStyle>jackson2</annotationStyle>
+              <includeAdditionalProperties>false</includeAdditionalProperties>
+              <sourcePaths>
+                <sourcePath>
+                  ${project.basedir}/schemas/event/document-submission-manager/additional-support-application-auto-submitted-event-v1.json
+                </sourcePath>
+              </sourcePaths>
+              <targetPackage>
+                uk.gov.dwp.health.pip.document.submission.manager.generated.event
+              </targetPackage>
+              <classNameSuffix>Payload</classNameSuffix>
+              <generateBuilders>true</generateBuilders>
               <useJakartaValidation>true</useJakartaValidation>
             </configuration>
             <goals>
@@ -600,6 +825,11 @@
             <groupId>org.pitest</groupId>
             <artifactId>pitest-junit5-plugin</artifactId>
             <version>${plugin.pitest-junit5.version}</version>
+          </dependency>
+          <dependency>
+            <groupId>org.pitest</groupId>
+            <artifactId>pitest-history-plugin</artifactId>
+            <version>${pitest-history-plugin.version}</version>
           </dependency>
         </dependencies>
         <configuration>

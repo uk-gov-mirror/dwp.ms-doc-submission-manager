@@ -1,0 +1,56 @@
+openapi: '3.1.0'
+
+info:
+  title: DWP PIP Application Coordinator Service
+  description: Rest API for operations relating to the application coordinator
+  version: '@project.version@'
+
+servers:
+  - url: 'https://localhost:8080'
+
+paths:
+
+  /v2/applications:
+    get:
+      summary: Get all applications
+      operationId: getAllApplications
+      parameters:
+        - in: query
+          name: application_id
+          schema:
+            type: string
+            pattern: ^[a-z0-9]{24}
+            example: "5ed0d430716609122be7a4d6"
+        - in: query
+          name: routedTo
+          schema:
+            $ref: 'includes/components.yaml#/components/schemas/RoutedToEnum'
+        - in: query
+          name: currentState
+          schema:
+            $ref: 'includes/components.yaml#/components/schemas/StateOptionalDto'
+      responses:
+        200:
+          description: OK - all applications returned
+          content:
+            application/json:
+              schema:
+                $ref: 'includes/components.yaml#/components/schemas/ApplicationsListDto'
+        404:
+          description: Applications not found for given parameters
+        400:
+          description: Bad request
+
+  /v2/applications/timeline:
+    post:
+      summary: Create a Timeline Event
+      operationId: createTimelineEvent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: 'includes/components.yaml#/components/schemas/CreateTimelineEventDto'
+      responses:
+        201:
+          description: Created - Timeline Event created

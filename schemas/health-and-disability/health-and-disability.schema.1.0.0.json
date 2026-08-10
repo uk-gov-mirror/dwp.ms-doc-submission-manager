@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "$id": "https://gitlab.com/dwp/health/pip-apply/schemas/health-and-disability/health-and-disability.schema.1.0.0.json",
+  "title": "Health and Disability",
+  "description": "Schema to describe the data structure for the health and disability component of the application schema.",
+  "type": "object",
+  "properties": {
+    "health": {
+      "description": "Describes the details needed for the health conditions and health care professionals sections within the the pip-apply application",
+      "type": "object",
+      "properties": {
+        "conditions": {
+          "description": "A list of health conditions",
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "health-condition.schema.1.0.0.json"
+          }
+        },
+        "healthProfessionalsDetails": {
+          "description": "Describes the details needed for the health care professionals section within the the pip-apply application",
+          "type": "object",
+          "properties": {
+            "includeHealthProfessionals": {
+              "description": "Are there any health professionals that you would like to tell us about?",
+              "type": "boolean",
+              "examples": [
+                true,
+                false
+              ]
+            }
+          },
+          "oneOf": [
+            {
+              "properties": {
+                "includeHealthProfessionals": {
+                  "const": false
+                }
+              },
+              "required": [ "includeHealthProfessionals" ],
+              "additionalProperties": false
+            },
+            {
+              "properties": {
+                "includeHealthProfessionals": {
+                  "const": true
+                },
+                "professionals": {
+                  "description": "A list of health professionals details, each to include a name, profession, contact details and date last seen",
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "$ref": "health-professional.schema.1.0.0.json"
+                  }
+                }
+              },
+              "required": [ "includeHealthProfessionals", "professionals" ],
+              "additionalProperties": false
+            }
+          ]
+        }
+      }
+    },
+    "dailyLivingActivity": {
+      "description": "The daily living section of the PIP2 claim data",
+      "type": "object",
+      "$ref": "daily-living.schema.1.0.0.json"
+    },
+    "mobility": {
+      "description": "The mobility section of the PIP2 claim data",
+      "$ref": "mobility.schema.1.0.0.json"
+    },
+    "other": {
+      "description": "Supports the provision of additional information for a PIP2 claim",
+      "type": "object",
+      "properties": {
+        "conditionAffected": {
+          "description": "Is there anything else you would like to tell us about?",
+          "type": "boolean",
+          "examples": [
+            true,
+            false
+          ]
+        }
+      },
+      "oneOf": [
+        {
+          "properties": {
+            "conditionAffected": {
+              "const": false
+            }
+          },
+          "required": [ "conditionAffected" ],
+          "additionalProperties": false
+        },
+        {
+          "properties": {
+            "conditionAffected": {
+              "const": true
+            },
+            "otherDescription": {
+              "description": "Free text to hold any additional information relating to a claim.",
+              "type": "string",
+              "maxLength": 5000,
+              "examples": [
+                "All of the additional details the claimant wants to enter for their claim."
+              ]
+            }
+          },
+          "required": [ "conditionAffected", "otherDescription" ]
+        }
+      ]
+    }
+  }
+}

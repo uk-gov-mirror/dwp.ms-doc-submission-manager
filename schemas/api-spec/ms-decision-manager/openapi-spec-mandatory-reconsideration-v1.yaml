@@ -1,0 +1,190 @@
+openapi: '3.1.0'
+
+info:
+  title: DWP PIP Mandatory Reconsideration Service
+  description: Version 1 Rest API for operations relating to the mandatory reconsideration
+  version: '1.0'
+
+servers:
+  - url: 'https://localhost:8080'
+
+paths:
+
+  /v1/mandatory-reconsiderations:
+    post:
+      tags:
+        - mandatory reconsideration
+      summary: Creates mandatory reconsideration
+      operationId: createMandatoryReconsideration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MandatoryReconsiderationCreateDto'
+      responses:
+        201:
+          description: CREATED - mandatory reconsideration created
+        400:
+          description: BAD REQUEST - badly formed json or values not valid
+        404:
+          description: NOT FOUND - decision does not exist for provided decision id
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+
+    get:
+      tags:
+        - mandatory reconsideration
+      summary: Get mandatory reconsiderations by decision id
+      operationId: getMandatoryReconsiderationsByDecisionId
+      parameters:
+        - name: decisionId
+          in: query
+          description: decision id for the mandatory reconsiderations
+          required: false
+          schema:
+            type: string
+            example: "6ed1d430716609122be7a5f2"
+      responses:
+        200:
+          description: OK - mandatory reconsiderations exist for decision id
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MandatoryReconsiderationDetails'
+        400:
+          description: BAD REQUEST - badly formed request
+        404:
+          description: NOT FOUND - mandatory reconsiderations does not exist for provided decision id
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+
+  /v1/mandatory-reconsiderations/{mandatoryReconsiderationId}:
+    get:
+      tags:
+        - mandatory reconsideration
+      summary: Get mandatory reconsideration by id
+      operationId: mandatoryReconsiderationById
+      parameters:
+        - name: mandatoryReconsiderationId
+          in: path
+          description: unique mandatory reconsideration id
+          required: true
+          schema:
+            type: string
+            pattern: ^[a-z0-9]{24}
+            example: "6ed1d430716609122be7a4d9"
+      responses:
+        200:
+          description: OK - mandatory reconsideration exists for id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MandatoryReconsiderationDetails'
+        400:
+          description: BAD REQUEST - badly formed request
+        404:
+          description: NOT FOUND - mandatory reconsideration does not exist for provided id
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+
+components:
+  securitySchemes:
+    sideCarProxySecurity:
+      type: mutualTLS
+      description: "Security is enforced by an external side car proxy using mTLS, not directly by this API"
+      x-sidecar-implementation: true
+  schemas:
+    MandatoryReconsiderationDetails:
+      type: object
+      title: MandatoryReconsiderationDetails
+      required:
+        - id
+        - challenged_decision_id
+        - decision_communication_method
+        - source
+        - created_date
+        - updated_date
+      allOf:
+        - $ref: '#/components/schemas/MandatoryReconsiderationBase'
+      properties:
+        id:
+          example: "5ed1d430716609122be7a5d5"
+          type: string
+          pattern: ^[a-z0-9]{24}
+        created_date:
+          example: "2025-06-24T17:35:45Z"
+          type: string
+          format: date-time
+        updated_date:
+          example: "2025-06-24T17:35:45Z"
+          type: string
+          format: date-time
+
+    MandatoryReconsiderationBase:
+      type: object
+      title: MandatoryReconsiderationBase
+      description: Base DTO used for mandatory reconsideration.
+      required:
+        - challenged_decision_id
+        - decision_communication_method
+        - source
+      properties:
+        challenged_decision_id:
+          example: "6ed1d430716609122be7a5f2"
+          type: string
+          pattern: ^[a-z0-9]{24}
+        decision_communication_method:
+          $ref: '#/components/schemas/DecisionCommunicationMethodEnum'
+        late_request_reason:
+          type: string
+          example: reason for delay in raising mandatory reconsideration request
+        source:
+          $ref: '#/components/schemas/Source'
+        form_data:
+          type: object
+          description: form_data contains necessary data for mandatory reconsideration and should
+            include a version in order to safeguard from from_data structure changes.
+
+    MandatoryReconsiderationCreateDto:
+      type: object
+      title: MandatoryReconsiderationCreateDto
+      description: DTO used for creating mandatory reconsideration.
+      allOf:
+        - $ref: '#/components/schemas/MandatoryReconsiderationBase'
+
+    ChannelEnum:
+      title: ChannelEnum
+      example: Over the phone now
+      type: string
+      enum:
+        - Over the phone now
+        - Over the phone later
+        - On a paper form
+
+    DecisionCommunicationMethodEnum:
+      title: DecisionCommunicationMethodEnum
+      example: Over the phone
+      type: string
+      enum:
+        - Over the phone
+        - By letter
+
+    Source:
+      type: object
+      title: Source
+      required:
+        - channel
+        - staff_id
+        - staff_name
+      properties:
+        channel:
+          $ref: '#/components/schemas/ChannelEnum'
+        staff_id:
+          example: "staffId"
+          type: string
+        staff_name:
+          example: "staff name"
+          type: string

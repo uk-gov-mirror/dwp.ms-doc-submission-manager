@@ -1,0 +1,172 @@
+openapi: '3.1.0'
+
+info:
+  title: DWP PIP Decision Service
+  description: Rest API for operations relating to the pre decision
+  version: '@project.version@'
+
+servers:
+  - url: 'https://localhost:8080'
+
+paths:
+  /v2/pre-decision:
+    post:
+      tags:
+        - pre-decision
+      summary: Create pre decision
+      operationId: createPreDecision
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePreDecisionRequest'
+      responses:
+        200:
+          description: OK - pre decision created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PreDecisionDetails'
+        400:
+          description: BAD REQUEST - badly formed json or values not valid
+        409:
+          description: CONFLICT - pre decision for application id already exist
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+
+    get:
+      tags:
+        - pre-decision
+      summary: Get pre decision by application id
+      operationId: getPreDecisionByApplicationId
+      parameters:
+        - name: applicationId
+          in: query
+          description: applicationId for pre decision
+          required: true
+          schema:
+            type: string
+            example: "6ed1d430716609122be7a4d6"
+      responses:
+        200:
+          description: OK - pre decision exist for application id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PreDecisionDetails'
+        400:
+          description: BAD REQUEST - badly formed request
+        404:
+          description: NOT FOUND - pre decision does not exist for provided application id
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+
+  /v2/pre-decision/{preDecisionId}/question-answer:
+    patch:
+      tags:
+        - pre-decision
+      summary: Add or update question answer
+      operationId: addOrUpdateQuestionAnswer
+      parameters:
+        - name: preDecisionId
+          in: path
+          description: unique preDecisionId
+          required: true
+          schema:
+            type: string
+            example: "6ed1d430716609122be7a4d6"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuestionAnswerRequest'
+      responses:
+        200:
+          description: OK - Added or updated question answer for pre decision.
+        400:
+          description: BAD REQUEST - badly formed request.
+        404:
+          description: NOT FOUND - pre decision does not exist for pre decision id.
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+
+  /v2/pre-decision/{preDecisionId}/outcome:
+    post:
+      tags:
+        - pre-decision
+      summary: Store pre decision outcome
+      operationId: storePreDecisionOutcome
+      parameters:
+        - name: preDecisionId
+          in: path
+          description: unique preDecisionId
+          required: true
+          schema:
+            type: string
+            example: "6ed1d430716609122be7a4d6"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StoreOutcomeRequest'
+      responses:
+        200:
+          description: OK - pre decision outcome recorded successfully
+        400:
+          description: BAD REQUEST - badly formed json or values not valid
+        409:
+          description: CONFLICT - pre decision outcome for application id already exist
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+
+components:
+  securitySchemes:
+    sideCarProxySecurity:
+      type: mutualTLS
+      description: "Security is enforced by an external side car proxy using mTLS, not directly by this API"
+      x-sidecar-implementation: true
+  schemas:
+    CreatePreDecisionRequest:
+      type: object
+      required:
+        - application_id
+      allOf:
+        - $ref: 'includes/pre-decision-components.yaml#/components/schemas/ApplicationId'
+        - $ref: 'includes/pre-decision-components.yaml#/components/schemas/PreDecisionType'
+
+    PreDecisionDetails:
+      type: object
+      allOf:
+        - $ref: 'includes/pre-decision-components.yaml#/components/schemas/PreDecisionId'
+        - $ref: 'includes/pre-decision-components.yaml#/components/schemas/ApplicationId'
+        - $ref: 'includes/pre-decision-components.yaml#/components/schemas/PreDecisionType'
+        - $ref: 'includes/pre-decision-components.yaml#/components/schemas/PreDecisionOutcome'
+        - $ref: 'includes/pre-decision-components.yaml#/components/schemas/PreDecisionOutcomeDate'
+        - $ref: 'includes/pre-decision-components.yaml#/components/schemas/UserWhoCreatedPreDecisionOutcome'
+        - $ref: 'includes/pre-decision-components.yaml#/components/schemas/PreDecisionQuestionAnswer'
+
+    QuestionAnswerRequest:
+      type: object
+      allOf:
+        - $ref: 'includes/pre-decision-components.yaml#/components/schemas/Question'
+        - $ref: 'includes/pre-decision-components.yaml#/components/schemas/Answer'
+
+    PreDecisionOutcomeDetails:
+      type: object
+      allOf:
+        - $ref: 'includes/pre-decision-components.yaml#/components/schemas/PreDecisionId'
+        - $ref: 'includes/pre-decision-components.yaml#/components/schemas/ApplicationId'
+        - $ref: 'includes/pre-decision-components.yaml#/components/schemas/PreDecisionOutcome'
+        - $ref: 'includes/pre-decision-components.yaml#/components/schemas/UserWhoCreatedPreDecisionOutcome'
+
+    StoreOutcomeRequest:
+      type: object
+      required:
+        - outcome
+      allOf:
+        - $ref: 'includes/pre-decision-components.yaml#/components/schemas/PreDecisionOutcome'
+        - $ref: 'includes/pre-decision-components.yaml#/components/schemas/UserWhoCreatedPreDecisionOutcome'
+security:
+  - sideCarProxySecurity : []

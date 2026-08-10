@@ -1,0 +1,165 @@
+openapi: 3.1.0
+
+info:
+  title: DWP PDF Form Generator Service - PIP
+  description: Rest API for converting versioned PIP2 application form to PDF_A document
+  version: '@project.version@'
+
+servers:
+  - url: 'http://localhost:8080'
+
+paths:
+  /v3/pdf/s3CreatePdf:
+    post:
+      tags:
+        - create
+      description: Create new pdf from pip application and upload it to s3
+      operationId: s3CreatePDF
+      summary: Create a pdf from pip2 application and upload to s3
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePdfS3V3'
+      responses:
+        201:
+          description: PDF created and uploaded to s3
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/S3PdfReturn'
+        400:
+          description: Invalid JSON format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FailureResponse'
+
+  /v3/pdf/createPdf:
+    post:
+      tags:
+        - create
+      description: Create new health information gather pdf
+      operationId: createPDF
+      summary: Create new pdf from pip application form containing the claim details
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmissionDtoV3'
+      responses:
+        201:
+          description: PDF file created
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        400:
+          description: Invalid JSON format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FailureResponse'
+
+components:
+  securitySchemes:
+    sideCarProxySecurity:
+      type: mutualTLS
+      description: "Security is enforced by an external side car proxy using mTLS, not directly by this API"
+      x-sidecar-implementation: true
+
+  schemas:
+    CreatePdfS3V3:
+      type: object
+      required:
+        - submissionDto
+        - bucket
+      properties:
+        submissionDto:
+          $ref: '#/components/schemas/SubmissionDtoV3'
+        bucket:
+          $ref: '#/components/schemas/Bucket'
+    S3PdfReturn:
+      properties:
+        s3Ref:
+          $ref: '#/components/schemas/S3Ref'
+        bucket:
+          $ref: '#/components/schemas/Bucket'
+        file_size_kb:
+          $ref: '#/components/schemas/FileSizeKb'
+    SubmissionDtoV3:
+      type: object
+      properties:
+        claimantId:
+          $ref: '#/components/schemas/ClaimantId'
+        applicationId:
+          $ref: '#/components/schemas/ApplicationId'
+        submissionDate:
+          $ref: '#/components/schemas/SubmissionDate'
+        registrationDetails:
+          $ref: '#/components/schemas/RegistrationDetailsDto'
+        formData:
+          type: object
+          description: >
+            JSON object representing the answers given in the health information gather
+            Must be valid according to the JSON schema
+    ClaimantId:
+      example: "123456789"
+      minLength: 1
+      pattern: ^(?!\s*$).+
+      type: string
+    ApplicationId:
+      example: "123456789"
+      minLength: 1
+      pattern: ^(?!\s*$).+
+      type: string
+    SubmissionDate:
+      type: string
+      example: 24-01-2023
+    RegistrationDetailsDto:
+      type: object
+      properties:
+        personalDetails:
+          $ref: '#/components/schemas/PersonalDetailsDto'
+    Bucket:
+      description: AWS S3 bucket name
+      example: "pip-bucket"
+      type: string
+      minLength: 1
+    PersonalDetailsDto:
+      type: object
+      properties:
+        surname:
+          type: string
+        firstName:
+          type: string
+        nationalInsuranceNumber:
+          type: string
+        dateOfBirth:
+          type: string
+        postcode:
+          type: string
+        email:
+          type: string
+    S3Ref:
+      description: AWS S3 unique file key
+      example: 123_PRESCRIPTION.JPG.2020
+      type: string
+      minLength: 1
+    FailureResponse:
+      properties:
+        message:
+          $ref: '#/components/schemas/Message'
+    FileSizeKb:
+      description: unencrypted data size in kb
+      example: 1024
+      type: integer
+    Message:
+      description: detail description
+      type: string
+
+security:
+  - sideCarProxySecurity: [ ]

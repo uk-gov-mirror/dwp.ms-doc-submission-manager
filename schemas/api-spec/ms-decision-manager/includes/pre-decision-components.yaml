@@ -1,0 +1,153 @@
+components:
+  schemas:
+    PreDecisionId:
+      type: object
+      description: pre decision id
+      properties:
+        pre_decision_id:
+          example: "6ed1d430716609133be7a4d6"
+          type: string
+          pattern: ^[a-zA-Z0-9]{24}
+
+    ApplicationId:
+      type: object
+      description: application id
+      properties:
+        application_id:
+          example: "6ed1d430716609122be7a4d6"
+          type: string
+          pattern: ^[a-zA-Z0-9]{24}
+
+    PreDecisionOutcome:
+      type: object
+      description: pre decision outcome
+      properties:
+        outcome:
+          $ref: '#/components/schemas/PreDecisionOutcomeEnum'
+
+    PreDecisionOutcomeEnum:
+      title: PreDecisionOutcomeEnum
+      type: string
+      enum:
+        - "continueToMakeDecision"
+        - "moveToPIPCS"
+        - "disallow"
+        - "withdraw"
+
+    Type:
+      title: Type
+      type: string
+      enum:
+        - ORIGINAL
+        - MANDATORY_RECONSIDERATION
+
+    PreDecisionType:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/Type'
+
+    PreDecisionOutcomeDate:
+      type: object
+      description: date pre decision outcome recorded against the application
+      properties:
+        outcome_date:
+          example: "2023-01-29T17:32:28Z"
+          type: string
+          format: date-time
+
+    UserWhoCreatedPreDecisionOutcome:
+      type: object
+      description: user who created pre decision outcome
+      properties:
+        user_who_created_the_outcome:
+          example: "aUser"
+          type: string
+
+
+    Question:
+      type: object
+      description: question
+      properties:
+        question:
+          $ref: '#/components/schemas/QuestionEnum'
+
+    QuestionEnum:
+      title: QuestionEnum
+      type: string
+      enum:
+        - "identity"
+        - "name"
+        - "address"
+        - "dateOfDeath"
+        - "nationality"
+        - "residencyPresence"
+        - "immigrationStatus"
+        - "srel"
+        - "representativeAppointee"
+        - "withdrawn"
+        - "age"
+        - "additionalSupport"
+        - "alternativeFormat"
+        - "fraud"
+        - "kcis"
+        - "workingAbroad"
+        - "foreignBenefits"
+        - "dla"
+        - "disabilityPayment"
+        - "afip"
+        - "wpms"
+        - "caa"
+        - "hospital"
+        - "careHome"
+        - "nursingHome"
+        - "residentialSchoolOrCollege"
+        - "prisonOrLegalCustody"
+        - "correspondenceAddress"
+
+    Answer:
+      type: object
+      description: answer
+      properties:
+        answer:
+          $ref: '#/components/schemas/AnswerEnum'
+
+    AnswerEnum:
+      title: AnswerEnum
+      type: string
+      enum:
+        - "yes"
+        - "no"
+        - "comeBack"
+
+    Status:
+      type: object
+      description: status
+      properties:
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+
+    StatusEnum:
+      title: StatusEnum
+      type: string
+      enum:
+        - "done"
+        - "issue"
+        - "pending"
+
+    QuestionAnswer:
+      title: QuestionAnswer
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Question'
+        - $ref: '#/components/schemas/Answer'
+        - $ref: '#/components/schemas/Status'
+
+    PreDecisionQuestionAnswer:
+      type: object
+      description: question answers related to pre decision.
+      properties:
+        question_answers:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuestionAnswer'

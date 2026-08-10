@@ -17,9 +17,6 @@ public class HealthCaptureManagerProperties {
   @NotBlank(message = "Base uri should not be blank")
   private String baseUri;
 
-  @NotBlank(message = "Get application endpoint should not be blank")
-  private String getApplicationByIdEndpoint;
-
-  @NotBlank(message = "Get form specification endpoint should not be blank")
-  private String getFormSpecificationByIdEndpoint;
+  @NotBlank(message = "Get application v2 endpoint should not be blank")
+  private String getApplicationByIdV2Endpoint;
 }

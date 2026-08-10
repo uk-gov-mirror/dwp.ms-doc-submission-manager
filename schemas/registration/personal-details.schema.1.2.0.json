@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "$id": "https://gitlab.com/dwp/health/pip-apply/schemas/registration/personal-details.schema.1.2.0.json",
+  "title": "personal details schema",
+  "description": "The personal-details section of the registration data",
+  "type": "object",
+  "properties": {
+    "surname": {
+      "description": "The claimant's surname",
+      "type": "string",
+      "pattern": "^[ -~]+$",
+      "maxLength": 35,
+      "minLength": 1,
+      "examples": [
+        "Claimant"
+      ]
+    },
+    "firstname": {
+      "description": "The claimant's first name",
+      "type": "string",
+      "pattern": "^[ -~]+$",
+      "maxLength": 35,
+      "minLength": 1,
+      "examples": [
+        "Bob",
+        "Alice"
+      ]
+    },
+    "nino": {
+      "description": "The claimant's nino",
+      "type": "string",
+      "pattern": "^(?!BG|GB|NK|KN|TN|NT|ZZ)[ABCEGHJ-PRSTW-Z][ABCEGHJ-NPRSTW-Z]\\d{6}[A-D]$",
+      "maxLength": 9,
+      "examples": [
+        "AA111111A"
+      ]
+    },
+    "dob": {
+      "description": "The claimant's date of birth",
+      "type": "string",
+      "format": "date",
+      "examples": [
+        "2001-01-01"
+      ]
+    },
+    "address": {
+      "description": "The claimant's address",
+      "$ref": "address.schema.1.0.0.json"
+    },
+    "alternativeAddress": {
+      "description": "The claimant's address",
+      "$ref": "address.schema.1.0.0.json"
+    },
+    "contact": {
+      "$ref": "personal-details.schema.1.1.0.json#/$defs/contact110"
+    },
+    "bankDetails": {
+      "$ref": "personal-details.schema.1.1.0.json#/$defs/bankDetails110"
+    },
+    "alternateFormat": {
+      "$ref": "personal-details.schema.1.1.0.json#/$defs/alternateFormat110"
+    }
+  },
+  "required": [
+    "surname",
+    "firstname",
+    "nino",
+    "dob",
+    "address",
+    "contact"
+  ]
+}

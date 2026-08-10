@@ -1,0 +1,384 @@
+openapi: 3.1.0
+
+info:
+  title: DWP PDF Form Generator Service - PIP
+  description: Rest API for converting versioned PIP2 application form to PDF_A document
+  version: '@project.version@'
+
+servers:
+  - url: 'http://localhost:8080'
+
+paths:
+  /v2/pdf/createPdf:
+    post:
+      tags:
+        - create
+      description: Create new pdf from pip application form containing the claim details
+      operationId: createPDF
+      summary: Create a pdf from pip2 application
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/submissionDto'
+      responses:
+        201:
+          description: PDF file created
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        400:
+          description: Invalid JSON format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FailureResponse'
+
+  /v2/pdf/s3CreatePdf:
+    post:
+      tags:
+        - create
+      description: Create new pdf from pip application and upload it to s3
+      operationId: s3CreatePDF
+      summary: Create a pdf from pip2 application and upload to s3
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePdfS3'
+      responses:
+        201:
+          description: PDF created and uploaded to s3
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/S3PdfReturn'
+        400:
+          description: Invalid JSON format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FailureResponse'
+
+components:
+  securitySchemes:
+    sideCarProxySecurity:
+      type: mutualTLS
+      description: "Security is enforced by an external side car proxy using mTLS, not directly by this API"
+      x-sidecar-implementation: true
+  schemas:
+    CreatePdfS3:
+      type: object
+      required:
+        - submissionDto
+        - bucket
+      properties:
+        submissionDto:
+          $ref: '#/components/schemas/submissionDto'
+        bucket:
+          $ref: '#/components/schemas/bucket'
+
+    S3PdfReturn:
+      properties:
+        s3Ref:
+          $ref: '#/components/schemas/s3Ref'
+        bucket:
+          $ref: '#/components/schemas/bucket'
+        file_size_kb:
+          $ref: '#/components/schemas/file_size_kb'
+
+    submissionDto:
+      type: object
+      properties:
+        applicationId:
+          $ref: '#/components/schemas/applicationId'
+        claimantId:
+          $ref: '#/components/schemas/claimantId'
+        formSpecificationId:
+          $ref: '#/components/schemas/formSpecificationId'
+        submissionId:
+          $ref: '#/components/schemas/submissionId'
+        submissionDate:
+          $ref: '#/components/schemas/submissionDate'
+        responses:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuestionAnswerSectionDto'
+        registrationDetails:
+          $ref: '#/components/schemas/RegistrationDetailsDto'
+
+    answerOrder:
+      type: integer
+
+    applicationId:
+      example: "123456789"
+      minLength: 1
+      pattern: ^(?!\s*$).+
+      type: string
+
+    AdviceResponseDto:
+      allOf:
+        - $ref: '#/components/schemas/QuestionAnswerDto'
+      type: object
+      required:
+        - response
+      properties:
+        viewed:
+          type: boolean
+      title: ADVICE
+
+    BooleanResponseDto:
+      allOf:
+        - $ref: '#/components/schemas/QuestionAnswerDto'
+      type: object
+      required:
+        - response
+      properties:
+        response:
+          type: boolean
+      title: BOOL_QUESTION
+
+    bucket:
+      description: AWS S3 bucket name
+      example: "pip-bucket"
+      type: string
+      minLength: 1
+
+    claimantId:
+      example: "123456789"
+      minLength: 1
+      pattern: ^(?!\s*$).+
+      type: string
+
+    FailureResponse:
+      properties:
+        message:
+          $ref: '#/components/schemas/message'
+
+    files:
+      type: array
+      items:
+        $ref: '#/components/schemas/FileUpload'
+
+    file_size_kb:
+      description: unencrypted data size in kb
+      example: 1024
+      type: integer
+
+    FileUpload:
+      type: object
+      properties:
+        sanitisedName:
+          type: string
+        id:
+          type: string
+        displaySize:
+          type: string
+        size:
+          type: integer
+        s3Ref:
+          type: string
+        bucket:
+          type: string
+        mimetype:
+          type: string
+        dateTime:
+          type: string
+        drsDocType:
+          type: string
+          enum:
+            - PIP2_FORM
+            - PIP2_EVIDENCE
+
+    FileUploadDto:
+      allOf:
+        - $ref: '#/components/schemas/QuestionAnswerDto'
+      type: object
+      required:
+        - viewed
+      properties:
+        viewed:
+          type: boolean
+      title: FILE_UPLOAD
+
+    FileUploadSummaryDto:
+      allOf:
+        - $ref: '#/components/schemas/QuestionAnswerDto'
+      type: object
+      required:
+        - response
+      properties:
+        response:
+          type: boolean
+      title: FILE_UPLOAD_SUMMARY
+
+    formSpecificationId:
+      example: "123456789"
+      minLength: 1
+      pattern: ^(?!\s*$).+
+      type: string
+
+    id:
+      type: string
+
+    message:
+      description: detail description
+      type: string
+
+    MultiPartResponseDto:
+      allOf:
+        - $ref: '#/components/schemas/QuestionAnswerDto'
+      type: object
+      required:
+        - responses
+      properties:
+        responses:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuestionAnswerDto'
+      title: MULTI_PART_QUESTION
+
+    PersonalDetailsDto:
+      type: object
+      properties:
+        surname:
+          type: string
+        firstName:
+          type: string
+        nationalInsuranceNumber:
+          type: string
+        dateOfBirth:
+          type: string
+        postcode:
+          type: string
+        email:
+          type: string
+
+    QuestionAnswerSectionDto:
+      type: object
+      properties:
+        questionAnswers:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuestionAnswerDto'
+        reference:
+          type: string
+
+    QuestionAnswerDto:
+      type: object
+      required:
+        - questionType
+      properties:
+        reference:
+          $ref: '#/components/schemas/Reference'
+        question:
+          $ref: '#/components/schemas/Question'
+        questionType:
+          $ref: '#/components/schemas/QuestionType'
+        responseId:
+          $ref: '#/components/schemas/ResponseId'
+        answerOrder:
+          $ref: '#/components/schemas/answerOrder'
+      discriminator:
+        propertyName: questionType
+        mapping:
+          ADVICE: '#/components/schemas/AdviceResponseDto'
+          BOOL_QUESTION: '#/components/schemas/BooleanResponseDto'
+          TEXT_AREA_QUESTION: '#/components/schemas/TextAreaResponseDto'
+          SHORT_TEXT_QUESTION: '#/components/schemas/ShortTextResponseDto'
+          RADIO_QUESTION: '#/components/schemas/RadioResponseDto'
+          MULTI_PART_QUESTION: '#/components/schemas/MultiPartResponseDto'
+          FILE_UPLOAD_SUMMARY: '#/components/schemas/FileUploadSummaryDto'
+          FILE_UPLOAD: '#/components/schemas/FileUploadDto'
+        oneOf:
+          - $ref: '#/components/schemas/AdviceResponseDto'
+          - $ref: '#/components/schemas/BooleanResponseDto'
+          - $ref: '#/components/schemas/TextAreaResponseDto'
+          - $ref: '#/components/schemas/ShortTextResponseDto'
+          - $ref: '#/components/schemas/RadioResponseDto'
+          - $ref: '#/components/schemas/MultiPartResponseDto'
+          - $ref: '#/components/schemas/FileUploadSummaryResponseDto'
+          - $ref: '#/components/schemas/FileUploadResponseDto'
+
+    QuestionType:
+      type: string
+      enum:
+        - ADVICE
+        - BOOL_QUESTION
+        - TEXT_AREA_QUESTION
+        - SHORT_TEXT_QUESTION
+        - RADIO_QUESTION
+        - MULTI_PART_QUESTION
+        - FILE_UPLOAD
+        - FILE_UPLOAD_SUMMARY
+
+    RegistrationDetailsDto:
+      type: object
+      properties:
+        personalDetails:
+          $ref: '#/components/schemas/PersonalDetailsDto'
+
+    ShortTextResponseDto:
+      allOf:
+        - $ref: '#/components/schemas/QuestionAnswerDto'
+      type: object
+      required:
+        - response
+      properties:
+        response:
+          type: string
+      title: SHORT_TEXT_QUESTION
+
+    submissionId:
+      example: "123456789"
+      minLength: 1
+      pattern: ^(?!\s*$).+
+      type: string
+
+    submissionDate:
+      type: string
+      example: 24-01-2023
+
+    s3Ref:
+      description: AWS S3 unique file key
+      example: 123_PRESCRIPTION.JPG.2020
+      type: string
+      minLength: 1
+
+    TextAreaResponseDto:
+      allOf:
+        - $ref: '#/components/schemas/QuestionAnswerDto'
+      type: object
+      required:
+        - response
+      properties:
+        response:
+          type: string
+      title: TEXT_AREA_QUESTION
+
+    RadioResponseDto:
+      allOf:
+        - $ref: '#/components/schemas/QuestionAnswerDto'
+      type: object
+      required:
+        - responseReference
+      properties:
+        responseReference:
+          type: string
+      title: RADIO_QUESTION
+
+    Question:
+      type: string
+
+    Reference:
+      type: string
+
+    ResponseId:
+      type: string
+      format: uuid
+security:
+  - sideCarProxySecurity : []

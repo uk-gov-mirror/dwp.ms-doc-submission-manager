@@ -1,0 +1,556 @@
+components:
+  schemas:
+    StateDto:
+      type: object
+      title: StateDto
+      properties:
+        currentState:
+          $ref: '#/components/schemas/StateEnum'
+      required: [ currentState ]
+    StateOptionalDto:
+      type: object
+      title: StateOptionalDto
+      properties:
+        currentState:
+          $ref: '#/components/schemas/StateEnum'
+    HistoryDto:
+      type: object
+      title: HistoryDto
+      properties:
+        state:
+          $ref: '#/components/schemas/StateEnum'
+        timestamp:
+          description: Timestamp in format yyyy-MM-dd'T'HH:mm:ss.SSS'Z'
+          example: 2023-05-09T11:00:25.954Z
+          type: string
+    AdditionalSupportDto:
+      type: object
+      title: AdditionalSupportDto
+      nullable: true
+      properties:
+        state:
+          description: State of additional support marker
+          type: string
+          enum:
+            - NO_ADDITIONAL_SUPPORT
+            - ADDITIONAL_SUPPORT_INDICATED
+            - ADDITIONAL_SUPPORT_CONFIRMED
+    ApplicationCoordinatorDto:
+      type: object
+      title: ApplicationCoordinatorDto
+      properties:
+        application_id:
+          type: string
+          pattern: ^[a-z0-9]{24}
+          example: "5ed0d430716609122be7a4d6"
+        decision_id:
+          type: string
+          pattern: ^[a-z0-9]{24}
+          example: "6ed0d430716609122be5a2e7"
+        claimant_id:
+          type: string
+          pattern: ^[a-z0-9]{24}
+        nino:
+          type: string
+          pattern: ^(?!BG|GB|NK|KN|TN|NT|ZZ)[ABCEGHJ-PRSTW-Z][ABCEGHJ-NPRSTW-Z]\d{6}[A-D]
+          example: "AA112233A"
+        submission_id:
+          type: string
+          pattern: ^[a-z0-9]{24}
+          example: "5ed0d430716609122be7a4d6"
+        identityVerified:
+          description: is User Identity Verified for that application
+          type: boolean
+        routedTo:
+          $ref: '#/components/schemas/RoutedToEnum'
+        srel:
+          description: do special rules for end of life need to be followed
+          type: boolean
+        has_referral_id:
+          description: the id for the assessment report in HAS
+          type: string
+        has_referral_status:
+          $ref: '#/components/schemas/HasReferralStatusEnum'
+        state:
+          $ref: '#/components/schemas/StateDto'
+        history:
+          type: array
+          items:
+            $ref: '#/components/schemas/HistoryDto'
+        journey_type:
+          $ref: '#/components/schemas/JourneyTypeEnum'
+      required: [ application_id ]
+    ApplicationCoordinatorV6Dto:
+      type: object
+      title: ApplicationCoordinatorV6Dto
+      properties:
+        application_id:
+          type: string
+          pattern: ^[a-z0-9]{24}
+          example: "5ed0d430716609122be7a4d6"
+        decision_id:
+          type: string
+          pattern: ^[a-z0-9]{24}
+          example: "6ed0d430716609122be5a2e7"
+        claimant_id:
+          type: string
+          pattern: ^[a-z0-9]{24}
+        nino:
+          type: string
+          pattern: ^(?!BG|GB|NK|KN|TN|NT|ZZ)[ABCEGHJ-PRSTW-Z][ABCEGHJ-NPRSTW-Z]\d{6}[A-D]
+          example: "AA112233A"
+        submission_id:
+          type: string
+          pattern: ^[a-z0-9]{24}
+          example: "5ed0d430716609122be7a4d6"
+        routedTo:
+          $ref: '#/components/schemas/RoutedToEnum'
+        srel:
+          description: do special rules for end of life need to be followed
+          type: boolean
+        has_referral_id:
+          description: the id for the assessment report in HAS
+          type: string
+        has_referral_status:
+          $ref: '#/components/schemas/HasReferralStatusEnum'
+        state:
+          $ref: '#/components/schemas/StateDto'
+        history:
+          type: array
+          items:
+            $ref: '#/components/schemas/HistoryDto'
+        journey_type:
+          $ref: '#/components/schemas/JourneyTypeEnum'
+        region:
+          $ref: '#/components/schemas/RegionEnum'
+        language:
+          $ref: '#/components/schemas/LanguageEnum'
+        additional_support:
+          $ref: '#/components/schemas/AdditionalSupportDto'
+        identity_verified:
+          description: returns true if the application is marked as identity verified
+          type: boolean
+          nullable: true
+      required: [ application_id ]
+    ApplicationCreateV5Dto:
+      type: object
+      title: ApplicationCreateV5Dto
+      description: >
+        DTO used for creating application in a given state with a specified region. If state is not specified the application will be created in the REGISTRATION state.
+        Optionally provide a ApplicationId to use, or a random one is generated.
+      required:
+        - benefit_type
+        - language
+        - region
+        - nino
+      allOf:
+        - $ref: '#/components/schemas/ClaimantId'
+        - $ref: '#/components/schemas/BenefitType'
+        - $ref: '#/components/schemas/Language'
+        - $ref: '#/components/schemas/Nino'
+        - $ref: '#/components/schemas/Region'
+        - $ref: '#/components/schemas/State'
+        - $ref: '#/components/schemas/Timestamp'
+        - $ref: '#/components/schemas/ApplicationId'
+    ApplicationDetails:
+      type: object
+      title: ApplicationDetails
+      properties:
+        application_id:
+          type: string
+          pattern: ^[a-z0-9]{24}
+          example: "5ed0d430716609122be7a4d6"
+        decision_id:
+          type: string
+          pattern: ^[a-z0-9]{24}
+          example: "6ed0d430716609122be5a2e7"
+        claimant_id:
+          type: string
+          pattern: ^[a-z0-9]{24}
+        nino:
+          type: string
+          pattern: ^(?!BG|GB|NK|KN|TN|NT|ZZ)[ABCEGHJ-PRSTW-Z][ABCEGHJ-NPRSTW-Z]\d{6}[A-D]
+          example: "AA112233A"
+        submission_id:
+          type: string
+          pattern: ^[a-z0-9]{24}
+          example: "5ed0d430716609122be7a4d6"
+        routedTo:
+          $ref: '#/components/schemas/RoutedToEnum'
+        identityVerified:
+          description: is User Identity Verified for that application
+          type: boolean
+        srel:
+          description: do special rules for end of life need to be followed
+          type: boolean
+        has_referral_id:
+          description: the id for the assessment report in HAS
+          type: string
+        has_referral_status:
+          $ref: '#/components/schemas/HasReferralStatusEnum'
+        state:
+          $ref: '#/components/schemas/StateDto'
+        history:
+          type: array
+          items:
+            $ref: '#/components/schemas/HistoryDto'
+        journey_type:
+          $ref: '#/components/schemas/JourneyTypeEnum'
+        region:
+          $ref: '#/components/schemas/RegionEnum'
+        language:
+          $ref: '#/components/schemas/LanguageEnum'
+      required: [ application_id ]
+    ManualEventDto:
+      type: object
+      title: ManualEventDto
+      properties:
+        application_id:
+          type: string
+          pattern: ^[a-z0-9]{24}
+          example: "5ed0d430716609122be7a4d6"
+        name:
+          $ref: '#/components/schemas/EventNameEnum'
+        notes:
+          type: string
+          example: "Note (for context)."
+          maxLength: 2000
+        eject_reason:
+          $ref: '#/components/schemas/EjectReasonEnum'
+        agentId:
+          type: string
+          pattern: ^[0-9]{8}
+          example: "5436896"
+        disallow_reason:
+          $ref: '#/components/schemas/DisallowReasonEnum'
+      required: [ application_id, name, agentId ]
+    CreateTimelineEventDto:
+      type: object
+      title: CreateTimelineEventDto
+      allOf:
+        - $ref: '#/components/schemas/ManualEventDto'
+      properties:
+        event_type:
+          description: determine the source of the event
+          $ref: '#/components/schemas/EventTypeEnum'
+      required: [ application_id, event_type, name, agentId ]
+    TimelineDto:
+      type: object
+      title: TimelineDto
+      properties:
+        timeline_events:
+          type: array
+          items:
+            $ref: '#/components/schemas/TimelineEventDto'
+    TimelineEventDto:
+      type: object
+      title: TimelineEventDto
+      properties:
+        application_id:
+          type: string
+          pattern: ^[a-z0-9]{24}
+          example: "5ed0d430716609122be7a4d6"
+        event_type:
+          description: determine the source of the event
+          $ref: '#/components/schemas/EventTypeEnum'
+        event_name:
+          description: the name of the event
+          $ref: '#/components/schemas/EventNameEnum'
+        timestamp:
+          description: Timestamp in format yyyy-MM-dd'T'HH:mm:ss.SSS'Z'
+          example: 2023-05-09T11:00:25.954Z
+          type: string
+        notes:
+          type: string
+          example: "Note (for context)."
+          maxLength: 2000
+        eject_reason:
+          $ref: '#/components/schemas/EjectReasonEnum'
+        agentId:
+          type: string
+          pattern: ^[0-9]{8}
+          example: "5436896"
+        disallow_reason:
+          $ref: '#/components/schemas/DisallowReasonEnum'
+      required: [ application_id, event_type, event_name, timestamp ]
+    ApplicationsListDto:
+      type: object
+      title: ApplicationsListDto
+      properties:
+        applications:
+          type: array
+          items:
+            $ref: '#/components/schemas/ApplicationCoordinatorDto'
+      required: [ applications ]
+    EjectReasonEnum:
+      title: EjectReasonEnum
+      description: reasons for ejection
+      example: WORKING_ABROAD
+      type: string
+      enum:
+        - ADDITIONAL_SUPPORT_NEEDED
+        - ALTERNATIVE_FORMAT_NEEDED
+        - APPLICANT_GETS_OTHER_BENEFITS
+        - APPOINTEE_ADDED
+        - CHANGE_OF_PERSONAL_DETAILS
+        - CLAIMANT_DID_NOT_RECEIVE_PAYMENT
+        - DEATH_OF_APPLICANT_OR_CLAIMANT
+        - DETAILS_DO_NOT_MATCH_SEARCHLIGHT_RECORD
+        - EVIDENCE_OF_FRAUD
+        - HEALTH_ASSESSMENT_COULD_NOT_BE_COMPLETED
+        - IMMIGRATION_STATUS
+        - KEEP_CUSTOMER_INTERACTIONS_SAFE_MARKER
+        - MANDATORY_RECONSIDERATION
+        - NEW_EVIDENCE_SENT_AFTER_DECISION
+        - NEW_MOTABILITY_AGREEMENT
+        - RESIDENCE_AND_PRESENCE_CRITERIA
+        - REQUEST_FOR_SPLIT_PAYMENT
+        - SPECIAL_RULES_FOR_END_OF_LIFE
+        - STAYS_IN_PRISON_HOSPITAL_OR_OTHER_ACCOMMODATION
+        - WITHDRAWN_CLAIM
+        - WORKING_ABROAD
+        - OTHER
+        - PAYMENT_CREATION_ERROR
+        - PAYMENT_ERROR
+    ApplicationCreateDto:
+      type: object
+      title: ApplicationCreateDto
+      description: One of claimant_id or nino is required not both, nino is preferred as claimant_id is earmarked for removal.
+      required:
+        - benefit_type
+        - language
+      allOf:
+        - $ref: '#/components/schemas/ClaimantId'
+        - $ref: '#/components/schemas/BenefitType'
+        - $ref: '#/components/schemas/Language'
+        - $ref: '#/components/schemas/Nino'
+    ApplicationDto:
+      type: object
+      title: ApplicationDto
+      allOf:
+        - $ref: '#/components/schemas/ApplicationId'
+    ClaimantId:
+      deprecated: true
+      type: object
+      description: claimant id (account reference)
+      properties:
+        claimant_id:
+          example: "6ed1d430716609122be7a4d6"
+          type: string
+          pattern: ^[a-z0-9]{24}
+    Nino:
+      type: object
+      description: claimants national insurance number
+      properties:
+        nino:
+          example: "AA112233A"
+          type: string
+          pattern: ^(?!BG|GB|NK|KN|TN|NT|ZZ)[ABCEGHJ-PRSTW-Z][ABCEGHJ-NPRSTW-Z]\d{6}[A-D]
+    BenefitType:
+      type: object
+      properties:
+        benefit_type:
+          $ref: '#/components/schemas/BenefitTypeEnum'
+    Language:
+      type: object
+      properties:
+        language:
+          $ref: '#/components/schemas/LanguageEnum'
+    JourneyType:
+      type: object
+      properties:
+        journey_type:
+          $ref: '#/components/schemas/JourneyTypeEnum'
+    Region:
+      type: object
+      properties:
+        region:
+          $ref: '#/components/schemas/RegionEnum'
+    State:
+      type: object
+      properties:
+        state:
+          $ref: '#/components/schemas/StateEnum'
+    Timestamp:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          example: 2023-05-09T11:00:25.954Z
+    ApplicationId:
+      type: object
+      description: application id
+      properties:
+        application_id:
+          example: "5ed0d430716609122be7a4d6"
+          type: string
+          pattern: ^[a-z0-9]{24}
+    ApplicationCountsDto:
+      type: object
+      title: ApplicationCountsDto
+      properties:
+        stateCounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/StateCountDto'
+        routedToCounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoutedToCountDto'
+        ejectReasonCounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/EjectReasonCountDto'
+    StateCountDto:
+      type: object
+      title: StateCountDto
+      properties:
+        state:
+          $ref: '#/components/schemas/StateEnum'
+        count:
+          type: integer
+    RoutedToCountDto:
+      type: object
+      title: RoutedToCountDto
+      properties:
+        routedTo:
+          $ref: '#/components/schemas/RoutedToEnum'
+        count:
+          type: integer
+    EjectReasonCountDto:
+      type: object
+      title: EjectReasonCountDto
+      properties:
+        ejectReason:
+          $ref: '#/components/schemas/EjectReasonEnum'
+        count:
+          type: integer
+    StateEnum:
+      type: string
+      title: StateEnum
+      example: "REGISTRATION"
+      enum:
+        - REGISTRATION
+        - HEALTH_AND_DISABILITY
+        - HIG_COMPLETE
+        - SUBMITTED
+        - DISALLOWED
+        - DISALLOWED_NON_RETURN
+        - DISALLOWED_NOT_ELIGIBLE
+        - WITHDRAWN
+        - READY_FOR_DECISION
+        - REFERRED_TO_ASSESSMENT
+        - RETURNED_FROM_ASSESSMENT
+        - DECISION_AWARDED
+        - DECISION_NOT_AWARDED
+        - ROUTED_TO_PIPCS
+        - REBUILT_IN_PIPCS
+    RoutedToEnum:
+      title: RoutedToEnum
+      description: marker from application router
+      type: string
+      example: "PIPCS"
+      enum:
+        - PIPCS
+        - PIPSERVICE
+    JourneyTypeEnum:
+      title: JourneyTypeEnum
+      description: the journey type of the application
+      type: string
+      enum:
+        - TACTICAL
+        - STRATEGIC
+        - PIP2_INVITED
+    HasReferralStatusEnum:
+      title: HasReferralStatusEnum
+      description: the outcome of the has assessment
+      type: string
+      enum:
+        - SUCCESS
+        - CLAIM_WITHDRAWN
+        - FAILED_TO_ATTEND
+        - CITIZEN_DEATH_OCCURRED
+        - ASSESSMENT_NOT_COMPLETED
+        - EJECTED
+      default: null
+    DisallowReasonEnum:
+      title: DisallowReasonEnum
+      type: string
+      enum:
+        - DISALLOW_ELIGIBILITY_OVER_STATE_PENSION_AGE
+    EventTypeEnum:
+      description: determine the source of the event
+      title: EventTypeEnum
+      example: STATE_CHANGE
+      type: string
+      enum:
+        - STATE_CHANGE
+        - MANUAL_EVENT
+        - REQUEST_FOR_ASSESSMENT
+        - APPLICATION_ROUTER
+        - SMS_NOTIFICATION
+        - IDENTITY_VERIFIED
+        - MANDATORY_RECONSIDERATION
+        - ADDITIONAL_SUPPORT
+    EventNameEnum:
+      title: EventNameEnum
+      description: the name of the event
+      example: SUBMISSION
+      type: string
+      enum:
+        - INBOUND_CALL
+        - OUTBOUND_CALL
+        - NOTIFICATION
+        - CASE_EJECT
+        - DISALLOW
+        - REGISTRATION
+        - HEALTH_AND_DISABILITY
+        - SUBMITTED
+        - DISALLOWED
+        - DISALLOWED_NON_RETURN
+        - DISALLOWED_NOT_ELIGIBLE
+        - WITHDRAWN
+        - READY_FOR_DECISION
+        - REFERRED_TO_ASSESSMENT
+        - RETURNED_FROM_ASSESSMENT
+        - DECISION_AWARDED
+        - DECISION_NOT_AWARDED
+        - ROUTED_TO_PIPCS
+        - REBUILT_IN_PIPCS
+        - HIG_DEADLINE_EXTENDED
+        - MOVE_TO_PIPCS_REQUIRED
+        - CLAIMANT_IDENTITY_VERIFIED
+        - PIPSERVICE
+        - PIPCS
+        - IDV_UPLIFT
+        - REMINDER
+        - OTHER
+        - ID_VERIFIED
+        - CHANGED_SEARCHLIGHT_ADDRESS
+        - MANDATORY_RECONSIDERATION_REGISTERED
+        - MANDATORY_RECONSIDERATION_INTENT
+        - MANDATORY_RECONSIDERATION_WITHDRAWN
+        - ADDITIONAL_SUPPORT_INDICATED
+        - ADDITIONAL_SUPPORT_CONFIRMED
+        - NO_ADDITIONAL_SUPPORT
+    BenefitTypeEnum:
+      title: BenefitTypeEnum
+      description: the type of benefit PIP, ESA etc..
+      example: PIP
+      type: string
+      enum:
+        - PIP
+    RegionEnum:
+      title: RegionEnum
+      description: region code, NI or GB
+      type: string
+      enum:
+        - GB
+        - NI
+    LanguageEnum:
+      title: LanguageEnum
+      type: string
+      enum:
+        - EN
+        - CY

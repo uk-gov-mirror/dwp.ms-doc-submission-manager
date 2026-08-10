@@ -1,0 +1,310 @@
+openapi: '3.1.0'
+
+info:
+  title: DWP PIP Decision Manager Service
+  description: Rest API for operations relating to the decision for a claim
+  version: '@project.version@'
+
+servers:
+  - url: 'https://localhost:8080'
+
+paths:
+
+  /v1/decisions:
+    post:
+      tags:
+        - decision
+      summary: Record new decision
+      operationId: recordDecision
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDecisionRequest'
+      responses:
+        201:
+          description: CREATED - decision recorded successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DecisionDetails'
+        400:
+          description: BAD REQUEST - badly formed json or values not valid
+        409:
+          description: CONFLICT - decision for application id and date time already exist
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+
+    get:
+      tags:
+        - decision
+      summary: Get decision by query parameters
+      operationId: decisionsByQueryParameters
+      parameters:
+        - name: applicationId
+          in: query
+          description: applicationId for the decision
+          required: false
+          schema:
+            type: string
+            example: "6ed1d430716609122be7a4d6"
+        - name: reviewId
+          in: query
+          description: reviewId for the decision
+          required: false
+          schema:
+            type: string
+            example: "6ed1d430716609332be7a4d6"
+      responses:
+        200:
+          description: OK - decisions exist for query parameters
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DecisionDetails'
+        400:
+          description: BAD REQUEST - badly formed request
+        404:
+          description: NOT FOUND - decision does not exist for provided query parameters
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+
+  /v1/decisions/{decisionId}/publish:
+    post:
+      tags:
+        - decision
+      summary: Publish decision
+      operationId: publishDecision
+      parameters:
+        - name: decisionId
+          in: path
+          description: unique decision id
+          required: true
+          schema:
+            type: string
+            example: "6ed1d430716609122be7a4d6"
+      responses:
+        200:
+          description: OK - decision published successfully
+        400:
+          description: BAD REQUEST - badly formed json or values not valid
+        404:
+          description: NOT FOUND - decision does not exist for provided decision id
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+
+  /v1/decisions/{decisionId}:
+    get:
+      tags:
+        - decision
+      summary: Get decisions by decision id
+      operationId: decisionByDecisionId
+      parameters:
+        - name: decisionId
+          in: path
+          description: unique decision id
+          required: true
+          schema:
+            type: string
+            example: "6ed1d430716609122be7a4d6"
+      responses:
+        200:
+          description: OK - decision exists for decision id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DecisionDetails'
+        400:
+          description: BAD REQUEST - badly formed request
+        404:
+          description: NOT FOUND - decision does not exist for provided decision id
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+
+  /v1/decisions/{decision-id}/award-details:
+    patch:
+      tags:
+        - decision
+      summary: Patch a decision with award details
+      operationId: updateAwardDetails
+      parameters:
+        - name: decision-id
+          in: path
+          description: unique decision id
+          required: true
+          schema:
+            type: string
+            example: "6ed1d430716609122be7a4d6"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAwardDetailsRequest'
+      responses:
+        202:
+          description: ACCEPTED - decision award details accepted
+        400:
+          description: BAD REQUEST - badly formed json or values not valid
+        404:
+          description: NOT FOUND - decision does not exist for provided decision id
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+
+    get:
+      tags:
+        - decision
+      summary: Get award details by decision id
+      operationId: getAwardDetailsByDecisionId
+      parameters:
+        - name: decision-id
+          in: path
+          description: unique decision id
+          required: true
+          schema:
+            type: string
+            example: "6ed1d430716609122be7a4d6"
+      responses:
+        200:
+          description: OK - award details exists for decision id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AwardDetails'
+        400:
+          description: BAD REQUEST - badly formed request
+        404:
+          description: NOT FOUND - decision does not exist for provided decision id
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+
+  /v1/decisions/{decision-id}/case-manager-award-details:
+    patch:
+      tags:
+        - decision
+      summary: Patch a decision with award details provided by case manager
+      operationId: updateCaseManagerAwardDetails
+      parameters:
+        - name: decision-id
+          in: path
+          description: unique decision id
+          required: true
+          schema:
+            type: string
+            example: "6ed1d430716609122be7a4d6"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCaseManagerAwardDetailsRequest'
+      responses:
+        202:
+          description: ACCEPTED - decision award details accepted
+        400:
+          description: BAD REQUEST - badly formed json or values not valid
+        404:
+          description: NOT FOUND - decision does not exist for provided decision id
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+
+  /v1/decisions/{decision-id}/agree-with-ap-review-period:
+    patch:
+      tags:
+        - decision
+      summary: Patch a decision with agent's decision to agree with AP award review period
+      operationId: updateAgentAgreeWithAPReviewPeriod
+      parameters:
+        - name: decision-id
+          in: path
+          description: unique decision id
+          required: true
+          schema:
+            type: string
+            example: "6ed1d430716609122be7a4d6"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: 'includes/components.yaml#/components/schemas/UpdateAgentAgreeAPReviewPeriodRequest'
+      responses:
+        200:
+          description: OK - decision updated with flag that denotes agent agrees with AP's award review period
+        400:
+          description: BAD REQUEST - Agreement cannot be null
+        404:
+          description: NOT FOUND - decision does not exist for provided decision id
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+
+components:
+  securitySchemes:
+    sideCarProxySecurity:
+      type: mutualTLS
+      description: "Security is enforced by an external side car proxy using mTLS, not directly by this API"
+      x-sidecar-implementation: true
+  schemas:
+    CreateDecisionRequest:
+      type: object
+      required:
+        - review_id
+        - application_id
+        - nino
+        - user_who_created_the_decision
+      allOf:
+        - $ref: 'includes/components.yaml#/components/schemas/ReviewId'
+        - $ref: 'includes/components.yaml#/components/schemas/ApplicationId'
+        - $ref: 'includes/components.yaml#/components/schemas/DecisionType'
+        - $ref: 'includes/components.yaml#/components/schemas/ReportType'
+        - $ref: 'includes/components.yaml#/components/schemas/NationalInsurance'
+        - $ref: 'includes/components.yaml#/components/schemas/UserWhoCreatedTheDecision'
+    DecisionDetails:
+      type: object
+      allOf:
+        - $ref: 'includes/components.yaml#/components/schemas/DecisionId'
+        - $ref: 'includes/components.yaml#/components/schemas/ReviewId'
+        - $ref: 'includes/components.yaml#/components/schemas/ApplicationId'
+        - $ref: 'includes/components.yaml#/components/schemas/NationalInsurance'
+        - $ref: 'includes/components.yaml#/components/schemas/Decision'
+        - $ref: 'includes/components.yaml#/components/schemas/DecisionType'
+        - $ref: 'includes/components.yaml#/components/schemas/DecisionDate'
+        - $ref: 'includes/components.yaml#/components/schemas/UserWhoCreatedTheDecision'
+        - $ref: 'includes/components.yaml#/components/schemas/DailyLivingScore'
+        - $ref: 'includes/components.yaml#/components/schemas/MobilityScore'
+        - $ref: 'includes/components.yaml#/components/schemas/DailyLivingRate'
+        - $ref: 'includes/components.yaml#/components/schemas/MobilityRate'
+
+    UpdateAwardDetailsRequest:
+      type: object
+      required:
+        - award_start_date
+      allOf:
+        - $ref: 'includes/components.yaml#/components/schemas/AwardStartDate'
+        - $ref: 'includes/components.yaml#/components/schemas/RecommendedReviewDate'
+        - $ref: 'includes/components.yaml#/components/schemas/RecommendedReviewPeriod'
+        - $ref: 'includes/components.yaml#/components/schemas/AssessmentReportCompletionDate'
+
+    UpdateCaseManagerAwardDetailsRequest:
+      type: object
+      required:
+        - case_manager_review_period
+      allOf:
+        - $ref: 'includes/components.yaml#/components/schemas/CaseManagerReviewPeriod'
+        - $ref: 'includes/components.yaml#/components/schemas/AwardEndDate'
+
+    AwardDetails:
+      type: object
+      allOf:
+        - $ref: 'includes/components.yaml#/components/schemas/DecisionId'
+        - $ref: 'includes/components.yaml#/components/schemas/AwardStartDate'
+        - $ref: 'includes/components.yaml#/components/schemas/AwardEndDate'
+        - $ref: 'includes/components.yaml#/components/schemas/RecommendedReviewDate'
+        - $ref: 'includes/components.yaml#/components/schemas/ReviewDate'
+        - $ref: 'includes/components.yaml#/components/schemas/RecommendedReviewPeriod'
+        - $ref: 'includes/components.yaml#/components/schemas/CaseManagerReviewPeriod'
+        - $ref: 'includes/components.yaml#/components/schemas/AssessmentReportCompletionDate'
+        - $ref: 'includes/components.yaml#/components/schemas/UpdateAgentAgreeAPReviewPeriodRequest'
+
+security:
+  - sideCarProxySecurity : []

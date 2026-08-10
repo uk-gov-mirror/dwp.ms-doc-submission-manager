@@ -1,5 +1,6 @@
 package uk.gov.dwp.health.pip.document.submission.manager.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,6 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import support.TestConstant;
+import uk.gov.dwp.health.pip.application.coordinator.openapi.coordinator.dto.ApplicationDetails;
 import uk.gov.dwp.health.pip.document.submission.manager.config.properties.DrsBusinessUnit;
 import uk.gov.dwp.health.pip.document.submission.manager.config.properties.DrsMetaProperties;
 import uk.gov.dwp.health.pip.document.submission.manager.config.properties.EventConfigProperties;
@@ -21,8 +23,9 @@ import uk.gov.dwp.health.pip.document.submission.manager.entity.DrsUpload;
 import uk.gov.dwp.health.pip.document.submission.manager.entity.Storage;
 import uk.gov.dwp.health.pip.document.submission.manager.entity.Submission;
 import uk.gov.dwp.health.pip.document.submission.manager.event.request.DrsUploadRequest;
-import uk.gov.dwp.health.pip.document.submission.manager.exception.DuplicateException;
+import uk.gov.dwp.health.pip.document.submission.manager.exception.DuplicateSubmissionException;
 import uk.gov.dwp.health.pip.document.submission.manager.model.DrsStatusEnum;
+import uk.gov.dwp.health.pip.document.submission.manager.model.application.ResultWrapper;
 import uk.gov.dwp.health.pip.document.submission.manager.openapi.model.ApplicationMeta;
 import uk.gov.dwp.health.pip.document.submission.manager.openapi.model.DrsMetadata;
 import uk.gov.dwp.health.pip.document.submission.manager.openapi.model.PipApplicationV1;
@@ -31,6 +34,7 @@ import uk.gov.dwp.health.pip.document.submission.manager.openapi.model.ResubmitD
 import uk.gov.dwp.health.pip.document.submission.manager.openapi.model.ResubmitResponseObject;
 import uk.gov.dwp.health.pip.document.submission.manager.openapi.model.S3RequestDocumentObject;
 import uk.gov.dwp.health.pip.document.submission.manager.openapi.model.SubmissionAttachObjectV1;
+import uk.gov.dwp.health.pip.document.submission.manager.service.ApplicationCoordinatorService;
 import uk.gov.dwp.health.pip.document.submission.manager.utils.Batch;
 import uk.gov.dwp.health.pip.document.submission.manager.utils.RequestPartition;
 
@@ -47,6 +51,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -71,6 +76,9 @@ class V1SubmissionServiceImplTest {
   @Mock private DataServiceImpl dataService;
   @Mock private DateFormat dateFormat;
   @Mock private RequestPartition partitionUtil;
+  @Mock private ApplicationCoordinatorService applicationCoordinatorService;
+  @Mock private EmailNotificationServiceImpl emailNotificationService;
+  @Mock private GetClaimantEmailService getClaimantEmailService;
 
   @Test
   @DisplayName("test create new submission returns submission response object")
@@ -152,7 +160,7 @@ class V1SubmissionServiceImplTest {
     when(application.getApplicationId()).thenReturn(TestConstant.APPLICATION_ID);
     when(dataService.findSubmissionByClaimantIdAndClaimId(anyString(), anyString()))
         .thenReturn(mock(Submission.class));
-    assertThrows(DuplicateException.class, () -> cut.createNewSubmission(application));
+    assertThrows(DuplicateSubmissionException.class, () -> cut.createNewSubmission(application));
     verify(dataService)
         .findSubmissionByClaimantIdAndClaimId(strArgCaptor.capture(), strArgCaptor.capture());
     assertThat(strArgCaptor.getAllValues())
@@ -162,7 +170,7 @@ class V1SubmissionServiceImplTest {
 
   @Test
   @DisplayName("test attach further evidence returns attach document response object")
-  void testAttachFurtherEvidenceReturnsAttachDocumentResponseObject() {
+  void testAttachFurtherEvidenceReturnsAttachDocumentResponseObject() throws JsonProcessingException {
     var attachObject = new SubmissionAttachObjectV1();
     attachObject.setSubmissionId(TestConstant.SUBMISSION_ID);
     attachObject.setRegion(GB);
@@ -207,7 +215,27 @@ class V1SubmissionServiceImplTest {
     businessUnit.setCallerId("test-caller-id");
     when(drsMetaProperties.findBusinessUnitByRegionCode(anyString())).thenReturn(businessUnit);
 
-    var actual = cut.attachDocumentToExistingSubmission(attachObject);
+    when(applicationCoordinatorService.getApplication(TestConstant.APPLICATION_ID))
+        .thenReturn(
+            ResultWrapper.<ApplicationDetails>builder()
+                .value(
+                    new ApplicationDetails()
+                        .region(ApplicationDetails.RegionEnum.GB)
+                        .journeyType(ApplicationDetails.JourneyTypeEnum.PIP2_INVITED)
+                        .language(ApplicationDetails.LanguageEnum.EN)
+                        .nino("AA370773A"))
+                .build());
+
+    when(getClaimantEmailService.getEmailFromIdentityByUserId("test-user-id"))
+        .thenReturn("test-email");
+
+    doNothing()
+        .when(emailNotificationService)
+        .sendAttachDocsEmailNotification(
+            anyString(), anyString(), anyString(), anyString(), anyString());
+
+    var actual = cut.attachDocumentToExistingSubmission("test-user-id",
+        attachObject);
 
     InOrder order =
         inOrder(
@@ -243,6 +271,11 @@ class V1SubmissionServiceImplTest {
                       TestConstant.URL,
                       TestConstant.REQUEST_ID_1));
         });
+
+    verify(getClaimantEmailService).getEmailFromIdentityByUserId("test-user-id");
+    verify(emailNotificationService)
+        .sendAttachDocsEmailNotification(
+            "test-email", "GB", "EN", "PIP2_INVITED", TestConstant.APPLICATION_ID);
   }
 
   @Test

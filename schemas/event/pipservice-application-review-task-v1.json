@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://business.events.integration.health.dwp.gov.uk/intra-domain-business-event/pipservice-application-review-task-schema.json",
+  "type": "object",
+  "title": "pipservice-application-review-task-payload-schema",
+  "description": "Intra Domain Business Event. PIP Service application review task Schema (Fat Event Payload)",
+  "required": [
+    "application_id",
+    "actioning_system",
+    "task_type",
+    "nino",
+    "version"
+  ],
+  "properties": {
+    "application_id": {
+      "$ref": "type-refs-v1.json#/defs/application_id"
+    },
+    "actioning_system": {
+      "$ref": "#/$defs/actioning_system_def"
+    },
+    "task_type": {
+      "$ref": "#/$defs/task_type_def"
+    },
+    "nino": {
+      "$ref": "#/$defs/nino_def"
+    },
+    "version": {
+      "$ref": "#/$defs/version_def"
+    }
+  },
+  "$defs": {
+    "actioning_system_def": {
+      "type": "string",
+      "enum": [
+        "PIP_APP_COORDINATOR_SERVICE"
+      ],
+      "description": "PIP Service referral."
+    },
+    "task_type_def": {
+      "type": "string",
+      "enum": [
+        "pre-has-review",
+        "decision-review"
+      ],
+      "description": "Task name."
+    },
+    "nino_def": {
+      "type": "string",
+      "description": "Citizen nino."
+    },
+    "version_def": {
+      "type": "string",
+      "enum": [
+        "1.0.0"
+      ],
+      "description": "Schema version."
+    }
+  }
+}

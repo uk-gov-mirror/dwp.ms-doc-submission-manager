@@ -1,0 +1,282 @@
+openapi: 3.1.0
+
+info:
+  title: DWP IDENTITY STATUS SERVICE IDV
+  description: Rest API for managing user identity
+  version: 2.0.0
+
+servers:
+  - url: 'https://localhost:8080'
+
+paths:
+
+  /v2/identity:
+    get:
+      tags:
+        - get
+      summary: Get the Identity record by subjectId (email) or nino.
+      operationId: getIdentity
+      description: Please note only one query parameter is allowed
+      parameters:
+        - in: header
+          name: nino
+          schema:
+            $ref: 'openapi-spec-v1.yaml#/components/schemas/nino'
+        - in: header
+          name: subjectId
+          schema:
+            $ref: 'openapi-spec-v1.yaml#/components/schemas/subjectId'
+      responses:
+        200:
+          description: The identity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentityResponse2'
+        404:
+          description: An identity with the given subjectId (email) or nino was not found
+
+    post:
+      tags:
+        - identity
+      summary: Endpoint to create or update identity status
+      operationId: registerV2
+      parameters:
+        - name: x-id-token
+          in: header
+          description: JWT Token
+          required: true
+          schema:
+            type: string
+        - name: x-channel
+          in: header
+          description: Channel
+          required: false
+          schema:
+            type: string
+            enum:
+              - "oidv"
+              - "aidv"
+              - "seeded"
+            default: "oidv"
+        - name: publish-guid-event
+          in: query
+          description: flag indicating whether to publish guid event to PIPCS
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        201:
+          description: Identity Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IdentityResponse2"
+        200:
+          description: Identity Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IdentityResponse2"
+        400:
+          description: Bad request - Invalid input
+        500:
+          description: Internal server error - an internal error occurred
+
+    patch:
+      tags:
+        - identity
+      summary: updates a identity's nino and subjectId (email) using its reference number id
+      operationId: updateIdentityById
+      parameters:
+        - name: id
+          in: query
+          required: true
+          description: the reference number of the identity record to update
+          schema:
+            type: string
+            example: "5ed0d430716609122be7a4d6"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IdentityUpdateRequest'
+      responses:
+        200:
+          description: identity updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentityResponse2'
+        404:
+          description: An identity with the given reference id was not found
+        400:
+          description: Bad request - Invalid input
+        500:
+          description: Internal server error - an internal error occurred
+
+  /v2/identity/agent-idv-uplift:
+    patch:
+      tags:
+        - patch
+      summary: PATCH to update identity status for a user to medium confidence
+      description: PATCH to update identity status for a user to medium confidence
+      operationId: upliftIdentityStatusByNino
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/upliftDtoV2'
+      responses:
+        204:
+          description: NO CONTENT - identity status updated for a nino
+        404:
+          description: NOT FOUND - Identity not found
+        423:
+          description: LOCKED - Identity already has Medium confidence
+
+  /v2/identity/seed:
+    post:
+      tags:
+        - identity
+      summary: Endpoint to create identity status record with limited information for seeding invited digital users
+      operationId: seedIdentityRecord
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/identitySeedDto'
+      responses:
+        201:
+          description: Identity Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IdentityResponse2"
+        400:
+          description: Bad request - Invalid input
+        500:
+          description: Internal server error - an internal error occurred
+
+  /v2/identity/kbv-status:
+    patch:
+      tags:
+        - patch
+      summary: Add or update KBV status for an identity record
+      operationId: updateKbvStatus
+      description:
+        Adds the `kbv_status` field if missing, or updates it if already present.
+      parameters:
+        - name: nino
+          in: query
+          required: true
+          description: NINO of the identity record to update
+          schema:
+            type: string
+            pattern: '^(?!BG|GB|NK|KN|TN|NT|ZZ)[ABCEGHJ-PRSTW-Z][ABCEGHJ-NPRSTW-Z]\d{6}[A-D]'
+            example: "AA000000A"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - kbv_status
+              properties:
+                kbv_status:
+                  $ref: '#/components/schemas/KbvStatusEnum'
+      responses:
+        204:
+          description: NO CONTENT - KBV status successfully added or updated
+        404:
+          description: NOT FOUND - Identity with the given NINO was not found
+        500:
+          description: Internal server error - an internal error occurred
+
+components:
+  securitySchemes:
+    dthAuth:
+      type: http
+      scheme: bearer
+      name: x-id-token
+      in: header
+      description: "Authentication is handled by DTH and token is passed on"
+  schemas:
+    upliftDtoV2:
+      title: UpliftDtoV2
+      type: object
+      properties:
+        staffId:
+          type: string
+          pattern: ^[0-9]{8}
+          examples:
+            - 12345678
+        nino:
+          type: string
+          pattern: '^[A-Z]{2}[0-9]{6}[A-Z]$'
+          examples:
+            - AA123456B
+            - RA0000001
+      required:
+        - nino
+
+    identitySeedDto:
+      title: identitySeedDto
+      type: object
+      properties:
+        email:
+          type: string
+          pattern: '(^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+\.[a-zA-Z0-9.-]+$)'
+          examples:
+            - name@example.com
+        nino:
+          type: string
+          pattern: '^[A-Z]{2}[0-9]{6}[A-Z]$'
+          examples:
+            - AA123456B
+            - RA0000001
+      required:
+        - nino
+
+    IdentityUpdateRequest:
+      type: object
+      required:
+        - nino
+        - subjectId
+      properties:
+        nino:
+          $ref: 'openapi-spec-v1.yaml#/components/schemas/nino'
+        subjectId:
+          $ref: 'openapi-spec-v1.yaml#/components/schemas/subjectId'
+
+    IdentityResponse2:
+      type: object
+      required:
+        - subjectIdDto
+      properties:
+        ref:
+          type: string
+          description: reference number
+          example: "5ed0d430716609122be7a4d6"
+        applicationId:
+          type: string
+          description: Application Id
+          example: "507f1f77bcf86cd799439011"
+        kbv_status:
+          $ref: '#/components/schemas/KbvStatusEnum'
+      allOf:
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/subjectIdDto'
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/ninoDto'
+
+    KbvStatusEnum:
+      type: string
+      description: The status of KBV
+      enum:
+        - VERIFIED
+        - UNVERIFIED
+
+security:
+  - dthAuth: []

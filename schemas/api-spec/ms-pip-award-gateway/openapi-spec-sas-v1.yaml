@@ -1,0 +1,921 @@
+openapi: 3.1.0
+# Version History:
+# Date        Version     Description
+# 18/05/2025  1.0.0      Added OverlappingBenefit and AwardPaymentAdjustment attributes and merge changes from PipSas v 2.0.23
+# 12/05/2025  1.0.0      Remove the field overlappingBenefits from assessmentAttributes block
+# 07/05/2025  1.0.0      Remove values submitted_and_in_assessment and obtaining_citizen_information from ClaimStatusEnum as they are not being used by Manage an Appeal
+# 25/04/2025  1.0.0      Remove optional header attributes office-id, instigating-user-id, instigating-user-name and session-id
+# 07/03/2025  1.0.0      Relax regex patterns for headers instigating-user-id, office-id and session-id as per the PIP SAS implementation
+# 23/01/2025  1.0.0      Corrected grammatical errors within the api endpoint summary text
+# 14/11/2024  1.0.0      Added additional fields from PIP-SAS v2.0.17 schema which may be null
+# 12/11/2024  1.0.0      Added Authorization as a Mandatory header to be aligned with existing API
+# 30/09/2024  1.0.0      Updates to align model with PIP SAS model version 'Openapi_PIP_Service_v2.0.18.yaml'
+#
+#                        Note: The 'additionalProperties: false' flag has been dropped from the ClaimsData model object, as well as for all the enum types.
+#                        This is because it was causing a failure in the swagger code generation step.
+#                        This should have no real impact on the gateway implementation.
+info:
+  title: DWP PIP Award Gateway -> Citizen Information - Service Award Substitute API
+  description: |-
+    This endpoint is part of the DWP “Service Award Substitute”, which is an API to allow consumers to retrieve data held by DWP about a citizen.
+    The citizen is identified by a GUID, which is provided by the /citizens/match endpoint.
+
+    The /citizen/{guid}/claims endpoint returns active claim and active award associated with a citizen from data present in the source system.
+    
+    There are certain header fields required in each API call to PIP SAS as detailed below -
+
+    | Attribute (M/O) | Description |
+    | ---------| ---------- |
+    | `host-name (M)`| The hostname of the end user's workstation/desktop (or calling system for non-user system-to-system initiated calls). |
+    | `client-ip-address (M)` | IP address of the end user's workstation/desktop (or calling system for non-user system-to-system initiated calls), or an IP address enabling non-repudiable identification of the source of the request.Note: for IPv4, this will always be a max. of 15 characters. Maximum length of 32 is provided for forward compatibility with IPv6. |
+    | `instigating-system (M)` | DWP: Contains a unique "System Code", validated against DWP's master System Catalogue .External: Name of sending external system e.g. an external system or application name.Note: Suggest that the System Catalogue supports a hierarchical structure enabling modelling of nested services, systems & components. |
+    | `correlation-id (M)` | An ID created by an orchestrating system and passed to sub-systems to enable tracking of a business transaction across multiple systems. |
+    | `Authorization (M)` | AccessToken used to access downstream systems such as Guid To Nino service. |
+
+  version: "2.0.23"
+servers:
+  - url: 'https://gateway.integr-test.dwpcloud.uk:8444/citizen-information/award-substitutes/pip-award-service/'
+
+paths:
+
+  /v2/citizen/{guid}/claims:
+    get:
+      summary: 'The GET /citizen/{guid}/claims API returns details of a citizens benefit claims,
+       By default it returns only the active claims details which includes the details of assessments, awards, awardComponents and payabilityDetails present in the source system.
+        If there is no active claim found then SAS will return 404 - No open claim found message.
+        If there is a request params startDate and endDate populated in request then SAS will filter and surface the awards which overlap with these request dates.'
+      tags:
+        - Service_Award_Substitute
+      operationId: getClaims
+      parameters:
+        - name: guid
+          description: Global User ID - a unique identifier for a Citizen obtained from a separate call to the /citizens/match endpoint.
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^[0-9a-f]{64}$'
+            maxItems: 999
+        - name: componentType
+          description: Award component type which is requested by consumer.
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/ComponentTypeEnum'
+        - name: componentRateType
+          description: Award component rate type which is requested by consumer.
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/ComponentRateTypeEnum'
+        - name: startDate
+          description: 'Award start date that is requested by consumer (criteria: if endDate is populated this is will be mandatory.).'
+          in: query
+          required: false
+          schema:
+            type: string
+            pattern: '\d{4}-\d{2}-\d{2}'
+            maxLength: 999
+        - name: endDate
+          description: 'Award end date that is requested by consumer (criteria: if startDate is populated this is will be mandatory).'
+          in: query
+          required: false
+          schema:
+            type: string
+            pattern: '\d{4}-\d{2}-\d{2}'
+            maxLength: 999
+        - name: host-name
+          in: header
+          description: The hostname of the end user's workstation/desktop (or calling system for non-user system-to-system initiated calls).
+          required: true
+          schema:
+            type: string
+            pattern: '^.*$'
+            maxLength: 999
+        - name: client-ip-address
+          in: header
+          description: IP address of the end user's workstation/desktop (or calling system for non-user system-to-system initiated calls), or an IP address enabling non-repudiable identification of the source of the request.
+          required: true
+          schema:
+            type: string
+            pattern: '^.*$'
+            maxLength: 999
+        - name: instigating-system
+          in: header
+          description: DWP - Contains a unique "System Code", validated against DWP's master System Catalogue .External - Name of sending external system e.g. an external system or application name. Note - Suggest that the System Catalogue supports a hierarchical structure enabling modelling of nested services, systems & components.
+          required: true
+          schema:
+            type: string
+            pattern: '^.*$'
+            maxLength: 999
+        - name: correlation-id
+          in: header
+          description: An ID created by an orchestrating system and passed to sub-systems to enable tracking of a business transaction across multiple systems.
+          required: true
+          schema:
+            type: string
+            pattern: '^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}'
+            maxLength: 999
+        - name: Authorization
+          in: header
+          description: Authorization as a mandatory (M) header
+          required: true
+          schema:
+            type: string
+            pattern: '^.*$'
+            maxLength: 5000
+            default:
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClaimsListResponseJSONAPI'
+        400:
+          description: Bad Request.  The request is malformed or the body cannot be
+            parsed/understood. Please check request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetails'
+        401:
+          description: Unauthorized - no access to this API or invalid JWT token supplied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetails'
+        403:
+          description: Forbidden. Access to the requested resource is denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetails'
+        404:
+          description: No customer record found matching the id supplied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetails'
+        412:
+          description: Precondition failed. The client specified some preconditions
+            in the request headers that are not valid / met.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetails'
+        429:
+          description: Too many requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetails'
+        500:
+          description: Internal server error / failure. Please retry your request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetails'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetails'
+components:
+  securitySchemes:
+    sideCarProxySecurity:
+      type: mutualTLS
+      description: "Security is enforced by an external side car proxy using mTLS, not directly by this API"
+      x-sidecar-implementation: true
+
+  schemas:
+    ClaimsListResponseJSONAPI:
+      type: object
+      properties:
+        jsonapi:
+          $ref: '#/components/schemas/VersionObject'
+        links:
+          $ref: '#/components/schemas/Links'
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClaimsData'
+          maxItems: 999
+      additionalProperties: false
+    VersionObject:
+      type: object
+      properties:
+        version:
+          type: string
+          maxLength: 999
+          pattern: '^.*$'
+      additionalProperties: false
+    Links:
+      type: object
+      properties:
+        self:
+          type: string
+          maxLength: 999
+          pattern: '^.*$'
+      additionalProperties: false
+    ClaimsData:
+      type: object
+      properties:
+        id:
+          type: string
+          maxLength: 8
+          pattern: '^.*$'
+        type:
+          type: string
+          default: Claim
+          pattern: '^.*$'
+          maxLength: 999
+          example: Claim
+        attributes:
+          $ref: '#/components/schemas/Claim'
+        metadata:
+          $ref: '#/components/schemas/MetadataClaim'
+      additionalProperties: false
+    Claim:
+      type: object
+      properties:
+        startDate:
+          description: Date on which claim is to start.
+          type: string
+          format: date
+          pattern: '^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])Z?$'
+          maxLength: 999
+          example: 0000-00-00Z [yyyy-mm-ddZ].
+        endDate:
+          description: Date on which claim is to end.
+          type: string
+          format: date
+          pattern: '^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])Z?$'
+          maxLength: 999
+          example: 0000-00-00Z [yyyy-mm-ddZ].
+        claimDate:
+          description: Date on which claim is first made by Citizen.
+          type: string
+          format: date
+          pattern: '^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])Z?$'
+          maxLength: 999
+          example: 0000-00-00Z [yyyy-mm-ddZ].
+        receiptDate:
+          description: Date on which DWP received the claim.
+          type: string
+          format: date
+          pattern: '^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])Z?$'
+          maxLength: 999
+          example: 0000-00-00Z [yyyy-mm-ddZ]
+        entitlementStartDate:
+          description: Date on which entitlement start for the claim.
+          type: string
+          format: date
+          pattern: '^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])Z?$'
+          maxLength: 999
+          example: 0000-00-00Z [yyyy-mm-ddZ].
+        decisionDate:
+          description: Date on which latest decision made.
+          type: string
+          format: date-time
+          pattern: '^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])T([01]\d|2[0-3]):([0-5]\d):([0-5]\d)Z$'
+          maxLength: 999
+          example: 0000-00-00T00:00:00Z [yyyy-mm-ddTHH:MM:SSZ].
+        reviewDate:
+          description: Date on which claim to be reviewed.
+          type: string
+          format: date
+          pattern: '^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])Z?$'
+          maxLength: 999
+          example: 0000-00-00Z [yyyy-mm-ddZ]
+        benefitType:
+          type: string
+          description: Type of benefit the claim has been made for
+          enum:
+            - personal_independence_payment
+          pattern: '^[a-z]+(_[a-z]+)*$'
+          maxLength: 999
+        claimantId:
+          type: string
+          description: Citizen's DWP GUID '^[0-9a-f]{64}$'.
+          pattern: '^[0-9a-f]{64}$'
+          maxLength: 999
+        jointClaimantId:
+          type: string
+          description: Joint citizen DWP GUID.
+          pattern: '^[0-9a-f]{64}$'
+          maxLength: 999
+        status:
+          $ref: '#/components/schemas/ClaimStatus'
+        assessment:
+          type: array
+          items:
+            $ref: '#/components/schemas/Assessment'
+          maxItems: 999
+    ClaimStatus:
+      type: object
+      properties:
+        statusType:
+          $ref: '#/components/schemas/ClaimStatusEnum'
+        endReason:
+          $ref: '#/components/schemas/ClaimEndReasonEnum'
+      additionalProperties: false
+    AwardStatus:
+      type: object
+      properties:
+        statusType:
+          $ref: '#/components/schemas/AwardStatusEnum'
+        endReason:
+          $ref: '#/components/schemas/AwardEndReasonEnum'
+      additionalProperties: false
+    Assessment:
+      type: object
+      properties:
+        startDate:
+          description: Date in which an assessment period has started for a claim.
+          type: string
+          format: date
+          pattern: '^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])Z?$'
+          maxLength: 999
+          example: 0000-00-00Z [yyyy-mm-ddZ].
+        endDate:
+          description: Date in which an assessment period has ended for a claim.
+          type: string
+          format: date
+          pattern: '^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])Z?$'
+          maxLength: 999
+          example: 0000-00-00Z [yyyy-mm-ddZ].
+        decisionNumber:
+          type: string
+          description: Indicates unique identifier when the decision been taken on the award.
+          pattern: '^.*$'
+          maxLength: 999
+        decisionDate:
+          description: Date on which decision made.
+          type: string
+          format: date-time
+          pattern: '^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])T([01]\d|2[0-3]):([0-5]\d):([0-5]\d)Z$'
+          maxLength: 999
+          example: 0000-00-00T00:00:00Z [yyyy-mm-ddTHH:MM:SSZ].
+        assessmentAttributes:
+          type: array
+          items :
+            $ref: '#/components/schemas/AssessmentAttributes'
+          maxItems: 999
+        awards:
+          description: List of awards associated with this claim
+          type: array
+          items:
+            $ref: '#/components/schemas/Award'
+          maxItems: 999
+      additionalProperties: false
+    AssessmentAttributes:
+      type: object
+      properties:
+        startDate:
+          description: Start date of the Assessment period.
+          type: string
+          format: date
+          pattern: '^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])Z?$'
+          maxLength: 999
+          example: 0000-00-00Z [yyyy-mm-ddZ].
+        endDate:
+          description: End date of the Assessment period.
+          type: string
+          format: date
+          pattern: '^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])Z?$'
+          maxLength: 999
+          example: 0000-00-00Z [yyyy-mm-ddZ].
+        awardPaymentAdjustments:
+          type: array
+          items:
+            $ref: '#/components/schemas/AwardPaymentAdjustment'
+          maxItems: 999
+      additionalProperties: false
+    Award:
+      type: object
+      properties:
+        startDate:
+          description: Date on which award start.
+          type: string
+          format: date
+          pattern: '^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])Z?$'
+          example: 0000-00-00Z [yyyy-mm-ddZ].
+          maxLength: 999
+        endDate:
+          description: Date on which award end.
+          type: string
+          format: date
+          pattern: '^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])Z?$'
+          example: 0000-00-00Z [yyyy-mm-ddZ].
+          maxLength: 999
+        status:
+          $ref: '#/components/schemas/AwardStatus'
+        awardType:
+          $ref: '#/components/schemas/AwardTypeEnum'
+        isJointClaim:
+          type: boolean
+          default: false
+          description: Indicates if the award is for a joint claim.
+        entitlementAmount:
+          type: number
+          maxLength: 8
+          format: double
+          minimum: 0
+          maximum: 9999999999
+        deductionAmount:
+          type: number
+          maxLength: 8
+          format: double
+          minimum: 0
+          maximum: 9999999999
+        totalPayableAmount:
+          type: number
+          maxLength: 8
+          format: double
+          minimum: 0
+          maximum: 9999999999
+        awardComponents:
+          type: array
+          items:
+            $ref: '#/components/schemas/AwardComponent'
+          maxItems: 999
+        overlappingBenefits:
+          description: List of overlapping benefits impacting the assessment of this claim.
+          type: array
+          items:
+            $ref: '#/components/schemas/OverlappingBenefit'
+          maxItems: 999
+        paymentFrequency:
+          description: Frequency at which the award amount is paid to the citizen.
+          type: string
+          example:
+            - Weekly in Advance by Direct Payment on a Monday
+            - Weekly in Advance by Direct Payment on a Tuesday
+            - Weekly in Advance by Direct Payment on a Wednesday
+            - Weekly in Advance by Direct Payment on a Thursday
+            - Weekly in Advance by Direct Payment on a Friday
+            - 4 Weekly in Arrears by Direct Payment on Monday
+            - 4 Weekly in Arrears by Direct Payment on Tuesday
+            - 4 Weekly in Arrears by Direct Payment on Wednesday
+            - 4 Weekly in Arrears by Direct Payment on Thursday
+            - 4 Weekly in Arrears by Direct Payment on Friday
+          maxLength: 999
+          pattern: '^.*$'
+      additionalProperties: false
+    AwardComponent:
+      type: object
+      properties:
+        startDate:
+          description: Date on which award component start.
+          type: string
+          format: date
+          pattern: '^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])Z?$'
+          example: 0000-00-00Z [yyyy-mm-ddZ].
+          maxLength: 999
+        endDate:
+          description: Date on which award component end.
+          type: string
+          format: date
+          pattern: '^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])Z?$'
+          example: 0000-00-00Z [yyyy-mm-ddZ].
+          maxLength: 999
+        isPaymentSuspended:
+          $ref: '#/components/schemas/PaymentSuspendedFlagEnum'
+        paymentSuspensionReason:
+          $ref: '#/components/schemas/PaymentSuspensionReasonEnum'
+        componentType:
+          $ref: '#/components/schemas/ComponentTypeEnum'
+        componentRateType:
+          $ref: '#/components/schemas/ComponentRateTypeEnum'
+        componentAmount:
+          type: number
+          description: Specifies the award component amount.
+          format: double
+        payabilityDetails:
+          type: array
+          items:
+            $ref: '#/components/schemas/PayabilityDetail'
+          maxItems: 999
+      additionalProperties: false
+    PayabilityDetail:
+      type: object
+      properties:
+        startDate:
+          description: Date on which component payabilty start.
+          type: string
+          format: date
+          pattern: '^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])Z?$'
+          maxLength: 999
+          example: 0000-00-00Z [yyyy-mm-ddZ].
+        endDate:
+          description: Date on which component payabilty end.
+          type: string
+          format: date
+          pattern: '^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])Z?$'
+          maxLength: 999
+          example: 0000-00-00Z [yyyy-mm-ddZ].
+        payabilityStatus:
+          $ref: '#/components/schemas/PayabilityStatusEnum'
+        payabilityCode:
+          type: string
+          format: string
+          pattern: '^.*$'
+          maxLength: 999
+        metadata:
+          $ref: '#/components/schemas/MetadataEntity'
+      additionalProperties: false
+    ErrorDetails:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/JSONAPIErrorDetails'
+          maxItems: 999
+      additionalProperties: false
+    JSONAPIErrorDetails:
+      type: object
+      properties:
+        id:
+          type: string
+          maxLength: 999
+          pattern: '^.*$'
+        links:
+          $ref: '#/components/schemas/JSONAPIErrorLinks'
+        status:
+          type: string
+          maxLength: 999
+          pattern: '^.*$'
+        code:
+          type: string
+          maxLength: 999
+          pattern: '^.*$'
+        title:
+          type: string
+          maxLength: 999
+          pattern: '^.*$'
+        detail:
+          type: string
+          maxLength: 999
+          pattern: '^.*$'
+        source:
+          $ref: '#/components/schemas/Source'
+      additionalProperties: false
+    JSONAPIErrorLinks:
+      type: object
+      properties:
+        about:
+          type: string
+          maxLength: 999
+          pattern: '^.*$'
+      additionalProperties: false
+    Source:
+      type: object
+      properties:
+        pointer:
+          type: string
+          maxLength: 999
+          pattern: '^.*$'
+        parameter:
+          type: string
+          maxLength: 999
+          pattern: '^.*$'
+      additionalProperties: false
+    ClaimStatusEnum:
+      type: string
+      description: Status of the claim.
+      enum:
+        - awarded
+        - closed
+        - pending_closure
+        - payment_suspended
+        - submitted
+        - submit_failed
+        - disallowed
+        - withdrawn
+        - cancelled
+        - future_award
+      maxLength: 999
+      pattern: '^[a-z]+(_[a-z]+)*$'
+
+    ClaimEndReasonEnum:
+      type: string
+      description: Reason why a claim has ended.
+      enum:
+        - other
+        - unknown
+      maxLength: 999
+      pattern: '^[a-z]+(_[a-z]+)*$'
+
+    ComponentTypeEnum:
+      type: string
+      description: Specifies the type of award component.
+      enum:
+        - daily_living
+        - mobility
+      maxLength: 999
+      pattern: '^[a-z]+(_[a-z]+)*$'
+
+    ComponentRateTypeEnum:
+      description: Specifies the rate type of an award component.
+      type: string
+      enum:
+        - standard
+        - enhanced
+        - nil
+      maxLength: 999
+      pattern: '^[a-z]+(_[a-z]+)*$'
+
+    AwardTypeEnum:
+      description: The type of award.
+      type: string
+      enum:
+        - other
+      maxLength: 999
+      pattern: '^[a-z]+(_[a-z]+)*$'
+
+    AwardStatusEnum:
+      type: string
+      description: Status of the award.
+      enum:
+        - live
+        - award_active
+        - award_completed
+        - future_award
+        - award_cancelled
+      maxLength: 999
+      pattern: '^[a-z]+(_[a-z]+)*$'
+
+    AwardEndReasonEnum:
+      type: string
+      description: Reason why a award has ended.
+      enum:
+        - completed
+        - cancelled
+      maxLength: 999
+      pattern: '^[a-z]+(_[a-z]+)*$'
+
+    PaymentSuspendedFlagEnum:
+      description: The flag which indicates if a particular component is suspended.
+      type: string
+      enum:
+        - true
+        - false
+      maxLength: 999
+      pattern: '^[a-z]+(_[a-z]+)*$'
+
+    PaymentSuspensionReasonEnum:
+      type: string
+      description: Reason why a payment has been suspended for an award.
+      enum:
+        - other
+      maxLength: 999
+      pattern: '^[a-z]+(_[a-z]+)*$'
+
+    AdjustmentCategoryEnum:
+      type: string
+      description: Reason for the adjustment.
+      enum:
+        - recovery_of_overpayment
+        - offset
+        - underpayment
+        - increases_to_awarded_entitlement
+        - adjustment_category_not_recognised
+      maxLength: 999
+      pattern: '^[a-z]+(_[a-z]+)*$'
+
+    AdjustmentTypeEnum:
+      type: string
+      description: The type of adjustment that is made for an award.
+      enum:
+        - benefit_underpayment
+        - supplier_mobility_award
+        - winter_fuel
+        - xmas_bonus
+        - social_fund
+        - earnings_top_up
+        - retirement_pension
+        - widows_benefit
+        - incapacity_benefit
+        - job_seekers_allowance
+        - employment_support_allowance_contributory
+        - employment_support_allowance_income_related
+        - pension_credit
+        - mobility_allowance
+        - reduced_earnings_allowance
+        - widowed_parents_allowance
+        - sickness_benefit
+        - attendance_allowance
+        - income_support
+        - carers_allowance
+        - severe_disability_allowance
+        - disability_living_allowance
+        - unemployment_benefit
+        - other
+        - war_pension
+        - disability_working_allowance
+        - war_disablement_pension
+        - industrial_disablement_benefit
+        - industrial_death_benefit
+        - child_benefit
+        - war_widows_pension
+        - bereavement_allowance
+        - pneumoconiosis_byssinosis_miscellaneous_diseases
+        - adjustment_type_not_recognised
+        - maternity_allowance
+      maxLength: 999
+      pattern: '^[a-z]+(_[a-z]+)*$'
+
+    OverlappingBenefitTypeEnum:
+      type: string
+      description: Overlapping benefit type.
+      enum:
+        - industrial_injuries_disablement_benefit
+        - war_pension
+        - disability_living_allowance
+        - child_disability_payment
+        - adult_disability_payment
+        - scottish_adult_disability_living_allowance
+        - other
+      maxLength: 999
+      pattern: '^[a-z]+(_[a-z]+)*$'
+
+    PayabilityStatusEnum:
+      type: string
+      description: Payability status of the award component.
+      enum:
+        - payable
+        - not_payable
+      maxLength: 999
+      pattern: '^[a-z]+(_[a-z]+)*$'
+
+    MetadataClaim:
+      required:
+        - provenance
+        - veracity
+      title: Metadata for the claim data
+      description: Metadata for the claim data
+      type: object
+      properties:
+        provenance:
+          $ref: '#/components/schemas/MetaDataProvenance'
+        veracity:
+          $ref: '#/components/schemas/MetadataVeracityClaim'
+      additionalProperties: false
+
+    MetadataEntity:
+      required:
+        - veracity
+      title: Metadata for the claim data
+      description: Metadata for the claim data
+      type: object
+      properties:
+        veracity:
+          $ref: '#/components/schemas/MetadataVeracityEntity'
+      additionalProperties: false
+
+    MetaDataProvenance:
+      description: provenance metadata
+      required:
+        - systemOfRecord
+      properties:
+        systemOfRecord:
+          type: string
+          enum:
+            - pipcs
+          maxLength: 999
+          pattern: '^.*$'
+      additionalProperties: false
+
+    MetadataVeracityClaim:
+      description: veracity metadata.  For further explanation, please see https://dwpdigital.atlassian.net/wiki/spaces/DAG/pages/35778436003/Integration+Data+Standards
+      required:
+        - levelOfTrust
+      properties:
+        levelOfTrust:
+          description: Level of Trust, a value that indicates the level of trust in the correctness or validity of the data.  An example may be "Level 2 – Medium Trust"
+          type: string
+          enum:
+            - high
+          maxLength: 999
+          pattern: '^.*$'
+      additionalProperties: false
+
+    MetadataVeracityEntity:
+      description: veracity metadata.  For further explanation, please see https://dwpdigital.atlassian.net/wiki/spaces/DAG/pages/35778436003/Integration+Data+Standards
+      required:
+        - dataSource
+      properties:
+        dataSource:
+          description: Data Source for CIS Relationships.  This may convey a certain level of initial implicit trust in its veracity - for instance earnings data from HMRC, or distrust until investigated further - e.g. an allegation of fraud against a claimant by another individual.  An example may be "Citizen - Self Asserted"
+          type: string
+          enum:
+            - pipcs
+            - Data currently not available.
+          maxLength: 999
+          pattern: '^.*$'
+      additionalProperties: false
+
+    OverlappingBenefit:
+      type: object
+      properties:
+        benefitType:
+          $ref: '#/components/schemas/OverlappingBenefitTypeEnum'
+        benefitRateType:
+          description: Overlapping Benefit rate type defined by the source benefit system.
+          type: string
+          example:
+            - Higher
+            - Not awarded
+            - Not considered
+            - Half day/part time
+            - Full day/normal maximum
+            - Intermediate
+            - Exceptional
+            - Highest Care/Higher Mobility
+            - Highest Care/Lower Mobility
+            - Middle Care/Mobility not Awarded
+            - Middle Care/Higher Mobility
+            - Middle Care/Lower Mobility
+            - Lowest Care/Mobility not Awarded
+            - Highest Care/Mobility not Awarded
+            - Lowest Care/Higher Mobility
+            - Lowest Care/Lower Mobility
+            - Care not Awarded/Higher Mobility
+            - Care not Awarded/Lower Mobility
+            - Not Resident in Scotland – CDP Awarded
+            - Not Resident in Scotland – CDP Not Awarded
+            - Resident in Scotland – CDP
+            - Not Resident in Scotland – ADP Awarded
+            - Not Resident in Scotland – ADP Not Awarded
+            - Resident in Scotland – ADP
+            - Not Resident in Scotland – SADLA  Awarded
+            - Not Resident in Scotland – SADLA Not Awarded
+            - Other
+          pattern: '^.*$'
+          maxLength: 999
+        benefitDescription:
+          description: Breakdown of the Overlapping Benefit type shown on the source system.
+          type: string
+          example:
+            - War Pension Mobility Supplement
+            - War Pension Constant Attendance Allowance
+            - Industrial Injuries Disablement Benefit Constant Attendance Allowance
+            - Disability Living Allowance
+            - Child Disability Payment
+            - Adult Disability Payment
+            - Scottish Adult Disability Living Allowance
+            - Other
+          pattern: '^.*$'
+          maxLength: 999
+        awardStartDate:
+          type: string
+          description: Overlapping benefit start date.
+          example: 0000-00-00Z [yyyy-mm-ddZ].
+          format: date
+          pattern: '^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])Z?$'
+          maxLength: 999
+        awardEndDate:
+          type: string
+          description: Overlapping benefit end date.
+          example: 0000-00-00Z [yyyy-mm-ddZ].
+          format: date
+          pattern: '^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])Z?$'
+          maxLength: 999
+        metadata:
+          $ref: '#/components/schemas/MetadataEntity'
+      description: List of overlapping benefits impacting the assessment of this claim.
+      additionalProperties: false
+
+    AwardPaymentAdjustment:
+      type: object
+      properties:
+        adjustmentType:
+          $ref: '#/components/schemas/AdjustmentTypeEnum'
+        adjustmentCategory:
+          $ref: '#/components/schemas/AdjustmentCategoryEnum'
+        adjustmentAmount:
+          type: number
+          description: The amount to be adjusted to an award.
+          format: double
+          minimum: 0
+          maximum: 9999999999
+        startDate:
+          type: string
+          description: Date on which payment adjustment start.
+          format: date
+          example: 0000-00-00 [yyyy-mm-dd].
+          pattern: '^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$'
+          maxLength: 999
+        endDate:
+          type: string
+          description: Date on which payment adjustment end.
+          format: date
+          example: 0000-00-00 [yyyy-mm-dd].
+          pattern: '^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$'
+          maxLength: 999
+        metadata:
+          $ref: '#/components/schemas/MetadataEntity'
+      additionalProperties: false

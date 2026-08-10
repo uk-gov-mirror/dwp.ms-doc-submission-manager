@@ -1,0 +1,291 @@
+openapi: 3.1.0
+
+info:
+  title: DWP HTDS Submission Service - PIP
+  description: Rest API for managing document submissions
+  version: 4.0.0
+
+servers:
+  - url: 'https://localhost:8080'
+
+paths:
+  /v4/account/create:
+    post:
+      tags:
+        - create
+      summary: POST call to create a new account
+      description: POST call to create new account with all the verified data that will be used as part of the identification and authorisation steps
+      operationId: createAccount
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/V4NewAccountRequest'
+      responses:
+        201:
+          description: CREATED - new account created
+          content:
+            application/json:
+              schema:
+                $ref: 'openapi-spec-v1.yaml#/components/schemas/AccountReturn'
+        400:
+          description: BAD REQUEST - badly formed json or duplicate entry
+        409:
+          description: CONFLICT - citizen account already exists. Will return message body of 'NINO' or 'EMAIL'
+          content:
+            application/json:
+              schema:
+                $ref: 'openapi-spec-v1.yaml#/components/schemas/FailureResponse'
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+
+
+  /v4/account/claimantdetails:
+    patch:
+      tags:
+        - patch
+      summary: PATCH an account with claimant details
+      description: PATCH to request updating claimant details
+      operationId: updateClaimantDetails
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/V4UpdateClaimantDetailsRequest'
+      responses:
+        202:
+          description: ACCEPTED - Claimant details update accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/V4AccountDetails'
+        400:
+          description: BAD REQUEST - badly formed json
+        401:
+          description: UNAUTHORIZED - Account does not exist with given REF
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+
+
+  /v4/account/details/id/{accountId}:
+    get:
+      tags:
+        - query
+      summary: Get request to get account(s) details
+      description: GET request account details
+      operationId: accountDetailsByAccountNumber
+      parameters:
+        - name: accountId
+          in: path
+          description: unique account id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK - account exists with these values
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/V4AccountDetails'
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+
+  /v4/account/details/email/{email}:
+    get:
+      tags:
+        - query
+      summary: Get request to get account(s) details
+      description: GET request account details
+      operationId: accountDetailsByEmail
+      parameters:
+        - name: email
+          in: path
+          description: email address
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK - account exists with these values
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/V4AccountDetails'
+        400:
+          description: BAD REQUEST
+          content:
+            application/json:
+              schema:
+                $ref: 'openapi-spec-v1.yaml#/components/schemas/FailureResponse'
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+
+  /v4/account/details/nino/{nino}:
+    get:
+      tags:
+        - query
+      summary: Get request to get account(s) details
+      description: GET request account details
+      operationId: accountDetailsByNino
+      parameters:
+        - name: nino
+          in: path
+          description: national insurance number
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK - account exists with these values
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/V4AccountDetails'
+        400:
+          description: BAD REQUEST
+          content:
+            application/json:
+              schema:
+                $ref: 'openapi-spec-v1.yaml#/components/schemas/FailureResponse'
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+
+  /v4/account/verify/login:
+    post:
+      tags:
+        - identification
+      summary: POST call request for initial login validation using email and password without totp
+      description: POST call request to validate email with password
+      operationId: validFirstFactor
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: 'openapi-spec-v1.yaml#/components/schemas/ValidEmailPasswordRequest'
+      responses:
+        200:
+          description: OK - account exist and credentials valid
+          content:
+            application/json:
+              schema:
+                $ref: 'openapi-spec-v1.yaml#/components/schemas/AccountReturn'
+        400:
+          description: BAD REQUEST - badly formed json
+        401:
+          description: UNAUTHORIZED - credentials not valid or account not exist
+        403:
+          description: FORBIDDEN - account locked allowed login attempts exceeded
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+
+
+components:
+  schemas:
+
+    ResearchContact:
+      type: object
+      properties:
+        researchContact:
+          description: User response indicating willingness to participate in user research
+          type: string
+          example: "Yes"
+          enum:
+            - "Yes"
+            - "No"
+
+    HasPassword:
+      type: object
+      properties:
+        has_password:
+          description: Indicates whether the user has set up a password for their account
+          type: boolean
+
+    V4UpdateClaimantDetailsRequest:
+      type: object
+      required:
+        - ref
+        - current_nino
+        - new_nino
+        - current_email
+        - new_email
+        - dob
+        - forename
+        - surname
+        - mobile_phone
+        - postcode
+        - researchContact
+      allOf:
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/ref'
+        - $ref: 'openapi-spec-v3.yaml#/components/schemas/CurrentNationalInsurance'
+        - $ref: 'openapi-spec-v3.yaml#/components/schemas/NewNationalInsurance'
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/CurrentEmail'
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/NewEmail'
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/DateOfBirth'
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/Surname'
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/Forename'
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/Postcode'
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/MobilePhoneNumber'
+        - $ref: '#/components/schemas/ResearchContact'
+
+    V4NewAccountRequest:
+      type: object
+      required:
+        - email
+        - nino
+        - dob
+        - forename
+        - surname
+        - mobile_phone
+        - postcode
+        - researchContact
+        - language
+        - user_journey
+      allOf:
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/EmailAddress'
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/NationalInsurance'
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/DateOfBirth'
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/Surname'
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/Forename'
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/Postcode'
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/MobilePhoneNumber'
+        - $ref: '#/components/schemas/ResearchContact'
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/Language'
+        - $ref: 'openapi-spec-v3.yaml#/components/schemas/UserJourney'
+
+    V4AccountDetails:
+      type: object
+      required:
+        - ref
+        - nino
+        - forename
+        - surname
+        - dob
+        - mobile_phone
+        - email
+        - postcode
+        - language
+        - region
+        - researchContact
+        - user_journey
+      allOf:
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/ref'
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/EmailAddress'
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/NationalInsurance'
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/DateOfBirth'
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/Surname'
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/Forename'
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/Postcode'
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/MobilePhoneNumber'
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/Language'
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/Region'
+        - $ref: '#/components/schemas/ResearchContact'
+        - $ref: 'openapi-spec-v3.yaml#/components/schemas/UserJourney'
+        - $ref: '#/components/schemas/HasPassword'
+      properties:
+        transferredToDwpApply:
+          type: boolean
+          x-field-extra-annotation: "@com.fasterxml.jackson.annotation.JsonInclude(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL)"

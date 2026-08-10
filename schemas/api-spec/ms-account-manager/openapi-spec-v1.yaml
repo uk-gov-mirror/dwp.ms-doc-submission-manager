@@ -1,0 +1,553 @@
+openapi: 3.1.0
+
+info:
+  title: DWP HTDS User Management Service
+  description: Rest API for managing user account for save and resume user journey
+  version: 1.0.0
+
+servers:
+  - url: 'https://localhost:8080'
+
+paths:
+  /v1/account/create:
+    post:
+      tags:
+        - create
+      summary: POST call to create a new account
+      description: POST call to create new account with all the verified data that will be used as part of the identification and authorisation steps
+      operationId: createAccount
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewAccountRequest'
+      responses:
+        201:
+          description: CREATED - new account created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountReturn'
+        400:
+          description: BAD REQUEST - badly formed json or duplicate entry
+        409:
+          description: CONFLICT - citizen account already exists. Will return message body of 'NINO' or 'EMAIL'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FailureResponse'
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+
+  /v1/account/email:
+    patch:
+      tags:
+        - patch
+      summary: PATCH an account with new email address
+      description: PATCH to request updating existing email
+      operationId: updateEmail
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateEmailRequest'
+      responses:
+        202:
+          description: ACCEPTED - email updated accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountDetails'
+        400:
+          description: BAD REQUEST - badly formed json
+        401:
+          description: UNAUTHORIZED - Account not exist with given existing email
+        409:
+          description: CONFLICT - New email already registerd with an existing account
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FailureResponse'
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+
+  /v1/account/password:
+    post:
+      tags:
+        - password
+      summary: POST call request to create/reset password
+      description: POST to request create or reset password
+      operationId: createUpdatePassword
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordSetResetRequest'
+      responses:
+        200:
+          description: OK - password reset successfully
+        201:
+          description: CREATED - new password created successfully
+        400:
+          description: BAD REQUEST - badly formed json
+        401:
+          description: UNAUTHORIZED - TOTP or credentials not valid
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+        503:
+          description: SERVICE UNAVAILABLE - TOTP or Notify failure
+
+  /v1/account/identification:
+    post:
+      tags:
+        - identification
+      summary: POST call to identify account holder
+      description: request account manager to identify citizen account exists with the option to generate a totp and send it for verification
+      operationId: identification
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IdRequest'
+      responses:
+        200:
+          description: OK - account exists with these values
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentificationResponse'
+        400:
+          description: BAD REQUEST - badly formed json
+        401:
+          description: UNAUTHORIZED - account does not exist with these values
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+        503:
+          description: SERVICE NOT AVAILABLE - TOTP or Notify failure
+
+  /v1/account/verify/login:
+    post:
+      tags:
+        - identification
+      summary: POST call request for initial login validation using email and password
+      description: POST call request to validate email with password and generate totp
+      operationId: validFirstFactor
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ValidEmailPasswordRequest'
+      responses:
+        200:
+          description: OK - account exist and credentials valid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountReturn'
+        400:
+          description: BAD REQUEST - badly formed json
+        401:
+          description: UNAUTHORIZED - credentials not valid or account not exist
+        403:
+          description: FORBIDDEN - acccount locked allowed login attempts exceeded
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+        503:
+          description: SERVICE NOT AVAILABLE - TOTP or Notify failure
+
+  /v1/account/verify/totp:
+    post:
+      tags:
+        - identification
+      summary: POST call request to confirm and complete login validation using account and totp
+      description: POST call request validate totp
+      operationId: valid2fFactor
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ValidTotpRequest'
+      responses:
+        200:
+          description: OK - account validated
+        400:
+          description: BAD REQUEST - badly formed json
+        401:
+          description: UNAUTHORIZED - final credentials validation failed
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+        503:
+          description: SERVICE NOT AVAILABLE - TOTP failure
+
+  /v1/account/details/{accountId}:
+    get:
+      tags:
+        - query
+      summary: Get request to get the account details for an account
+      description: GET request account details
+      operationId: accountDetailsByAccountNumber
+      deprecated: true
+      parameters:
+        - name: accountId
+          in: path
+          description: unique account id
+          required: true
+          schema:
+            type: string
+
+      responses:
+        200:
+          description: OK - account exists with these values
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountDetails'
+        400:
+          description: BAD REQUEST - badly formed json
+        401:
+          description: UNAUTHORIZED - credentials not valid or account not exist
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+
+  /v1/account/details:
+    post:
+      tags:
+        - query
+      summary: POST request to search account holder by NINO
+      description: POST request account details
+      operationId: accountDetailsByNino
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NinoDetailsRequest'
+      deprecated: true
+      responses:
+        200:
+          description: OK - account exists with these values
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/AccountDetails'
+        400:
+          description: BAD REQUEST - badly formed json
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+
+components:
+  securitySchemes:
+    sideCarProxySecurity:
+      type: mutualTLS
+      description: "Security is enforced by an external side car proxy using mTLS, not directly by this API"
+      x-sidecar-implementation: true
+  schemas:
+    NewAccountRequest:
+      type: object
+      required:
+        - email
+        - nino
+        - dob
+        - forename
+        - surname
+        - mobile_phone
+        - postcode
+        - language
+      allOf:
+        - $ref: '#/components/schemas/EmailAddress'
+        - $ref: '#/components/schemas/NationalInsurance'
+        - $ref: '#/components/schemas/DateOfBirth'
+        - $ref: '#/components/schemas/Surname'
+        - $ref: '#/components/schemas/Forename'
+        - $ref: '#/components/schemas/Postcode'
+        - $ref: '#/components/schemas/MobilePhoneNumber'
+        - $ref: '#/components/schemas/Language'
+
+    IdRequest:
+      type: object
+      required:
+        - email
+        - nino
+        - dob
+      allOf:
+        - $ref: '#/components/schemas/EmailAddress'
+        - $ref: '#/components/schemas/NationalInsurance'
+        - $ref: '#/components/schemas/DateOfBirth'
+        - type: object
+          properties:
+            generate_email_totp:
+              type: boolean
+              description: if set true will send a totp to the registered email address
+              default: false
+            generate_sms_totp:
+              type: boolean
+              description: if set true will send a totp to the registered mobile device
+              default: false
+
+    PasswordSetResetRequest:
+      description: set the password for the first time or resets the password. For PIP save-and-resume concern, only 1 totp is validated for resetting the password. The Api Accepts an array of totp along with the password as part of request
+      type: object
+      required:
+        - ref
+        - password
+        - totp
+      allOf:
+        - $ref: '#/components/schemas/ref'
+        - $ref: '#/components/schemas/ValidatedPasswordObject'
+        - type: object
+          properties:
+            totp:
+              type: array
+              items:
+                $ref: '#/components/schemas/totp'
+
+    ValidEmailPasswordRequest:
+      type: object
+      required:
+        - email
+        - password
+      allOf:
+        - $ref: '#/components/schemas/EmailAddress'
+        - $ref: '#/components/schemas/NonValidatedPasswordObject'
+
+    ValidTotpRequest:
+      type: object
+      required:
+        - ref
+        - totp
+      allOf:
+        - $ref: '#/components/schemas/ref'
+        - type: object
+          properties:
+            totp:
+              $ref: '#/components/schemas/totp'
+            generate_email_totp:
+              type: boolean
+              description: if set true will send a totp to the registered email address
+              default: false
+            generate_sms_totp:
+              type: boolean
+              description: if set true will send a totp to the registered mobile device
+              default: false
+
+    NinoDetailsRequest:
+      type: object
+      required:
+        - nino
+      allOf:
+        - $ref: '#/components/schemas/NationalInsurance'
+
+    UpdateEmailRequest:
+      type: object
+      required:
+        - current_email
+        - new_email
+      allOf:
+        - $ref: '#/components/schemas/CurrentEmail'
+        - $ref: '#/components/schemas/NewEmail'
+
+    AccountReturn:
+      type: object
+      required:
+        - ref
+      allOf:
+        - $ref: '#/components/schemas/ref'
+
+    IdentificationResponse:
+      type: object
+      required:
+        - ref
+        - status
+      allOf:
+        - $ref: '#/components/schemas/ref'
+        - $ref: '#/components/schemas/Status'
+
+    AccountDetails:
+      type: object
+      required:
+        - nino
+        - forename
+        - surname
+        - dob
+        - mobile_phone
+        - email
+        - postcode
+        - language
+        - region
+      allOf:
+        - $ref: '#/components/schemas/EmailAddress'
+        - $ref: '#/components/schemas/NationalInsurance'
+        - $ref: '#/components/schemas/DateOfBirth'
+        - $ref: '#/components/schemas/MobilePhoneNumber'
+        - $ref: '#/components/schemas/Surname'
+        - $ref: '#/components/schemas/Forename'
+        - $ref: '#/components/schemas/Postcode'
+        - $ref: '#/components/schemas/Language'
+        - $ref: '#/components/schemas/Region'
+    ref:
+      type: object
+      properties:
+        ref:
+          type: string
+          description: the customer reference/account number
+          example: "b0a0d4fb-e6c8-419e-8cb9-af45914bd1a6"
+          pattern: ^(?!\s*$).+
+
+    NationalInsurance:
+      type: object
+      properties:
+        nino:
+          type: string
+          description: NINO
+          example: AA123456C
+          pattern: "(^(?!BG)(?!GB)(?!NK)(?!KN)(?!TN)(?!NT)(?!ZZ)[A-Z&&[^DFIQUV]][A-Z&&[^DFIOQUV]][0-9]{6}[A-D]$)"
+
+    EmailAddress:
+      type: object
+      properties:
+        email:
+          type: string
+          description: Email address
+          example: citizen@dwp.gov.uk
+          pattern: "[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?"
+
+    CurrentEmail:
+      type: object
+      properties:
+        current_email:
+          type: string
+          description: Current email address
+          example: current@dwp.gov.uk
+          pattern: "[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?"
+
+    NewEmail:
+      type: object
+      properties:
+        new_email:
+          type: string
+          description: New mail address
+          example: new@dwp.gov.uk
+          pattern: "[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?"
+
+    DateOfBirth:
+      type: object
+      properties:
+        dob:
+          type: string
+          format: date
+          example: "1990-01-20"
+
+    Surname:
+      type: object
+      properties:
+        surname:
+          description: citizen surname name
+          type: string
+          example: Surname
+          pattern: "^[A-Z]([-' .]?[A-Za-z]+)+$"
+
+    Forename:
+      type: object
+      properties:
+        forename:
+          description: citizen forename name
+          type: string
+          example: Forename
+          pattern: "^[A-Z]([-' .]?[A-Za-z]+)+$"
+
+    Language:
+      type: object
+      properties:
+        language:
+          description: preferred language (welsh or english)
+          type: string
+          example: "EN"
+          enum:
+            - EN
+            - CY
+
+    MobilePhoneNumber:
+      type: object
+      properties:
+        mobile_phone:
+          type: string
+          description: the claimant's mobile phone
+          pattern: "^(\\+44\\s?7\\d{3}|\\(?07\\d{3}\\)?)\\s?\\d{3}\\s?\\d{3}$"
+          example: "07777777777"
+
+    NonValidatedPasswordObject:
+      type: object
+      properties:
+        password:
+          type: string
+          description: password
+          pattern: ^(?!\s*$).+
+
+    ValidatedPasswordObject:
+      type: object
+      properties:
+        password:
+          type: string
+          description: password
+          pattern: "(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=\\S+$).{8,}"
+
+    totp:
+      type: object
+      required:
+        - code
+        - source
+      properties:
+        code:
+          description: totp code
+          type: string
+          example: "111222"
+          pattern: "[0-9]{6}"
+        source:
+          description: either email or mobile
+          type: string
+          example: MOBILE
+          enum:
+            - EMAIL
+            - MOBILE
+
+    Status:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+            - PENDING
+            - ACTIVE
+            - LOCKED
+
+    Postcode:
+      type: object
+      properties:
+        postcode:
+          description: a valid UK postal code
+          type: string
+          example: SW1H 9NA
+          pattern: ^(?!\s*$).+
+
+    Region:
+      type: object
+      properties:
+        region:
+          description: PIP region code, NI or GB
+          type: string
+          enum:
+            - GB
+            - NI
+
+    FailureResponse:
+      allOf:
+        - $ref: '#/components/schemas/message'
+
+    message:
+      type: object
+      properties:
+        message:
+          description: NINO or EMAIL
+          type: string
+security:
+  - sideCarProxySecurity : []

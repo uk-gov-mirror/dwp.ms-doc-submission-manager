@@ -20,6 +20,12 @@ public class MsIdentityStatusProperties {
   @NotBlank(message = "Version should not be blank")
   private String apiVersion;
 
+  @NotBlank(message = "Version one should not be blank")
+  private String apiVersionOne;
+
   @NotBlank(message = "Endpoint should not be blank")
   private String apiEndpoint;
+
+  @NotBlank(message = "Get by id endpoint should not be blank")
+  private String getByIdApiEndpoint;
 }

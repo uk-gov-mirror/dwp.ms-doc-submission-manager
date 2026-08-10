@@ -6,9 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.dwp.health.pip.document.submission.manager.config.HealthCaptureManagerConfig;
-import uk.gov.dwp.health.pip.document.submission.manager.exception.DataRequestException;
-import uk.gov.dwp.health.pip.document.submission.manager.model.application.AuditableFormSpecificationDto;
-import uk.gov.dwp.health.pip.document.submission.manager.model.application.HealthCaptureApplicationDto;
+import uk.gov.dwp.health.pip.document.submission.manager.openapi.healthinformation.v2.dto.HealthCaptureApplicationDtoV2;
 
 @Service
 @Slf4j
@@ -19,35 +17,14 @@ public class HealthCaptureManagerService {
 
   private final HealthCaptureManagerConfig healthCaptureManagerConfig;
 
-  public HealthCaptureApplicationDto getApplicationDtoFromHealthCaptureManager(
+  public HealthCaptureApplicationDtoV2 getApplicationDtoV2FromHealthCaptureManager(
       String applicationId) {
-    String getApplicationByIdUri = healthCaptureManagerConfig.getHcmApplicationByIdUri();
-    getApplicationByIdUri = getApplicationByIdUri.replace("{applicationId}", applicationId);
+    String getApplicationByIdUri = healthCaptureManagerConfig.getHcmApplicationByIdV2Uri();
+    getApplicationByIdUri = getApplicationByIdUri.replace("{application_id}", applicationId);
 
-    ResponseEntity<HealthCaptureApplicationDto> response = restTemplate.getForEntity(
-        getApplicationByIdUri, HealthCaptureApplicationDto.class);
+    ResponseEntity<HealthCaptureApplicationDtoV2> response =
+        restTemplate.getForEntity(getApplicationByIdUri, HealthCaptureApplicationDtoV2.class);
 
-    if (response.getBody() == null) {
-      throw new DataRequestException(
-          "Empty response from Health Capture Manager when getting application DTO");
-    }
-    return response.getBody();
-  }
-
-  public AuditableFormSpecificationDto getFormSpecificationFromHealthCaptureManager(
-      String formSpecificationId) {
-    String getFormSpecificationByIdUri =
-        healthCaptureManagerConfig.getHcmFormSpecificationByIdUri();
-    getFormSpecificationByIdUri =
-        getFormSpecificationByIdUri.replace("{formSpecificationId}", formSpecificationId);
-
-    ResponseEntity<AuditableFormSpecificationDto> response = restTemplate.getForEntity(
-        getFormSpecificationByIdUri, AuditableFormSpecificationDto.class);
-
-    if (response.getBody() == null) {
-      throw new DataRequestException(
-          "Empty response from Health Capture Manager when getting form specification DTO");
-    }
     return response.getBody();
   }
 }

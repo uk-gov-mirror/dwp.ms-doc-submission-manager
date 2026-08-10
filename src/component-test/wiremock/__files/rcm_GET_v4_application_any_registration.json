@@ -1,0 +1,114 @@
+{
+  "claimantId": "123456789",
+  "effectiveFrom": "2023-05-09",
+  "effectiveTo": "2023-08-10T10:15:30+01:00",
+  "submissionDate": "2023-05-09",
+  "channelType": "Digital",
+  "identityConfirmed": "Yes",
+  "userId": "userId",
+  "motabilityScheme": {
+    "receiveMotabilityInformation": "Yes"
+  },
+  "personalDetails": {
+    "surname": "Smith",
+    "firstName": "Jill",
+    "nationalInsuranceNumber": "RN000020D",
+    "dateOfBirth": "2000-01-01",
+    "address": {
+      "line1": "Testing line 1",
+      "line2": "Testing line 2",
+      "line3": "Testing line 3",
+      "town": "Testing town",
+      "county": "Testing county",
+      "postcode": "AB1 1AB",
+      "country": "England"
+    },
+    "alternativeAddress": {
+      "line1": "Alternative line 1",
+      "line2": "Alternative line 2",
+      "line3": "Alternative line 3",
+      "town": "Alternative town",
+      "county": "Alternative county",
+      "postcode": "CD1 1CD",
+      "country": "England"
+    },
+    "contact": {
+      "mobileNumber": "07111111111",
+      "smsUpdates": "true",
+      "alternativeNumber": "07111111112",
+      "textPhone": "false"
+    },
+    "alternateFormat": {
+      "formatType": "braille",
+      "option": "type1Uncontracted",
+      "additionalInfo": "some-additional-info"
+    }
+  },
+  "aboutYourHealth": {
+    "conditions": [
+      "Diabetes",
+      "Asthma"
+    ],
+    "careAccommodation": {
+      "accommodationType": "hospital",
+      "admissionDate": "2021-01-01",
+      "address": {
+        "line1": "Care line 1",
+        "line2": "Care line 2",
+        "line3": "Care line 3",
+        "town": "Care town",
+        "county": "Care county",
+        "postcode": "AC1 2BC",
+        "country": "England"
+      },
+      "costsPaid": "localAuthority",
+      "payingOrgName": "OrgName",
+      "agreeToRepay": "true",
+      "privatePatientPaying": "false"
+    },
+    "hcpContactConsent": true,
+    "hcpShareConsent": true,
+    "healthProfessionals": [
+      {
+        "name": "Ruth",
+        "profession": "Doctor",
+        "phoneNumber": "07222222222",
+        "address": {
+          "line1": "Doctor address line 1",
+          "line2": "Doctor address line 2",
+          "line3": "Doctor address line 3",
+          "town": "Doctor town",
+          "county": "Doctor county",
+          "postcode": "AB2 2AB",
+          "country": "England"
+        },
+        "lastContact": "01/01/2021"
+      }
+    ]
+  },
+  "residenceAndPresence": {
+    "nationality": "French",
+    "residentBeforeBrexit": "Yes",
+    "inUkTwoOutOfThreeYears": "Yes",
+    "receivingPensionsOrBenefitsFromEEA": true,
+    "payingInsuranceEEA": true
+  },
+  "additionalSupport": {
+    "helpCommunicating": true,
+    "helpUnderstandingLetters": true,
+    "helper": {
+      "firstName": "John",
+      "surname": "Smith"
+    }
+  },
+  "stateDto": {
+    "currentState": "REGISTRATION",
+    "history": [
+      {
+        "state": "REGISTRATION",
+        "timestamp": "2023-05-09T11:00:25.954Z"
+      }
+    ]
+  },
+  "language": "EN"
+}

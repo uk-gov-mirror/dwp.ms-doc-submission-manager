@@ -1,0 +1,318 @@
+openapi: 3.1.0
+info:
+  title: DWP PIP Award micro service
+  description: Rest API for operations relating to an award
+  version: 1.0.0
+servers:
+  - url: 'https://localhost:8080'
+
+paths:
+  /v1/award:
+    get:
+      operationId: getAwardByApplicationId
+      parameters:
+        - name: application_id
+          in: query
+          required: true
+          schema:
+            type: string
+            example: '12345678'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AwardDto'
+        400:
+          description: Bad request - invalid request
+        404:
+          description: Award data does not exist for specified applicaton_id
+        500:
+          description: Internal server error - an internal error occurred
+
+  /v1/award/timeline:
+    get:
+      operationId: getAwardTimelineByApplicationId
+      parameters:
+        - name: application_id
+          in: query
+          required: true
+          schema:
+            type: string
+            example: '12345678'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AwardTimelineDto'
+  /v1/awards:
+    get:
+      operationId: getAllAwards
+      parameters:
+        - name: application_id
+          in: query
+          schema:
+            type: string
+            example: '12345678'
+        - name: award_id
+          in: query
+          schema:
+            type: string
+            example: '12345678'
+        - name: current_state
+          in: query
+          schema:
+            $ref: '#/components/schemas/AwardStates'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AwardsListDto'
+
+components:
+  securitySchemes:
+    sideCarProxySecurity:
+      type: mutualTLS
+      description: "Security is enforced by an external side car proxy using mTLS, not directly by this API"
+      x-sidecar-implementation: true
+  schemas:
+    AwardNonStateChangingEvents:
+      type: string
+      enum:
+        - REQUEST_EJECT
+        - OTHER
+    AwardDto:
+      required:
+        - application_id
+        - decision_id
+        - nino
+        - daily_living_rate
+        - mobility_rate
+        - review_period
+        - start_date
+        - end_date
+        - review_date
+        - payable_from_date
+        - decision_date
+        - payment_frequency
+      properties:
+        application_id:
+          type: string
+          example: '12345678'
+          nullable: false
+        decision_id:
+          type: string
+          example: '12345678'
+          nullable: false
+        award_id:
+          type: string
+          example: '12345678'
+          nullable: false
+        state:
+          type: string
+          $ref: '#/components/schemas/AwardStates'
+          nullable: false
+        nino:
+          type: string
+          nullable: false
+          example: 'AA123456A'
+        daily_living_rate:
+          nullable: false
+          type: string
+          $ref: '#/components/schemas/AwardRate'
+        mobility_rate:
+          nullable: false
+          type: string
+          $ref: '#/components/schemas/AwardRate'
+        review_period:
+          nullable: true
+          type: string
+          $ref: '#/components/schemas/ReviewPeriod'
+        start_date:
+          nullable: false
+          type: string
+          format: date
+          example: '2020-01-01'
+        end_date:
+          nullable: false
+          type: string
+          format: date
+          example: '2023-01-01'
+        review_date:
+          nullable: false
+          type: string
+          format: date
+          example: '2023-01-01'
+        payable_from_date:
+          nullable: false
+          type: string
+          format: date
+          example: '2020-01-01'
+        decision_date:
+          nullable: false
+          type: string
+          format: date
+          example: '2020-01-01'
+        payment_frequency:
+          nullable: false
+          type: string
+          $ref: '#/components/schemas/PaymentFrequency'
+        createdAt:
+          type: string
+          format: date-time
+          example: '2020-01-01T00:00:00Z'
+          nullable: false
+        updatedAt:
+          type: string
+          format: date-time
+          example: '2020-01-01T00:00:00Z'
+          nullable: false
+    AwardTimelineDto:
+      type: object
+      properties:
+        timeline_events:
+          type: array
+          items:
+            $ref: '#/components/schemas/AwardTimelineEventDto'
+    AwardTimelineEventDto:
+      type: object
+      required:
+        - award_id
+        - application_id
+        - event_type
+        - event_name
+      properties:
+        award_id:
+          type: string
+          example: '12345678'
+        application_id:
+          type: string
+          example: '12345678'
+        event_type:
+          type: string
+          $ref: '#/components/schemas/AwardEventTypes'
+        event_name:
+          type: string
+          $ref: '#/components/schemas/AwardEvents'
+        eject_reason:
+          type: string
+          $ref: '#/components/schemas/EjectReason'
+        created_at:
+          type: string
+          format: date-time
+          example: '2020-01-01T00:00:00Z'
+        notes:
+          type: string
+          example: 'Test notes'
+        agent_id:
+          type: string
+          example: '123456'
+    AwardsListDto:
+      type: object
+      properties:
+        awards:
+          type: array
+          items:
+            $ref: '#/components/schemas/AwardDto'
+
+    # Externally managed through json2pojo
+    # These are just here to support AwardDto
+    # Update the JSON schema and then align them here
+    AwardEventTypes:
+      type: string
+      enum:
+        - STATE_CHANGE
+        - NON_STATE_CHANGE
+    AwardRate:
+      type: string
+      enum:
+        - NIL
+        - STANDARD
+        - ENHANCED
+    ReviewPeriod:
+      type: object
+      required:
+        - value
+        - unit
+      properties:
+        value:
+          type: integer
+          nullable: false
+        unit:
+          type: string
+          nullable: false
+          enum:
+            - MONTHLY
+    PaymentFrequency:
+      type: object
+      required:
+        - value
+        - unit
+      properties:
+        value:
+          type: integer
+          example: 4
+          minimum: 4
+          maximum: 4
+          nullable: false
+        unit:
+          type: string
+          nullable: false
+          enum:
+            - WEEKS
+    AwardStates:
+      type: string
+      enum:
+        - CREATED
+        - IN_PAYMENT
+        - SUSPENDED
+        - STOPPED
+        - EJECTED_PAYMENT_STOPPED
+        - EJECTED_REBUILT_IN_PIPCS
+        - FINISHED
+    AwardEvents:
+      type: string
+      enum:
+        - AWARDED
+        - PAYMENT_CREATED
+        - EJECTED_PAYMENT_STOPPED
+        - EJECTED_REBUILT_IN_PIPCS
+        - SUSPEND
+        - STOP
+        - FINISH
+        - REQUEST_EJECTION
+        - OTHER
+    EjectReason:
+      type: string
+      enum:
+        - ADDITIONAL_SUPPORT_NEEDED
+        - ALTERNATIVE_FORMAT_NEEDED
+        - APPLICANT_GETS_OTHER_BENEFITS
+        - APPOINTEE_ADDED
+        - CHANGE_OF_PERSONAL_DETAILS
+        - CLAIMANT_DID_NOT_RECEIVE_PAYMENT
+        - DEATH_OF_APPLICANT_OR_CLAIMANT
+        - DETAILS_DO_NOT_MATCH_SEARCHLIGHT_RECORD
+        - EVIDENCE_OF_FRAUD
+        - HEALTH_ASSESSMENT_COULD_NOT_BE_COMPLETED
+        - IMMIGRATION_STATUS
+        - KEEP_CUSTOMER_INTERACTIONS_SAFE_KCIS_MARKER
+        - MANDATORY_RECONSIDERATION
+        - NEW_EVIDENCE_SENT_AFTER_DECISION
+        - NEW_MOTABILITY_AGREEMENT
+        - RESIDENCE_AND_PRESENCE_CRITERIA
+        - REQUEST_FOR_SPLIT_PAYMENT
+        - SPECIAL_RULES_FOR_END_OF_LIFE_SREL
+        - STAYS_IN_PRISON_HOSPITAL_OR_OTHER_ACCOMMODATION
+        - WITHDRAWN_CLAIM
+        - WORKING_ABROAD
+        - OTHER
+security:
+  - sideCarProxySecurity : []
+
+

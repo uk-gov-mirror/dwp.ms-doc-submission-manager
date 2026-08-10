@@ -6,6 +6,27 @@ spring:
     mongodb:
       auto-index-creation: true
 
+feature:
+  data:
+    changestream:
+      enabled: ${FEATURE_DATA_CHANGESTREAM_ENABLED:false}
+
+uk:
+  gov:
+    dwp:
+      health:
+        changestream:
+          channels:
+            - collection: ${CHANGESTREAM_DOCUMENT_COLLECTION:document}
+              routing-key: ${CHANGESTREAM_DOCUMENT_ROUTING_KEY:doc-sub-routing-key}
+              database: ${CHANGESTREAM_DOCUMENT_ROUTER_DATABASE:document}
+            - collection: ${CHANGESTREAM_SUBMISSION_COLLECTION:submission}
+              routing-key: ${CHANGESTREAM_SUBMISSION_ROUTING_KEY:doc-sub-routing-key}
+              database: ${CHANGESTREAM_SUBMISSION_ROUTER_DATABASE:submission}
+            - collection: ${CHANGESTREAM_DRSUPLOAD_COLLECTION:drs_upload}
+              routing-key: ${CHANGESTREAM_DRSUPLOAD_ROUTING_KEY:doc-sub-routing-key}
+              database: ${CHANGESTREAM_DRSUPLOAD_ROUTER_DATABASE:drsupload}
+
 ---
 
 spring:

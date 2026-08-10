@@ -1,0 +1,161 @@
+openapi: '3.1.0'
+
+info:
+  title: DWP PIP Eligibility Service
+  description: Rest API for operations relating to the pre health assessment eligibility
+  version: '@project.version@'
+
+servers:
+  - url: 'https://localhost:8080'
+
+paths:
+
+  /v2/eligibility:
+    post:
+      tags:
+        - eligibility
+      summary: Create eligibility
+      operationId: createEligibility
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+                $ref: '#/components/schemas/CreateEligibilityRequest'
+      responses:
+        200:
+          description: eligibility created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EligibilityDetails'
+        400:
+          description: BAD REQUEST - badly formed request
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+
+    get:
+      tags:
+        - eligibility
+      summary: Get eligibility by application id
+      operationId: getEligibilityByApplicationId
+      parameters:
+        - name: applicationId
+          in: query
+          description: applicationId for eligibility
+          required: true
+          schema:
+            type: string
+            example: "6ed1d430716609122be7a4d6"
+      responses:
+        200:
+          description: OK - eligibility exist for application id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EligibilityDetails'
+        400:
+          description: BAD REQUEST - badly formed request
+        404:
+          description: NOT FOUND - eligibility does not exist for provided application id
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+
+  /v2/eligibility/{eligibilityId}/question-answer:
+    patch:
+      tags:
+        - eligibility
+      summary: Add or update question answer
+      operationId: addOrUpdateQuestionAnswer
+      parameters:
+        - name: eligibilityId
+          in: path
+          description: unique eligibilityId
+          required: true
+          schema:
+            type: string
+            example: "6ed1d430716609122be7a4d6"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuestionAnswerRequest'
+      responses:
+        200:
+          description: OK - Added or updated question answer for eligibility.
+        400:
+          description: BAD REQUEST - badly formed request.
+        404:
+          description: NOT FOUND - eligibility does not exist for eligibility id.
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+
+  /v2/eligibility/{eligibilityId}/outcome:
+    post:
+      tags:
+        - eligibility
+      summary: Store eligibility outcome
+      operationId: storeEligibilityOutcome
+      parameters:
+        - name: eligibilityId
+          in: path
+          description: unique eligibilityId
+          required: true
+          schema:
+            type: string
+            example: "6ed1d430716609122be7a4d6"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StoreOutcomeRequest'
+      responses:
+        200:
+          description: OK - eligibility outcome recorded successfully
+        400:
+          description: BAD REQUEST - badly formed json or values not valid
+        409:
+          description: CONFLICT - eligibility outcome for application id already exist
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+
+components:
+  securitySchemes:
+    sideCarProxySecurity:
+      type: mutualTLS
+      description: "Security is enforced by an external side car proxy using mTLS, not directly by this API"
+      x-sidecar-implementation: true
+  schemas:
+    CreateEligibilityRequest:
+      type: object
+      required:
+        - application_id
+      allOf:
+        - $ref: 'includes/components-v2.yaml#/components/schemas/ApplicationId'
+
+    QuestionAnswerRequest:
+      type: object
+      allOf:
+        - $ref: 'includes/components-v2.yaml#/components/schemas/Question'
+        - $ref: 'includes/components-v2.yaml#/components/schemas/Answer'
+
+    EligibilityDetails:
+      type: object
+      allOf:
+        - $ref: 'includes/components-v2.yaml#/components/schemas/EligibilityId'
+        - $ref: 'includes/components-v2.yaml#/components/schemas/ApplicationId'
+        - $ref: 'includes/components-v2.yaml#/components/schemas/Outcome'
+        - $ref: 'includes/components-v2.yaml#/components/schemas/OutcomeDate'
+        - $ref: 'includes/components-v2.yaml#/components/schemas/UserWhoCreatedTheOutcome'
+        - $ref: 'includes/components-v2.yaml#/components/schemas/EligibilityQuestionAnswer'
+
+    StoreOutcomeRequest:
+      type: object
+      required:
+        - outcome
+      allOf:
+        - $ref: 'includes/components-v2.yaml#/components/schemas/Outcome'
+        - $ref: 'includes/components-v2.yaml#/components/schemas/UserWhoCreatedTheOutcome'
+security:
+  - sideCarProxySecurity : []

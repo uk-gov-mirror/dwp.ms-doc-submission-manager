@@ -8,25 +8,26 @@ import io.restassured.http.ContentType;
 import io.restassured.parsing.Parser;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayNameGeneration;
+import org.junit.jupiter.api.DisplayNameGenerator;
 import org.slf4j.LoggerFactory;
-
-import uk.gov.dwp.health.pip.document.submission.manager.config.RestAssuredConfiguration;
-
 import uk.gov.dwp.health.pip.document.submission.manager.utils.MessageUtil;
 
 import static io.restassured.RestAssured.given;
 
-public class ApiTest {
+@Slf4j
+@DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
+public abstract class ApiTest {
+  protected static MessageUtil messageUtil;
+
   static RequestSpecification requestSpec;
+
   private static boolean loggingReconfigured = false;
-  protected static MessageUtil applicationSubmittedUtils;
-  protected static MessageUtil stateChangeUtils;
-  protected static MessageUtil batchDocUtils;
-  protected static MessageUtil submittedApplicationUtils;
 
   @BeforeAll
-  public static void setup() {
+  static void setup() {
     reduceLoggerOutput();
     RestAssured.baseURI = getEnv("HOST", "http://localhost");
     RestAssured.port = Integer.parseInt(getEnv("PORT", "9945"));
@@ -37,35 +38,37 @@ public class ApiTest {
             .setContentType(ContentType.JSON)
             .addFilter(new AllureRestAssured())
             .build();
-    RestAssuredConfiguration.configureObjectMapper();
 
     var awsEndpointOverride = getEnv("AWS_ENDPOINT_OVERRIDE", "http://localhost:4566");
     var awsRegion = getEnv("AWS_REGION", "eu-west-2");
-    var submissionQueueUrl =
-            getEnv(
-                    "SUBMISSION_QUEUE_URL",
-                    "http://localhost:4566/000000000000/application-submission");
 
-    var stateChangeQueueUrl =
-            getEnv(
-                    "STATE_CHANGE_QUEUE_URL",
-                    "http://localhost:4566/000000000000/state-change-in");
+    messageUtil = new MessageUtil(awsEndpointOverride, awsRegion);
+  }
 
-    var batchDocQueueUrl =
-        getEnv(
-            "BATCH_DOC_QUEUE_URL",
-            "http://localhost:4566/000000000000/docbatch-batch-upload");
+  protected static String getEnv(String name, String defaultValue) {
+    String env = System.getenv(name);
+    return env == null ? defaultValue : env;
+  }
 
-    var submittedApplicationQueueUrl =
-        getEnv(
-            "SUBMITTED_APP_QUEUE_URL",
-            "http://localhost:4566/000000000000/submitted-application-queue");
+  protected Response postRequest(String path, Object bodyPayload) {
+    return given().spec(requestSpec).body(bodyPayload).when().post(path);
+  }
 
-    applicationSubmittedUtils =
-        new MessageUtil(awsEndpointOverride, awsRegion, submissionQueueUrl);
-    batchDocUtils = new MessageUtil(awsEndpointOverride, awsRegion, batchDocQueueUrl);
-    stateChangeUtils = new MessageUtil(awsEndpointOverride, awsRegion, stateChangeQueueUrl);
-    submittedApplicationUtils = new MessageUtil(awsEndpointOverride, awsRegion, submittedApplicationQueueUrl);
+  protected Response postRequestWithHeader(
+      String path, Object bodyPayload, String headerName, String headerValue) {
+
+    RequestSpecification requestSpecWithHeaders =
+        new RequestSpecBuilder()
+            .setContentType(ContentType.JSON)
+            .addFilter(new AllureRestAssured())
+            .addHeader(headerName, headerValue)
+            .build();
+
+    return given().spec(requestSpecWithHeaders).body(bodyPayload).when().post(path);
+  }
+
+  protected Response getRequest(String path) {
+    return given().spec(requestSpec).when().get(path);
   }
 
   private static void reduceLoggerOutput() {
@@ -79,19 +82,6 @@ public class ApiTest {
   }
 
   private static void reduceLoggerOutput(final String name) {
-    ((ch.qos.logback.classic.Logger)LoggerFactory.getLogger(name)).setLevel(Level.ERROR);
-  }
-
-  protected Response postRequest(String path, Object bodyPayload) {
-    return given().spec(requestSpec).body(bodyPayload).when().post(path);
-  }
-
-  protected Response getRequest(String path) {
-    return given().spec(requestSpec).when().get(path);
-  }
-
-  private static String getEnv(String name, String defaultValue) {
-    String env = System.getenv(name);
-    return env == null ? defaultValue : env;
+    ((ch.qos.logback.classic.Logger) LoggerFactory.getLogger(name)).setLevel(Level.ERROR);
   }
 }

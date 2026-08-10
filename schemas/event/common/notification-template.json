@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "javaName": "template",
+  "description": "Id and version for the template to be used for notification",
+  "required": [
+    "id",
+    "version"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "javaName": "id",
+      "description": "The id of notification template to be used"
+    },
+    "version": {
+      "type": "string",
+      "javaName": "version",
+      "description": "The version of notification template to be used"
+    }
+  }
+}

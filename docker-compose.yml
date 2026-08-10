@@ -1,7 +1,6 @@
-version: "2.1"
 services:
   localstack:
-    image: ${LOCALSTACK_IMAGE}
+    image: localstack/localstack:4.14.0
     environment:
       - SERVICES=s3,sns,sqs,kms,cloudwatch
       - LOCALSTACK_HOST=localstack
@@ -14,27 +13,34 @@ services:
     volumes:
       - ./config/localstack:/etc/localstack/init/ready.d
     healthcheck:
-      test: ['CMD-SHELL',
-             'awslocal sqs list-queues | grep environment-config-complete']
+      test: [ 'CMD-SHELL',
+              'awslocal sqs list-queues | grep environment-config-complete' ]
     expose:
       - 4566
     ports:
       - "4566:4566"
-    logging:
-      driver: none
 
   mongodb:
     container_name: mongodb
-    image: mongo:7.0.14@sha256:244afb1488edfc42aaa8ffa6153393bbc075d63516ab0305daa2eaa35241eb52
+    image: mongo:7.0.32@sha256:8d727b31455fbedbc5600fe8c903aed89d0c7a7c2273a3a41bd054c1ee7baf31
     environment:
       - storage.wiredTiger.engineConfig.cacheSizeGB=5
-    command: mongod --port 27017 --quiet
+    command: [ "--replSet", "rs0", "--bind_ip_all", "--port", "27017" ]
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: echo "try { rs.status() } catch (err) { rs.initiate({_id:'rs0',members:[{_id:0,host:'host.docker.internal:27017'}]}) }" | mongosh --port 27017 --quiet
+      interval: 5s
+      timeout: 30s
+      start_period: 0s
+      retries: 30
+    volumes:
+      - "mongo1_data:/data/db"
+      - "mongo1_config:/data/configdb"
     expose:
       - 27017
     ports:
       - '27017:27017'
-    logging:
-      driver: none
 
   wm-ms-clamav-s3-file-submission:
     image: '${MOCK_IMAGE}'
@@ -87,10 +93,20 @@ services:
       timeout: 15s
       retries: 20
 
+  wiremock:
+    image: wiremock/wiremock:3.13.2@sha256:8bdd64a25db911ba521a38aebf1590d96767c2d29f3e941e2f496a760bbdf47d
+    expose:
+      - 8080
+    ports:
+      - "9570:8080"
+    command:
+      - --verbose
+      - --global-response-templating
+    volumes:
+      - './src/component-test/wiremock:/home/wiremock'
+
   ms-doc-submission-manager:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: '${GITLAB_IMAGE}'
     ports:
       - "9945:8080"
       - "5005:5005"
@@ -100,83 +116,92 @@ services:
       mongodb:
         condition: service_started
     environment:
-      - SPRING_PROFILES_ACTIVE=dev
+      - AWS_ACCESS_KEY_ID=awsaccesskey
+      - AWS_CLOUD_WATCH_AWS-REGION=eu-west-2
+      - AWS_CLOUD_WATCH_CREDENTIALS_ACCESS-KEY=awsaccesskey
+      - AWS_CLOUD_WATCH_CREDENTIALS_SECRET-KEY=its-a-secret
+      - AWS_CLOUD_WATCH_ENDPOINT_OVERRIDE=http://localstack:4566
+      - AWS_CLOUD_WATCH_METRIC-PRODUCT=pip-apply
+      - AWS_CLOUD_WATCH_METRIC-ENVIRONMENT=local
+      - AWS_CLOUD_WATCH_METRIC-ENV-ID=component-test
+      - AWS_CLOUD_WATCH_NAMESPACE=test
       - AWS_DEFAULT_REGION=eu-west-2
-      - AWS_S3_AWS_REGION=eu-west-2
-      - AWS_S3_ENDPOINT_OVERRIDE=http://localstack:4566
-      - AWS_S3_BUCKET=pip-bucket
-      - AWS_S3_ENCRYPT_ENABLE=true
       - AWS_ENCRYPTION_KMS_OVERRIDE=http://localstack:4566
       - AWS_ENCRYPTION_MESSAGE_DATA_KEY_ID=awssecretkey
       - AWS_ENCRYPTION_MONGO_DATA_KEY_ID=awssecrekey
+      - AWS_SECRET_ACCESS_KEY=its-a-secret
+      - AWS_S3_AWS_REGION=eu-west-2
+      - AWS_S3_BUCKET=pip-bucket
+      - AWS_S3_ENCRYPT_ENABLE=true
+      - AWS_S3_ENDPOINT_OVERRIDE=http://localstack:4566
+      - CHANGESTREAM_DOCUMENT_COLLECTION=document
+      - CHANGESTREAM_DOCUMENT_ROUTER_DATABASE=doc-sub-mgr-db
+      - CHANGESTREAM_DOCUMENT_ROUTING_KEY=pip.docsub.mgr.stream
+      - CHANGESTREAM_DRSUPLOAD_COLLECTION=drs_upload
+      - CHANGESTREAM_DRSUPLOAD_ROUTER_DATABASE=doc-sub-mgr-db
+      - CHANGESTREAM_DRSUPLOAD_ROUTING_KEY=pip.docsub.mgr.stream
+      - CHANGESTREAM_SUBMISSION_COLLECTION=submission
+      - CHANGESTREAM_SUBMISSION_ROUTER_DATABASE=doc-sub-mgr-db
+      - CHANGESTREAM_SUBMISSION_ROUTING_KEY=pip.docsub.mgr.stream
       - DRS_CALLER_ID=pip-online
       - DRS_EVENT_INCOMING_ROUTING_KEY=pip.batch.response
-      - DRS_EVENT_OUTBOUND_BATCH_UPLOAD_QUEUE=docbatch-batch-upload
+      - DRS_EVENT_OUTBOUND_BATCH_UPLOAD_QUEUE=arn:aws:sqs:eu-west-2:000000000000:docbatch-batch-upload
       - DRS_EVENT_QUEUE_NAME=docbatch-batch-response
+      - DRS_MAX_DISK_SIZE_KB_PER_BATCH=100000
+      - DRS_MAX_NUMBER_FILE_PER_BATCH=99
+      - DRS_UNITS_GB_CALLER_ID=pip-online
+      - DRS_UNITS_NI_CALLER_ID=pip-online-ni
+      - EVENT_INBOUND_ADDITIONAL_SUPPORT_SUBMISSION_QUEUE_ENABLED=true
+      - EVENT_INBOUND_ADDITIONAL_SUPPORT_SUBMISSION_QUEUE_NAME=ms-doc-sub-additional-support-submission-queue
+      - EVENT_OUTBOUND_APPLICATION_COORDINATOR_ADDITIONAL_SUPPORT_SUBMISSION_QUEUE_NAME=ms-app-co-additional-support-submission-queue
       - EVENT_OUTBOUND_WORKFLOW_ROUTING_KEY=workflow
       - EVENT_OUTBOUND_WORKFLOW_TOPIC_EXCHANGE=workflow-topic
+      - FEATURE_DATA_CHANGESTREAM_ENABLED=true
       - FEATURE_MONGO_STABLE_API_ENABLED=true
-      - FEATURE_DATA_CHANGESTREAM_ENABLED=false
-      - FEATURE_CHANGESTREAM_DECRYPTION_ENABLED=false
+      - LOGGING_LEVEL_UK_GOV_DWP_HEALTH_MONGO_CHANGESTREAM=INFO
+      - LOGGING_LEVEL_ORG_MONGODB_DRIVER=WARN
+      - NOTIFY_GB_API_KEY=pip2_outbound_email_test_key-d1c8683e-fd5e-49e9-9447-7c785868fb87-57bde543-a4f5-4218-a705-d9e74fc01b2e
+      - NOTIFY_GB_ATTACH_DOCUMENTS_TEMPLATE_ID=38b10f02-308c-4057-8aca-1c40a35ff4e3
+      - NOTIFY_GB_CY_INVITED_ATTACH_DOCUMENTS_TEMPLATE_ID=406d9abf-9a51-4943-a83f-d47830a53784
+      - NOTIFY_GB_EN_INVITED_ATTACH_DOCUMENTS_TEMPLATE_ID=99ad8bbb-5845-45b9-ae7e-56c36c4b5503
+      - NOTIFY_GB_INVITED_SUBMISSION_SUCCESS_TEMPLATE_ID=227d408c-6f41-4483-b0bf-17e6664d8e7c
+      - NOTIFY_GB_SUBMISSION_SUCCESS_TEMPLATE_ID=2de6cc07-adab-4e6b-b137-dd48f017082f
+      - NOTIFY_NI_API_KEY=dfc_pip_ni_email_test_key-e2dee782-18af-4cda-b6e9-21e92195e087-7a8ac983-6ffe-4d12-bf3e-6c8cea2f230a
+      - NOTIFY_NI_ATTACH_DOCUMENTS_TEMPLATE_ID=6d0d773e-1113-476d-a9b4-d806f0ebabcc
+      - NOTIFY_NI_INVITED_ATTACH_DOCUMENTS_TEMPLATE_ID=68862a13-348b-4a1f-bc40-39fe679c8471
+      - NOTIFY_NI_INVITED_SUBMISSION_SUCCESS_TEMPLATE_ID=673af765-e499-402d-b037-d3590d5c7419
+      - NOTIFY_PROXY_HOST=proxy.external.dev.private.nonprod.health.dwpcloud.uk
+      - NOTIFY_PROXY_PORT=3128
+      - SPRING_MONGODB_HOST=mongodb
+      - SPRING_MONGODB_PORT=27017
+      - SPRING_MONGODB_DATABASE=doc-sub-mgr-db
+      - SPRING_PROFILES_ACTIVE=dev
       - UK_GOV_DWP_HEALTH_ACCOUNTMGR_API_ENDPOINT=account/details/id/{accountId}
       - UK_GOV_DWP_HEALTH_ACCOUNTMGR_API_VERSION=v7
       - UK_GOV_DWP_HEALTH_ACCOUNTMGR_BASE_URI=http://pip-apply-mocks:8080
       - UK_GOV_DWP_HEALTH_APPLICATION_ACTIVE_DURATION=93
       - UK_GOV_DWP_HEALTH_APPLICATION_COORDINATOR_API_ENDPOINT=applications
-      - UK_GOV_DWP_HEALTH_APPLICATION_COORDINATOR_API_VERSION=v1
-      - UK_GOV_DWP_HEALTH_APPLICATION_COORDINATOR_BASE_URI=http://pip-apply-mocks:8080
-      - UK_GOV_DWP_HEALTH_APPLICATION_SUBMISSION_QUEUE_NAME=application-submission
-      - UK_GOV_DWP_HEALTH_APPLICATION_SUBMISSION_ROUTING_KEY=pip.submit.application
-      - UK_GOV_DWP_SUBMITTED_HEALTH_APPLICATION_TOPIC_NAME=submitted-application-topic
-      - UK_GOV_DWP_SUBMITTED_HEALTH_APPLICATION_ROUTING_KEY=submitted.application
-      - UK_GOV_DWP_HEALTH_CHANGESTREAM_CHANNELS[0]_COLLECTION=document
-      - UK_GOV_DWP_HEALTH_CHANGESTREAM_CHANNELS[0]_ROUTING_KEY=pip.docsub.mgr.stream
-      - UK_GOV_DWP_HEALTH_CHANGESTREAM_CHANNELS[0]_DATABASE=pip-apply-application-submission-mgr
-      - UK_GOV_DWP_HEALTH_CHANGESTREAM_CHANNELS[0]_SKIP_DECRYPTION=true
-      - UK_GOV_DWP_HEALTH_CHANGESTREAM_CHANNELS[1]_COLLECTION=submission
-      - UK_GOV_DWP_HEALTH_CHANGESTREAM_CHANNELS[1]_ROUTING_KEY=pip.docsub.mgr.stream
-      - UK_GOV_DWP_HEALTH_CHANGESTREAM_CHANNELS[1]_DATABASE=pip-apply-application-submission-mgr
-      - UK_GOV_DWP_HEALTH_CHANGESTREAM_CHANNELS[1]_SKIP_DECRYPTION=true
-      - UK_GOV_DWP_HEALTH_CHANGESTREAM_CHANNELS[2]_COLLECTION=drs_upload
-      - UK_GOV_DWP_HEALTH_CHANGESTREAM_CHANNELS[2]_ROUTING_KEY=pip.docsub.mgr.stream
-      - UK_GOV_DWP_HEALTH_CHANGESTREAM_CHANNELS[2]_DATABASE=pip-apply-application-submission-mgr
-      - UK_GOV_DWP_HEALTH_CHANGESTREAM_CHANNELS[2]_SKIP_DECRYPTION=true
-      - UK_GOV_DWP_HEALTH_HCM_GET_APPLICATION_BY_ID_ENDPOINT=/application/{applicationId}
-      - UK_GOV_DWP_HEALTH_HCM_GET_FORM_SPECIFICATION_BY_ID_ENDPOINT=/form-specification/{formSpecificationId}
-      - UK_GOV_DWP_HEALTH_HCM_BASE_URI=http://pip-apply-mocks:8080
+      - UK_GOV_DWP_HEALTH_APPLICATION_COORDINATOR_API_VERSION=v5
+      - UK_GOV_DWP_HEALTH_APPLICATION_COORDINATOR_BASE_URI=http://wiremock:8080
+      - UK_GOV_DWP_HEALTH_HCM_BASE_URI=http://wiremock:8080
+      - UK_GOV_DWP_HEALTH_HCM_GET_APPLICATION_BY_ID_V2_ENDPOINT=/v2/applications/{application_id}
+      - UK_GOV_DWP_HEALTH_IDENTITY_API_VERSION=v2
+      - UK_GOV_DWP_HEALTH_IDENTITY_API_VERSION_ONE=v1
+      - UK_GOV_DWP_HEALTH_IDENTITY_API_ENDPOINT=identity
+      - UK_GOV_DWP_HEALTH_IDENTITY_BASE_URI=http://pip-apply-mocks:8080
+      - UK_GOV_DWP_HEALTH_IDENTITY_GET_BY_ID_API_ENDPOINT=identity/get-identity-by-id
+      - UK_GOV_DWP_HEALTH_INTEGRATION_AWS_REGION=eu-west-2
+      - UK_GOV_DWP_HEALTH_INTEGRATION_ENABLED=true
+      - UK_GOV_DWP_HEALTH_INTEGRATION_MESSAGE_TYPE=aws
       - UK_GOV_DWP_HEALTH_INTEGRATION_OUTBOUND_TOPIC_EXCHANGE=pip-docsub-analytics
       - UK_GOV_DWP_HEALTH_INTEGRATION_SNS_ENDPOINT_OVERRIDE=http://localstack:4566
       - UK_GOV_DWP_HEALTH_INTEGRATION_SQS_ENDPOINT_OVERRIDE=http://localstack:4566
-      - UK_GOV_DWP_HEALTH_INTEGRATION_AWS_REGION=eu-west-2
-      - UK_GOV_DWP_HEALTH_INTEGRATION_MESSAGE_TYPE=aws
-      - UK_GOV_DWP_HEALTH_INTEGRATION_ENABLED=true
-      - UK_GOV_DWP_HEALTH_PIP2_PDF_GENERATOR_API_VERSION=v2
+      - UK_GOV_DWP_HEALTH_PIP2_PDF_GENERATOR_API_VERSION=v4
       - UK_GOV_DWP_HEALTH_PIP2_PDF_GENERATOR_BASE_URI=http://pip-apply-mocks:8080
-      - UK_GOV_DWP_HEALTH_PIP2_PDF_GENERATOR_PDF_API_ENDPOINT=pdf/createPdf
       - UK_GOV_DWP_HEALTH_PIP2_PDF_GENERATOR_PDF_S3_API_ENDPOINT=pdf/s3CreatePdf
-      - UK_GOV_DWP_HEALTH_IDENTITY_API_ENDPOINT=identity/get-identity-by-application-id/{applicationId}
-      - UK_GOV_DWP_HEALTH_IDENTITY_API_VERSION=v1
-      - UK_GOV_DWP_HEALTH_IDENTITY_BASE_URI=http://pip-apply-mocks:8080
-      - AWS_ACCESS_KEY_ID=awsaccesskey
-      - AWS_SECRET_ACCESS_KEY=its-a-secret
-      - SPRING_DATA_MONGODB_HOST=mongodb
-      - SPRING_DATA_MONGODB_PORT=27017
-      - DRS_UNITS_GB_CALLER_ID=pip-online
-      - DRS_UNITS_NI_CALLER_ID=pip-online-ni
-      - DRS_MAX_DISK_SIZE_KB_PER_BATCH=100000
-      - DRS_MAX_NUMBER_FILE_PER_BATCH=99
-      - AWS_CLOUD_WATCH_AWS-REGION=eu-west-2
-      - AWS_CLOUD_WATCH_NAMESPACE=test
-      - AWS_CLOUD_WATCH_METRIC-PRODUCT=pip-apply
-      - AWS_CLOUD_WATCH_METRIC-ENVIRONMENT=local
-      - AWS_CLOUD_WATCH_METRIC-ENV-ID=component-test
-      - AWS_CLOUD_WATCH_ENDPOINT_OVERRIDE=http://localstack:4566
-      - AWS_CLOUD_WATCH_CREDENTIALS_ACCESS-KEY=awsaccesskey
-      - AWS_CLOUD_WATCH_CREDENTIALS_SECRET-KEY=its-a-secret
-      - LOGGING_LEVEL_UK_GOV_DWP_HEALTH_MONGO_CHANGESTREAM_CONFIG=INFO
-      - LOGGING_LEVEL_ORG_MONGODB_DRIVER=WARN
-      - APP_COORDINATOR_SUBMITTED_ROUTING_KEY=state.change
-      - APP_COORDINATOR_SUBMITTED_TOPIC_NAME=pip-application-coordinator-state-change
+      - UK_GOV_DWP_HEALTH_RCM_API_ENDPOINT=application/{application_id}/registration
+      - UK_GOV_DWP_HEALTH_RCM_API_VERSION=v4
+      - UK_GOV_DWP_HEALTH_RCM_BASE_URI=http://wiremock:8080
     entrypoint:
       - java
       - -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
@@ -185,6 +210,8 @@ services:
 
   api-test:
     container_name: api-test
+    depends_on:
+      - ms-doc-submission-manager
     image: '${MAVEN_IMAGE}'
     entrypoint: /bin/bash -c
     command:
@@ -195,21 +222,29 @@ services:
     working_dir: /usr/src
     environment:
       AWS_ACCESS_KEY: awsaccesskey
+      AWS_ACCESS_KEY_ID: awsaccesskey
       AWS_ENDPOINT_OVERRIDE: http://localstack:4566
       AWS_REGION: eu-west-2
+      AWS_SECRET_ACCESS_KEY: its-a-secret
       AWS_SECRET_KEY: its-a-secret
       AWS_SERVICE_HOSTNAME: localstack
-      HOST: http://ms-doc-submission-manager
-      STATE_CHANGE_QUEUE_URL: http://localstack:4566/000000000000/state-change-in
-      SUBMISSION_COLLECTION: submission
-      SUBMISSION_QUEUE_URL: http://localstack:4566/000000000000/application-submission
       BATCH_DOC_QUEUE_URL: http://localstack:4566/000000000000/docbatch-batch-upload
-      SUBMITTED_APP_QUEUE_URL: http://localstack:4566/000000000000/submitted-application-queue
-      PORT: 8080
+      CDC_QUEUE_URL: http://localstack:4566/000000000000/pip-docsub-analytics
+      EVENT_INBOUND_ADDITIONAL_SUPPORT_SUBMISSION_QUEUE_DLQ_URL: http://localstack:4566/000000000000/ms-doc-sub-additional-support-submission-queue-dlq
+      EVENT_INBOUND_ADDITIONAL_SUPPORT_SUBMISSION_QUEUE_URL: http://localstack:4566/000000000000/ms-doc-sub-additional-support-submission-queue
+      EVENT_OUTBOUND_ADDITIONAL_SUPPORT_SUBMISSION_QUEUE_URL: http://localstack:4566/000000000000/ms-app-co-additional-support-submission-queue
+      HOST: http://ms-doc-submission-manager
       MONGODB_HOST: mongodb
       MONGODB_PORT: 27017
+      PORT: 8080
+      SUBMISSION_COLLECTION: submission
     volumes:
       - .:/usr/src
       - ${MVN_M2}:/root/.m2
       - ${MVN_SETTINGS_FILE}:/root/.m2/settings.xml
       - ./target/test/reports:/usr/src/target/test-reports
+
+
+volumes:
+  mongo1_data:
+  mongo1_config:

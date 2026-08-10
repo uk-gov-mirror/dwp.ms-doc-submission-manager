@@ -1,0 +1,315 @@
+openapi: 3.1.1
+
+info:
+  title: DWP PIP health information service
+  description: Rest API for managing the PIP health information
+  version: '@project.version@'
+
+servers:
+  - url: 'https://localhost:8080'
+
+paths:
+
+  /v2/applications:
+    post:
+      tags:
+        - "health information"
+      summary: Create new health information data document
+      operationId: createApplication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HealthCaptureApplicationCreateDto'
+      responses:
+        201:
+          description: CREATED - initial health information data created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthCaptureApplicationDtoV2'
+        403:
+          description: FORBIDDEN - application already exists
+
+  /v2/applications/{application_id}:
+    get:
+      tags:
+        - "health information"
+      summary: get health information data by application id
+      operationId: getHealthDataByApplicationId
+      parameters:
+        - in: path
+          name: application_id
+          required: true
+          schema:
+            $ref: '#/components/schemas/ObjectId'
+      responses:
+        200:
+          description: OK - existing health information data found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthCaptureApplicationDtoV2'
+        404:
+          description: NOT FOUND - application not found
+        422:
+          description: UNPROCESSABLE ENTITY - unable to map registration data
+    put:
+      tags:
+        - "health information"
+      summary: update health information data by application id
+      operationId: updateHealthData
+      parameters:
+        - in: path
+          name: application_id
+          required: true
+          schema:
+            $ref: '#/components/schemas/ObjectId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              description: json data blob representing the ui journey context
+              $ref: '#/components/schemas/FormDataDto'
+      responses:
+        200:
+          description: OK - existing health data updated
+        404:
+          description: NOT FOUND - no application found for application id
+    patch:
+      tags:
+        - submission
+      summary: complete all actions upon submission and send first batch of evidence to DRS
+      description: >
+        endpoint to complete all actions upon submission and send evidence to DRS
+      operationId: submitApplication
+      parameters:
+        - in: path
+          name: application_id
+          required: true
+          schema:
+            $ref: '#/components/schemas/ObjectId'
+        - in: header
+          name: x-user-id
+          description: Id of user that is logged in,
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              description: json data blob representing the health form data
+              $ref: '#/components/schemas/FormDataDto'
+      responses:
+        200:
+          description: application and documents submitted
+        422:
+          description: health data not valid
+
+  /v2/upload/{applicationId}:
+    post:
+      tags:
+        - "health information"
+      summary: Upload PIP2 evidence
+      operationId: processFileUpload
+      parameters:
+        - in: path
+          name: applicationId
+          schema:
+            $ref: '#/components/schemas/ObjectId'
+          required: true
+          description: PIP application ID
+        - in: query
+          name: sanitisedFileName
+          schema:
+            type: string
+            description: Sanitised File Name
+      requestBody:
+        required: true
+        content:
+          multipart/*:
+            schema:
+              description: Evidence upload file
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        200:
+          description: OK - file uploaded successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                description: file upload response
+        400:
+          description: BAD_REQUEST
+          content:
+            application/json:
+              schema:
+                type: object
+                description: error object
+
+components:
+  schemas:
+    HealthCaptureApplicationCreateDto:
+      type: object
+      properties:
+        application_id:
+          $ref: '#/components/schemas/ObjectId'
+        claimant_id:
+          $ref: '#/components/schemas/ObjectId'
+    ObjectId:
+      example: "5ed0d430716609122be7a4d6"
+      type: string
+      pattern: ^[a-z0-9]{24}
+    HealthCaptureApplicationDtoV2:
+      type: object
+      properties:
+        application_id:
+          $ref: '#/components/schemas/ObjectId'
+        claimant_id:
+          $ref: '#/components/schemas/ObjectId'
+        submission_date:
+          type: string
+        registration_details:
+          $ref: '#/components/schemas/RegistrationDetailsDto'
+        application_timeframe:
+          $ref: '#/components/schemas/ApplicationTimeframeDto'
+        responses:
+          description: deprecated versioned questions and answers
+          type: object
+        form_data:
+          $ref: '#/components/schemas/FormDataDto'
+        files:
+          type: array
+          items:
+            $ref: '#/components/schemas/FileUploadDto'
+        state:
+          $ref: '#/components/schemas/StateDto'
+        submission_id:
+          type: string
+    RegistrationDetailsDto:
+      type: object
+      properties:
+        personal_details:
+          $ref: '#/components/schemas/PersonalDetailsDto'
+        health_details:
+          $ref: '#/components/schemas/HealthDetailsDto'
+    PersonalDetailsDto:
+      type: object
+      properties:
+        surname:
+          type: string
+        firstName:
+          type: string
+        national_insurance_number:
+          type: string
+        date_of_birth:
+          type: string
+        postcode:
+          type: string
+        email:
+          type: string
+    HealthDetailsDto:
+      type: object
+      properties:
+        health_professionals:
+          type: array
+          items:
+            $ref: '#/components/schemas/HealthProfessionalDto'
+    HealthProfessionalDto:
+      type: object
+      properties:
+        name:
+          type: string
+        profession:
+          type: string
+        phone_number:
+          type: string
+        address:
+          $ref: '#/components/schemas/AddressDto'
+        last_contact:
+          type: string
+    AddressDto:
+      type: object
+      properties:
+        line1:
+          type: string
+        line2:
+          type: string
+        line3:
+          type: string
+        town:
+          type: string
+        county:
+          type: string
+        postcode:
+          type: string
+        country:
+          type: string
+    ApplicationTimeframeDto:
+      type: object
+      properties:
+        effective_from:
+          type: string
+        effective_to:
+          type: string
+    FileUploadDto:
+      type: object
+      properties:
+        id:
+          type: string
+        bucket:
+          type: string
+        s3_ref:
+          type: string
+        mime_type:
+          type: string
+        size:
+          type: long
+        sanitised_name:
+          type: string
+        display_size:
+          type: string
+        date_time:
+          type: string
+        drs_doc_type:
+          type: string
+          enum:
+            - PIP2_FORM
+            - PIP2_EVIDENCE
+    StateDto:
+      type: object
+      properties:
+        current:
+          type: string
+        history:
+          type: array
+          items:
+            $ref: '#/components/schemas/HistoryDto'
+    HistoryDto:
+      type: object
+      properties:
+        state:
+          type: string
+        timestamp:
+          type: string
+    FormDataDto:
+      type: object
+      properties:
+        journeyContexts:
+          type: object
+        appName:
+          type: string
+        version:
+          type: string
+        mappedData:
+          type: object

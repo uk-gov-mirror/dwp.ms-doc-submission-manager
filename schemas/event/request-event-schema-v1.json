@@ -1,0 +1,106 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "https://gitlab.com/dwp/health/pip-apply/schemas/event/request-event-schema-v1.json",
+  "type": "object",
+  "title": "Request event message schema",
+  "description": "Schema describe how PIPCS-gw request event message should be formulated",
+  "default": {},
+  "examples": [
+    {
+      "applicationId": "00112233-4455-6677-8899-aabbccddeeff",
+      "payload": "{\"data\" : \"data-value\"}",
+      "queryVars": {
+        "var1": "var-1-value",
+        "var2": "var-2-value"
+      },
+      "respondTopic": "respondTopic",
+      "respondMessageRoutingKey": "respondRoutingKey"
+    }
+  ],
+  "required": [
+    "applicationId",
+    "host",
+    "endpoint",
+    "method",
+    "respondTopic",
+    "respondMessageRoutingKey"
+  ],
+  "properties": {
+    "applicationId": {
+      "$id": "#/properties/applicationId",
+      "type": "string",
+      "title": "The applicationId schema",
+      "description": "An unique ID for correlation purpose",
+      "examples": [
+        "application-id-from-application-manager"
+      ]
+    },
+    "payload": {
+      "$id": "#/properties/payload",
+      "type": "string",
+      "title": "The payload schema",
+      "description": "Payload in JSON string",
+      "examples": [
+        "payload-json-string"
+      ]
+    },
+    "queryVars": {
+      "$id": "#/properties/queryVars",
+      "type": "object",
+      "title": "The pathVars schema",
+      "description": "Path or query variables",
+      "examples": [
+        {
+          "var1": "var-1-value",
+          "var2": "var-2-value"
+        }
+      ],
+      "required": [
+        "var1",
+        "var2"
+      ],
+      "properties": {
+        "var1": {
+          "$id": "#/properties/queryVars/properties/var1",
+          "type": "string",
+          "title": "The var1 schema",
+          "description": "An explanation about the purpose of this instance.",
+          "default": "",
+          "examples": [
+            "var-1-value"
+          ]
+        },
+        "var2": {
+          "$id": "#/properties/queryVars/properties/var2",
+          "type": "string",
+          "title": "The var2 schema",
+          "description": "An explanation about the purpose of this instance.",
+          "default": "",
+          "examples": [
+            "var-2-value"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "respondTopic": {
+      "$id": "#/properties/respondTopic",
+      "type": "string",
+      "title": "The respondTopic schema",
+      "description": "SNS topic name",
+      "examples": [
+        "sns-topic-name"
+      ]
+    },
+    "respondMessageRoutingKey": {
+      "$id": "#/properties/respondMessageRoutingKey",
+      "type": "string",
+      "title": "The respondMessageRoutingKey schema",
+      "description": "Message routing key",
+      "examples": [
+        "resp-message-routing-key"
+      ]
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,404 @@
+openapi: 3.1.0
+
+info:
+  title: DWP PDF Form Generator Service - PIP
+  description: Rest API for converting HIG application form to PDF_A document
+  version: '@project.version@'
+
+servers:
+  - url: 'http://localhost:8080'
+
+paths:
+  /v4/pdf/s3CreatePdf:
+    post:
+      tags:
+        - create
+      description: Create new pdf from pip application and upload it to s3
+      operationId: s3CreatePDF
+      summary: Create a pdf from pip2 application and upload to s3
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePdfS3V4'
+      responses:
+        201:
+          description: PDF created and uploaded to s3
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/S3PdfReturn'
+        400:
+          description: Invalid JSON format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FailureResponse'
+
+components:
+  securitySchemes:
+    sideCarProxySecurity:
+      type: mutualTLS
+      description: "Security is enforced by an external side car proxy using mTLS, not directly by this API"
+      x-sidecar-implementation: true
+
+  schemas:
+    CreatePdfS3V4:
+      type: object
+      required:
+        - submissionDto
+        - bucket
+      properties:
+        submissionDto:
+          $ref: '#/components/schemas/SubmissionDtoV4'
+        bucket:
+          $ref: '#/components/schemas/Bucket'
+    S3PdfReturn:
+      properties:
+        s3Ref:
+          $ref: '#/components/schemas/S3Ref'
+        bucket:
+          $ref: '#/components/schemas/Bucket'
+        file_size_kb:
+          $ref: '#/components/schemas/FileSizeKb'
+    SubmissionDtoV4:
+      type: object
+      properties:
+        claimantId:
+          $ref: '#/components/schemas/ClaimantId'
+        applicationId:
+          $ref: '#/components/schemas/ApplicationId'
+        submissionDate:
+          $ref: '#/components/schemas/SubmissionDate'
+        registrationDetails:
+          $ref: '#/components/schemas/RegistrationDetailsDto'
+        formData:
+          $ref: '#/components/schemas/HealthInformationGatherRequest'
+    HealthInformationGatherRequest:
+      type: object
+      required:
+        - aboutYourHealth
+        - dailyLiving
+        - mobility
+        - reasonableAdjustments
+        - other
+      properties:
+        aboutYourHealth:
+          $ref: '#/components/schemas/Health'
+        dailyLiving:
+          $ref: '#/components/schemas/DailyLiving'
+        mobility:
+          $ref: '#/components/schemas/Mobility'
+        reasonableAdjustments:
+          $ref: '#/components/schemas/ReasonableAdjustments'
+        other:
+          $ref: '#/components/schemas/OtherInformation'
+    OtherInformation:
+      type: object
+      properties:
+        additionalInformation:
+          type: string
+          example: "Yes"
+        description:
+          type: string
+          example: "Description"
+    ReasonableAdjustments:
+      properties:
+        adjustments:
+          $ref: '#/components/schemas/Adjustments'
+        interpreter:
+          $ref: '#/components/schemas/Interpreter'
+    Adjustments:
+      type: object
+      properties:
+        isRequired:
+          type: string
+          example: "Yes"
+        description:
+          type: string
+          example: "I need adjustments"
+    Interpreter:
+      type: object
+      properties:
+        isRequired:
+          type: string
+          example: "Yes"
+        language:
+          type: string
+          example: "French"
+    Mobility:
+      properties:
+        planningFollowing:
+          $ref: '#/components/schemas/PlanningFollowing'
+        movingAround:
+          $ref: '#/components/schemas/MovingAround'
+    MovingAround:
+      type: object
+      properties:
+        isAffected:
+          type: string
+          example: "Yes"
+        description:
+          type: string
+          example: "I face difficulty planning"
+        severity:
+          $ref: '#/components/schemas/SeverityMeasure'
+    SeverityMeasure:
+      type: object
+      properties:
+        distance:
+          type: string
+          example: "Varies"
+        notes:
+          type: string
+          example: "Difficulty moving"
+    PlanningFollowing:
+      type: object
+      properties:
+        isAffected:
+          type: string
+          example: "Yes"
+        description:
+          type: string
+          example: "I face difficulty planning"
+    DailyLiving:
+      type: object
+      properties:
+        preparingFood:
+          $ref: '#/components/schemas/PreparingFood'
+        eatingDrinking:
+          $ref: '#/components/schemas/EatingDrinking'
+        managingTreatments:
+          $ref: '#/components/schemas/ManageTreatment'
+        washingBathing:
+          $ref: '#/components/schemas/WashingBathing'
+        toiletIncontinence:
+          $ref: '#/components/schemas/ToiletIncontinence'
+        dressingUndressing:
+          $ref: '#/components/schemas/Dressing'
+        talkingListening:
+          $ref: '#/components/schemas/TalkingListening'
+        reading:
+          $ref: '#/components/schemas/Reading'
+        mixingPeople:
+          $ref: '#/components/schemas/MixingPeople'
+        managingMoney:
+          $ref: '#/components/schemas/ManagingMoney'
+    ManagingMoney:
+      type: object
+      properties:
+        isAffected:
+          type: string
+          example: "Yes"
+        description:
+          type: string
+          example: "I face difficulty managing money"
+    MixingPeople:
+      type: object
+      properties:
+        isAffected:
+          type: string
+          example: "Yes"
+        description:
+          type: string
+          example: "Yes I face difficulty socializing"
+    Reading:
+      type: object
+      properties:
+        isAffected:
+          type: string
+          example: "Yes"
+        description:
+          type: string
+          example: "I face difficulty reading"
+    TalkingListening:
+      type: object
+      properties:
+        isAffected:
+          type: string
+          example: "Yes"
+        description:
+          type: string
+          example: "I face difficulties listening"
+    Dressing:
+      type: object
+      properties:
+        isAffected:
+          type: string
+          example: "Yes"
+        description:
+          type: string
+          example: "I face difficulty dressing and undressing"
+    ToiletIncontinence:
+      type: object
+      properties:
+        isAffected:
+          type: string
+          example: "Yes"
+        description:
+          type: string
+          example: "I always have difficulty cleaning myself"
+    WashingBathing:
+      type: object
+      properties:
+        isAffected:
+          type: string
+          example: "Yes"
+        description:
+          type: string
+          example: "I face difficulties washing and Bathing"
+    ManageTreatment:
+      type: object
+      properties:
+        isAffected:
+          type: string
+          example: "Yes"
+        description:
+          type: string
+          example: "I had difficulties managing treatment"
+        therapies:
+          type: string
+          example: "Therapies"
+    EatingDrinking:
+      type: object
+      properties:
+        isAffected:
+          type: string
+          example: "Yes"
+        useFeedingTube:
+          type: string
+          example: "Yes"
+        description:
+          type: string
+          example: "I have difficulties eating and drinking"
+    PreparingFood:
+      type: object
+      properties:
+        isAffected:
+          type: string
+          example: "Yes"
+        description:
+          type: string
+          example: "I have difficulties preparing food"
+    Health:
+      type: object
+      properties:
+        conditions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Condition'
+        hcpDetails:
+          type: array
+          items:
+            $ref: '#/components/schemas/HealthProfessional'
+    HealthProfessional:
+      type: object
+      properties:
+        order:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "HCP number one"
+        profession:
+          type: string
+          example: "GP"
+        phoneNumber:
+          type: string
+          example: "02082917007"
+        address:
+          $ref: '#/components/schemas/Address'
+        lastContact:
+          type: string
+          example: "12 months"
+    Address:
+      type: object
+      properties:
+        line1:
+          type: string
+          example: "123"
+        line2:
+          type: string
+          example: "Testing Street"
+        townOrCity:
+          type: string
+          example: "London"
+        county:
+          type: string
+          example: "Greater London"
+        postCode:
+          type: string
+          example: "SE6 4DB"
+    Condition:
+      type: object
+      properties:
+        order:
+          type: integer
+          example: 1
+        condition:
+          type: string
+          example: "Health condition 1"
+        description:
+          type: string
+          example: "health condition description 2"
+        approximateStartDate:
+          type: string
+          example: "1 year ago"
+    ClaimantId:
+      example: "123456789"
+      minLength: 1
+      pattern: ^(?!\s*$).+
+      type: string
+    ApplicationId:
+      example: "123456789"
+      minLength: 1
+      pattern: ^(?!\s*$).+
+      type: string
+    SubmissionDate:
+      type: string
+      example: 24-01-2023
+    RegistrationDetailsDto:
+      type: object
+      properties:
+        personalDetails:
+          $ref: '#/components/schemas/PersonalDetailsDto'
+    Bucket:
+      description: AWS S3 bucket name
+      example: "pip-bucket"
+      type: string
+      minLength: 1
+    PersonalDetailsDto:
+      type: object
+      properties:
+        surname:
+          type: string
+        firstName:
+          type: string
+        nationalInsuranceNumber:
+          type: string
+        dateOfBirth:
+          type: string
+        postcode:
+          type: string
+        email:
+          type: string
+    S3Ref:
+      description: AWS S3 unique file key
+      example: 123_PRESCRIPTION.JPG.2020
+      type: string
+      minLength: 1
+    FailureResponse:
+      properties:
+        message:
+          $ref: '#/components/schemas/Message'
+    FileSizeKb:
+      description: unencrypted data size in kb
+      example: 1024
+      type: integer
+    Message:
+      description: detail description
+      type: string
+
+security:
+  - sideCarProxySecurity: [ ]

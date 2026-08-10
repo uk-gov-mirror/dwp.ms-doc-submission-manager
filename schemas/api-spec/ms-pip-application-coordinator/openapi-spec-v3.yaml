@@ -1,0 +1,76 @@
+openapi: '3.1.0'
+
+info:
+  title: DWP PIP Application Coordinator Service
+  description: Version 3 Rest API for operations relating to the application coordinator
+  version: '@project.version@'
+
+servers:
+  - url: 'https://localhost:8080'
+
+paths:
+
+  /v3/applications:
+    post:
+      summary: Creates an application, differs from V1 in that an entry is newly create in coordinator and NOT looked up in application manager
+      operationId: createApplication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: 'includes/components.yaml#/components/schemas/ApplicationCreateDto'
+      responses:
+        201:
+          description: CREATED - initial application data created
+          content:
+            application/json:
+              schema:
+                $ref: 'includes/components.yaml#/components/schemas/ApplicationDto'
+        400:
+          description: BAD REQUEST - badly formed json or values not valid
+        409:
+          description: Conflict - active applications already exist
+
+  /v3/applications/counts:
+    get:
+      summary: get counts of applications for attributes
+      operationId: getApplicationCounts
+      description: |
+        For counts by state and counts by application router's decision on where to route the application to then don't pass a parameter
+        For counts by eject reason then pass ejectReasonCounts=true
+        For the above counts in a date range then pass startDate=<date> and an optional endDate
+      parameters:
+        - in: query
+          name: ejectReasonCounts
+          schema:
+            type: boolean
+        - in: query
+          name: startDate
+          schema:
+            type: string
+            format: date
+            example: "2025-03-26"
+        - in: query
+          name: endDate
+          schema:
+            type: string
+            format: date
+            example: "2025-03-26"
+      responses:
+        200:
+          description: counts of applications for attributes
+          content:
+            application/json:
+              schema:
+                $ref: 'includes/components.yaml#/components/schemas/ApplicationCountsDto'
+
+
+components:
+  securitySchemes:
+    sideCarProxySecurity:
+      type: mutualTLS
+      description: "Security is enforced by an external side car proxy using mTLS, not directly by this API"
+      x-sidecar-implementation: true
+security:
+  - sideCarProxySecurity : []

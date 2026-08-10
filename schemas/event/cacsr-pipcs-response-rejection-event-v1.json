@@ -1,0 +1,60 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "recordId": {
+      "type": "string",
+      "description": "Unique Identifier for each record in the file"
+    },
+    "fileName": {
+      "type": "string",
+      "pattern": "^PIP_CA_DATA_\\d{5}$",
+      "description": "Pipcs response file name"
+    },
+    "lastRecord": {
+      "type": "boolean",
+      "description": "Flag indicating if this is the last record"
+    },
+    "totalRecordCount": {
+      "type": "integer",
+      "description": "Total number of records in the file(populated when lastRecord is true)"
+    },
+    "recordType": {
+      "type": "string",
+      "enum": [
+        "01",
+        "02"
+      ],
+      "description": "RecordType from Pipcs response file"
+    },
+    "caServiceIndicator": {
+      "enum": [
+        "1",
+        "2"
+      ]
+    },
+    "dpNino": {
+      "$ref": "#/$defs/nino_def",
+      "description": "NI number of the PIP claimant"
+    },
+    "customerNino": {
+      "$ref": "#/$defs/nino_def",
+      "description": "NI number of the CA customer"
+    }
+  },
+  "$defs": {
+    "nino_def": {
+      "type": "string",
+      "minLength": 8,
+      "maxLength": 8,
+      "pattern": "^(?!BG|GB|NK|KN|TN|NT|ZZ)[ABCEGHJ-PRSTW-Z][ABCEGHJ-NPRSTW-Z]\\d{6}"
+    }
+  },
+  "required": [
+    "fileName",
+    "recordType",
+    "caServiceIndicator",
+    "dpNino",
+    "customerNino"
+  ]
+}

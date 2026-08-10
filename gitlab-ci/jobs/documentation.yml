@@ -2,11 +2,6 @@
 ###    Jobs to add project documentation                                             ###
 ########################################################################################
 
-### ENVIRONMENT
-.environment: &environment
-  environment:
-    name: "$ENVIRONMENT"
-    action: prepare
 
 ### TRIGGERS
 .documentation: &documentation
@@ -18,6 +13,5 @@ create-project-badges:
   extends: .create-project-badges-template
   dependencies:
     - todo-check
-  <<: *environment
   <<: *documentation
   

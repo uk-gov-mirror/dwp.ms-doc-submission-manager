@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "$id": "https://gitlab.com/dwp/health/pip-apply/schemas/database/ms-claim-manager-db-schema-v1.json",
+  "type": "object",
+  "title": "ms-claim-manager database json schema",
+  "description": "Schema describe PIP-apply ms-claim-manager database",
+  "properties": {
+    "applicationData": {
+      "type": "string"
+    },
+    "benefitCode": {
+      "type": "string"
+    },
+    "claimStatus": {
+      "type": "string"
+    },
+    "claimantId": {
+      "type": "string"
+    },
+    "completed": {
+      "type": "string"
+    },
+    "drsRequestId": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "drsRequestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "effectiveFrom": {
+      "type": "string"
+    },
+    "effectiveTo": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string"
+    },
+    "instanceId": {
+      "type": "string"
+    },
+    "submissionId": {
+      "type": "string"
+    }
+  }
+}

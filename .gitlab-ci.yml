@@ -5,6 +5,7 @@
 
 include:
   # config
+  - local: "/gitlab-ci/config/components.yml"
   - local: "/gitlab-ci/config/fragments.yml"
   - local: "/gitlab-ci/config/stages.yml"
   - local: "/gitlab-ci/config/constants.yml"

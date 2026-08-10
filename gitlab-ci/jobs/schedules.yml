@@ -2,11 +2,6 @@
 ###    Jobs to add project schedules                                                 ###
 ########################################################################################
 
-### ENVIRONMENT
-.environment: &environment
-  environment:
-    name: "$ENVIRONMENT"
-    action: prepare
 
 ### TRIGGERS
 .merge-to-develop: &merge-to-develop
@@ -22,5 +17,4 @@ create-nightly-develop-build-schedule:
     SCHEDULE_CRON: "00 19 * * *"
     RANDOMIZE_NIGHT: "true"
     RANDOMIZE_MINS: "true"
-  <<: *environment
   <<: *merge-to-develop

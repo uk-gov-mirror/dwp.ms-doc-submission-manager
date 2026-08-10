@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "decision-made-event-v2.json",
+  "type": "object",
+  "title": "decision-made-v2",
+  "description": "Event used to notify coordinator that a decision has been made",
+  "required": [
+    "decision"
+  ],
+  "properties": {
+    "decision": {
+      "$ref": "common/decision-data-v1.json"
+    },
+    "notification": {
+      "$ref": "decision-notification-event-v1.json"
+    }
+  }
+}

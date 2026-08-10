@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://business.events.integration.health.dwp.gov.uk/intra-domain-business-event/type-refs-v1-schema.json",
+  "type": "object",
+  "title": "type-schema",
+  "description": "Type definitions for Intra Domain Business Event.",
+  "defs": {
+    "application_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]{24}$",
+      "example": "5ed0d430716609122be7a4d6",
+      "description": "Application Identifier."
+    }
+  }
+}

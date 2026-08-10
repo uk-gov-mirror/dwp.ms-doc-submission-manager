@@ -1,0 +1,189 @@
+openapi: '3.1.0'
+
+info:
+  title: DWP PIP Decision Manager Service
+  description: Rest API for operations relating to UI From Data
+  version: '@project.version@'
+
+servers:
+  - url: 'https://localhost:8080'
+
+paths:
+  /v1/data/ui/form:
+    get:
+      tags:
+        - ui-data
+      summary: Get ui form data
+      operationId: getUiFormData
+      parameters:
+        - name: type
+          in: query
+          description: Type of the ui form data, typically maps to domain model
+          required: true
+          schema:
+            type: string
+            example: "DECISION_REVIEW"
+        - name: key
+          in: query
+          description: Key for the ui form data
+          required: true
+          schema:
+            type: string
+            pattern: ^[a-z0-9]{24}
+            example: "6ed1d430716609332be7a4d6"
+      responses:
+        200:
+          description: OK - ui form data retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FormDataDto'
+        400:
+          description: BAD REQUEST - query parameter not provided or invalid
+        404:
+          description: NOT FOUND - UI Form Data not found
+        500:
+          description: INTERNAL SERVER ERROR - Internal server error occurred
+
+    post:
+      tags:
+        - ui-data
+      summary: post a ui form data
+      operationId: createFormData
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FormDataDto'
+      responses:
+        201:
+          description: OK - UI Form Data created
+        400:
+          description: BAD REQUEST - query parameter not provided or invalid
+        404:
+          description: NOT FOUND - UI Form Data not found
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+
+    patch:
+      tags:
+        - ui-data
+      summary: Patch a ui form data
+      operationId: updateFormData
+      parameters:
+        - name: type
+          in: query
+          description: Type of the ui form data, typically maps to domain model
+          required: true
+          schema:
+            type: string
+            example: "DECISION_REVIEW"
+        - name: key
+          in: query
+          description: Key for the ui form data
+          required: true
+          schema:
+            type: string
+            pattern: ^[a-z0-9]{24}
+            example: "6ed1d430716609332be7a4d6"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateFormDataDto'
+      responses:
+        204:
+          description: NO CONTENT - UI Form Data updated successfully with form_data and/or version
+        400:
+          description: BAD REQUEST - query parameter not provided or invalid
+        404:
+          description: NOT FOUND - UI Form Data not found
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+
+    delete:
+      tags:
+        - ui-data
+      summary: delete a ui form data
+      operationId: deleteFormData
+      parameters:
+        - name: type
+          in: query
+          description: Type of the ui form data, typically maps to domain model
+          required: true
+          schema:
+            type: string
+            example: "DECISION_REVIEW"
+        - name: key
+          in: query
+          description: Key for the ui form data
+          required: true
+          schema:
+            type: string
+            pattern: ^[a-z0-9]{24}
+            example: "6ed1d430716609332be7a4d6"
+      responses:
+        204:
+          description: NO CONTENT - UI Form Data deleted successfully
+        400:
+          description: BAD REQUEST - query parameter not provided or invalid
+        404:
+          description: NOT FOUND - UI Form Data not found
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+components:
+  schemas:
+    FormDataDto:
+      type: object
+      required:
+        - type
+        - key
+        - version
+        - from_data
+      allOf:
+        - type: object
+          required:
+            - type
+            - key
+          properties:
+            id:
+              example: "6ed1d430716609332be7a4d6"
+              type: string
+              pattern: ^[a-z0-9]{24}
+            type:
+              type: string
+              description: Type of the ui form data, typically maps to domain model
+              example: "DECISION_REVIEW"
+            key:
+              type: string
+              description: Key for the ui form data
+              example: "6ed1d430716609332be7a4d6"
+              pattern: ^[a-z0-9]{24}
+        - $ref: '#/components/schemas/Version'
+        - $ref: '#/components/schemas/FormData'
+
+    UpdateFormDataDto:
+      type: object
+      required:
+        - from_data
+      allOf:
+        - $ref: '#/components/schemas/Version'
+        - $ref: '#/components/schemas/FormData'
+
+    Version:
+      type: object
+      description: Semantic version without Optional Suffixes.
+      properties:
+        version:
+          example: "1.0.0"
+          type: string
+          pattern: ^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$
+
+    FormData:
+      type: object
+      description: any json.
+      properties:
+        form_data:
+          type: object
+      meta:
+        type: object

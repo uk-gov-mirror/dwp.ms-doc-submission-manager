@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "decision-notification-event-v1.json",
+  "type": "object",
+  "title": "decision-notification-v1",
+  "description": "Event used as part of decision made event to provide data for coordinator in order to trigger notification event",
+  "required": [
+    "template",
+    "notificationData"
+  ],
+  "properties": {
+    "dwpGuid": {
+      "type": "string",
+      "javaName": "guid",
+      "description": "Guid for a given nino"
+    },
+    "clientApiKey": {
+      "type": "string",
+      "javaName": "clientApiKey",
+      "description": "Client api key"
+    },
+    "template": {
+      "$ref": "common/notification-template.json",
+      "description": "The notification template details"
+    },
+    "notificationData": {
+      "$ref": "notification-data-v1.json"
+    },
+    "correlationId": {
+      "javaName": "correlationId",
+      "type": "string"
+    },
+    "preview": {
+      "javaName": "preview",
+      "type": "string"
+    }
+  }
+}

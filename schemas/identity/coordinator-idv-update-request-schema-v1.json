@@ -1,0 +1,72 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "https://gitlab.com/dwp/health/pip-apply/schemas/identity/coordinator-idv-update-request-schema-v1.json",
+    "type": "object",
+    "title": "Application Coordinator identity request update schema",
+    "description": "Schema describes how Application Coordinator  identity request update message should be formulated",
+    "default": {},
+    "examples": [
+      {
+        "nino": "AA112233A",
+        "pip_apply_application_id": "61db48e403c1799df028",
+        "idv_states": "verified",
+        "identity_id": "be91d738-b76c-11ed-afa1-0242ac120002"
+      }
+    ],
+    "oneOf": [
+      {
+        "required": [
+          "pip_apply_application_id",
+          "idv_states",
+          "identity_id"
+        ]
+      },
+      {
+        "required": [
+          "nino",
+          "idv_states",
+          "identity_id"
+        ]
+      }
+    ],
+  "properties": {
+      "nino": {
+        "$id": "#/properties/nino",
+        "type": "string",
+        "title": "The nino schema",
+        "description": "Claimants nino",
+        "examples": [
+          "AA112233A"
+        ]
+      },
+      "pip_apply_application_id": {
+        "$id": "#/properties/pip_apply_application_id",
+        "type": "string",
+        "title": "The applicationId schema",
+        "description": "A unique ID for correlation purposes",
+        "examples": [
+          "61db48e403c1799df028"
+        ]
+      },
+      "idv_states": {
+        "$id": "#/properties/idv_states",
+        "type": "string",
+        "title": "The IDV status schema",
+        "description": "The IDV status to update the record with",
+        "enum": [
+          "verified",
+          "unverified"
+        ]
+      },
+      "identity_id": {
+        "$id": "#/properties/identity_id",
+        "type": "string",
+        "format": "uuid",
+        "title": "The IdentityId schema",
+        "description": "A unique UUID for Identity",
+        "examples": [
+          "be91d738-b76c-11ed-afa1-0242ac120002"
+        ]
+      }
+    }
+  }

@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "$id": "https://gitlab.com/dwp/health/pip-apply/schemas/database/ms-payment-manager-db-schema-v1.json",
+  "title": "ms-payment-manager database json schema",
+  "description": "Schema describing PIP-apply ms-payment-manager database",
+  "type": "object",
+  "properties": {
+    "paymentId": {
+      "type": "string"
+    },
+    "awardId": {
+      "type": "string"
+    },
+    "nino": {
+      "type": "string"
+    },
+    "paymentType": {
+      "type": "string"
+    },
+    "paymentStatus": {
+      "type": "string"
+    },
+    "paymentAmountDailyLiving": {
+      "type": "number"
+    },
+    "paymentAmountMobility": {
+      "type": "number"
+    },
+    "targetPaymentDate": {
+      "type": "date"
+    },
+    "actualPaymentDate": {
+      "type": "date"
+    },
+    "paymentRequestDate": {
+      "type": "date"
+    },
+    "paymentPeriodStart": {
+      "type": "date"
+    },
+    "paymentPeriodEnd": {
+      "type": "date"
+    }
+  }
+}

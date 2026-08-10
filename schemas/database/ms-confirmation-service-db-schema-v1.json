@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "$id": "https://gitlab.com/dwp/health/pip-apply/schemas/database/ms-confirmation-service-db-schema-v1.json",
+  "title": "ms-confirmation-service database json schema",
+  "description": "Schema describing PIP-apply ms-confirmation-service database",
+  "type": "object",
+  "properties": {
+    "fileName": {
+      "type": "string"
+    },
+    "recordType": {
+      "type": "string"
+    },
+    "dpNino": {
+      "type": "string"
+    },
+    "customerNino": {
+      "type": "string"
+    },
+    "serviceIndicator": {
+      "type": "string"
+    },
+    "startDate": {
+      "type": "date"
+    },
+    "customerSurname": {
+      "type": "string"
+    },
+    "customerFirstForename": {
+      "type": "string"
+    },
+    "customerOtherForename": {
+      "type": "string"
+    },
+    "customerDob": {
+      "type": "date"
+    },
+    "dpSurname": {
+      "type": "string"
+    },
+    "dpFirstForename": {
+      "type": "string"
+    },
+    "dpOtherForename": {
+      "type": "string"
+    },
+    "dpDateOfBirth": {
+      "type": "date"
+    }
+  }
+}

@@ -1,0 +1,125 @@
+{
+  "aboutYourHealth": {
+    "conditions": [
+      {
+        "order": 1,
+        "condition": "C1",
+        "approximateStartDate": "12 months ago",
+        "description": "This is the details about C1",
+        "meta": {
+          "name": "test",
+          "data": "test"
+        }
+      },
+      {
+        "order": 2,
+        "condition": "C2",
+        "approximateStartDate": "12 months ago",
+        "description": "This is the details about C2",
+        "meta": {
+          "name": "test",
+          "data": "test"
+        }
+      }
+    ],
+    "hcpDetails": [
+      {
+        "order": 1,
+        "name": "Jim",
+        "profession": "GP",
+        "phoneNumber": "07808555876",
+        "address": {
+          "line1": "123",
+          "line2": "Testing Street",
+          "townOrCity": "Newcastle",
+          "postCode": "NE6 5DX"
+        },
+        "lastContact": "October 2019"
+      },
+      {
+        "order": 2,
+        "name": "Jim",
+        "profession": "GP",
+        "phoneNumber": "07808555876",
+        "address": {
+          "line1": "123",
+          "line2": "Testing Street",
+          "townOrCity": "Newcastle",
+          "postCode": "NE6 5DX"
+        },
+        "lastContact": "October 2019"
+      }
+    ]
+  },
+  "dailyLiving": {
+    "preparingFood": {
+      "isAffected": "Yes",
+      "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Felis donec et odio pellentesque diam volutpat commodo sed egestas. Eget velit aliquet sagittis id consectetur purus ut faucibus."
+    },
+    "eatingDrinking": {
+      "isAffected": "Yes",
+      "useFeedingTube": "Yes",
+      "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Felis donec et odio pellentesque diam volutpat commodo sed egestas. Eget velit aliquet sagittis id consectetur purus ut faucibus."
+    },
+    "managingTreatments": {
+      "isAffected": "Yes",
+      "therapies": "moreDescription",
+      "description": "I had difficulties managing treatment"
+    },
+    "washingBathing": {
+      "isAffected": "Yes",
+      "description": "I face difficulties washing and Bathing"
+    },
+    "toiletIncontinence": {
+      "isAffected": "Yes",
+      "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Felis donec et odio pellentesque diam volutpat commodo sed egestas. Eget velit aliquet sagittis id consectetur purus ut faucibus."
+    },
+    "dressingUndressing": {
+      "isAffected": "Yes",
+      "description": "I face difficulty dressing and undressing"
+    },
+    "talkingListening": {
+      "isAffected": "Yes",
+      "description": "I face difficulties listening"
+    },
+    "reading": {
+      "isAffected": "Yes",
+      "description": "I face difficulty reading"
+    },
+    "mixingPeople": {
+      "isAffected": "Yes",
+      "description": "Yes I face difficulty socializing"
+    },
+    "managingMoney": {
+      "isAffected": "Yes",
+      "description": "I face difficulty managing money"
+    }
+  },
+  "mobility": {
+    "planningFollowing": {
+      "isAffected": "Yes",
+      "description": "I face difficulty planning"
+    },
+    "movingAround": {
+      "isAffected": "Yes",
+      "severity": {
+        "distance": "lessThan20m"
+      },
+      "description": "I face difficulty moving around"
+    }
+  },
+  "reasonableAdjustments": {
+    "adjustments": {
+      "isRequired": "Yes",
+      "description": "I do need adjustments"
+    },
+    "interpreter": {
+      "isRequired": "Yes",
+      "language": "French"
+    }
+  },
+  "other": {
+    "additionalInformation": "Yes",
+    "description": "I face difficulties"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "$id": "https://gitlab.com/dwp/health/pip-apply/schemas/registration/registration.schema.1.2.0.json",
+  "title": "Registration Schema",
+  "description": "Schema to describe the complete data structure for the registration component of the pip-apply application schema.",
+  "type": "object",
+  "properties": {
+    "additionalSupport": {
+      "description": "The additional support section of the registration data",
+      "$ref": "additional-support.schema.1.0.0.json"
+    },
+    "personalDetails": {
+      "type": "object",
+      "description": "The personal details section of the registration data",
+      "$ref": "personal-details.schema.1.1.0.json"
+    },
+    "residenceAndPresence": {
+      "description": "questions about residence and presence in the UK",
+      "type": "object",
+      "$ref": "residence-and-presence.schema.1.0.0.json"
+    },
+    "aboutYourHealth": {
+      "description": "section to capture details relating to health conditions, health professionals and healthcare residence",
+      "type": "object",
+      "$ref": "about-your-health.schema.1.1.0.json"
+    },
+    "motabilityScheme": {
+      "description": "The motability section of the registration data",
+      "$ref": "motability-scheme.schema.1.0.0.json"
+    }
+  },
+  "required": [
+    "additionalSupport",
+    "personalDetails",
+    "residenceAndPresence",
+    "aboutYourHealth"
+  ]
+}

@@ -1,0 +1,188 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "recordId": {
+      "type": "string",
+      "description": "Unique Identifier for each record in the file"
+    },
+    "fileName": {
+      "type": "string",
+      "pattern": "^PIP_CA_DATA_\\d{5}$",
+      "description": "Pipcs response file name"
+    },
+    "lastRecord": {
+      "type": "boolean",
+      "description": "Flag indicating if this is the last record"
+    },
+    "totalRecordCount": {
+      "type": "integer",
+      "description": "Total number of records in the file(populated when lastRecord is true)"
+    },
+    "recordType": {
+      "type": "string",
+      "enum": [
+        "03",
+        "04",
+        "05",
+        "06",
+        "07",
+        "08",
+        "09"
+      ],
+      "description": "RecordType from Pipcs response file"
+    },
+    "caServiceIndicator": {
+      "enum": [
+        "1",
+        "2"
+      ]
+    },
+    "dpNino": {
+      "$ref": "#/$defs/nino_def",
+      "description": "NI number of the PIP claimant"
+    },
+    "customerNino": {
+      "$ref": "#/$defs/nino_def",
+      "description": "NI number of the CA customer"
+    },
+    "qualifyingBenefit": {
+      "type": "string",
+      "enum": [
+        "0",
+        "2",
+        "5"
+      ],
+      "description": "Only populated when Record type is 5 (null value represented by 0), 2 – to indicate a change from PIP to CAA; 5 – to indicate ‘no change’ (QB is PIP)."
+    },
+    "dpSurname": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9\\s\\-']{1,35}$|^\\s{35}$",
+      "description": "Alphanumeric string, 1 to 35 characters long or space padded string"
+    },
+    "dpFirstForename": {
+      "$ref": "#/$defs/forename_def"
+    },
+    "dpOtherForename": {
+      "$ref": "#/$defs/forename_def"
+    },
+    "dateOfBirth": {
+      "$ref": "#/$defs/date_def"
+    },
+    "dateOfDeath": {
+      "$ref": "#/$defs/date_def"
+    },
+    "dpAddressLine1": {
+      "$ref": "#/$defs/address_line_def"
+    },
+    "dpAddressLine2": {
+      "$ref": "#/$defs/address_line_def"
+    },
+    "dpAddressLine3": {
+      "$ref": "#/$defs/address_line_def"
+    },
+    "dpAddressLine4": {
+      "$ref": "#/$defs/address_line_def"
+    },
+    "dpPostCode": {
+      "type": "string",
+      "pattern": "^[a-zA-Z]{1,2}\\d[a-zA-Z\\d]?\\s?\\d[a-zA-Z]{2}\\s?$|^\\s{8}$",
+      "description": "Alphanumeric string, 1 to 8 characters long or space padded string"
+    },
+    "qbEndDate": {
+      "$ref": "#/$defs/date_def"
+    },
+    "paStartDate1": {
+      "$ref": "#/$defs/date_def"
+    },
+    "paEndDate1": {
+      "$ref": "#/$defs/date_def"
+    },
+    "paClassification1": {
+      "$ref": "#/$defs/classification_def"
+    },
+    "paStartDate2": {
+      "$ref": "#/$defs/date_def"
+    },
+    "paEndDate2": {
+      "$ref": "#/$defs/date_def"
+    },
+    "paClassification2": {
+      "$ref": "#/$defs/classification_def"
+    },
+    "paMorePeriods": {
+      "type": "string",
+      "enum": [
+        "Y",
+        "N",
+        "X"
+      ],
+      "description": "Y for 2 or more qualifying payment adjustment periods, N for no periods or X if not set"
+    },
+    "dpGender": {
+      "type": "string",
+      "enum": [
+        "F",
+        "M",
+        "X"
+      ],
+      "description": "F, M or X"
+    }
+  },
+  "$defs": {
+    "address_line_def": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9\\s\\-'.,]{1,27}$|^\\s{27}$",
+      "description": "Alphanumeric string, 1 to 27 characters long or space padded string"
+    },
+    "date_def": {
+      "type": "string",
+      "pattern": "^\\d{8}$|^0{8}$",
+      "description": "Format: DDMMCCYY or 00000000 if no date specified"
+    },
+    "forename_def": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9\\s\\-']{1,70}$|^\\s{70}$",
+      "description": "Alphanumeric string, 1 to 70 characters long or space padded string"
+    },
+    "nino_def": {
+      "type": "string",
+      "minLength": 8,
+      "maxLength": 8,
+      "pattern": "^(?!BG|GB|NK|KN|TN|NT|ZZ)[ABCEGHJ-PRSTW-Z][ABCEGHJ-NPRSTW-Z]\\d{6}"
+    },
+    "classification_def": {
+      "type": "string",
+      "pattern": "^[0-9A-Z]{3}",
+      "description": "A three character capitalized string. Null values are represented by XXX"
+    }
+  },
+  "required": [
+    "fileName",
+    "recordType",
+    "caServiceIndicator",
+    "dpNino",
+    "customerNino",
+    "qualifyingBenefit",
+    "dpSurname",
+    "dpFirstForename",
+    "dpOtherForename",
+    "dateOfBirth",
+    "dateOfDeath",
+    "dpAddressLine1",
+    "dpAddressLine2",
+    "dpAddressLine3",
+    "dpAddressLine4",
+    "dpPostCode",
+    "qbEndDate",
+    "paStartDate1",
+    "paEndDate1",
+    "paClassification1",
+    "paStartDate2",
+    "paEndDate2",
+    "paClassification2",
+    "paMorePeriods",
+    "dpGender"
+
+  ]
+}

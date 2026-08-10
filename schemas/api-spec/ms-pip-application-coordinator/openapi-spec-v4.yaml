@@ -1,0 +1,121 @@
+openapi: '3.1.0'
+
+info:
+  title: DWP PIP Application Coordinator Service
+  description: Version 3 Rest API for operations relating to the application coordinator
+  version: '@project.version@'
+
+servers:
+  - url: 'https://localhost:8080'
+
+paths:
+
+  /v4/applications:
+    get:
+      summary: Get the application for a given id, only pass one ID
+      operationId: getApplication
+      description: Please note only one query parameter is allowed
+      parameters:
+        - in: query
+          name: application_id
+          schema:
+            type: string
+            pattern: ^[a-z0-9]{24}
+            example: "5ed0d430716609122be7a4d6"
+        - in: query
+          name: submission_id
+          schema:
+            type: string
+            pattern: ^[a-z0-9]{24}
+            example: "5ed0d430716609122be7a4d6"
+      responses:
+        200:
+          description: OK - application returned
+          content:
+            application/json:
+              schema:
+                $ref: 'includes/components.yaml#/components/schemas/ApplicationCoordinatorDto'
+        404:
+          description: An application with the given id was not found
+        400:
+          description: Bad request, either zero or more than one id is passed
+    post:
+      summary: Creates an application, differs from V1 in that an entry is newly create in coordinator and NOT looked up in application manager
+      operationId: createApplication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: 'includes/components.yaml#/components/schemas/ApplicationCreateDto'
+      responses:
+        201:
+          description: CREATED - initial application data created
+          content:
+            application/json:
+              schema:
+                $ref: 'includes/components.yaml#/components/schemas/ApplicationCoordinatorDto'
+        400:
+          description: BAD REQUEST - badly formed json or values not valid
+        409:
+          description: Conflict - active applications already exist
+
+  /v4/active/{nino}:
+    get:
+      summary: Get the current active application for the passed nino
+      operationId: getActiveApplication
+      description: Used to get the active application for the passed nino
+      parameters:
+        - in: path
+          name: nino
+          required: true
+          schema:
+            type: string
+            pattern: ^(?!BG|GB|NK|KN|TN|NT|ZZ)[ABCEGHJ-PRSTW-Z][ABCEGHJ-NPRSTW-Z]\d{6}[A-D]
+            example: "NS212121D"
+      responses:
+        200:
+          description: OK - application returned
+          content:
+            application/json:
+              schema:
+                $ref: 'includes/components.yaml#/components/schemas/ApplicationCoordinatorDto'
+        404:
+          description: An application with the given nino was not found
+        400:
+          description: Bad request, no nino passed
+
+  /v4/applications/{nino}:
+    get:
+      summary: Gets a list of applications for the passed path parameter
+      operationId: listApplications
+      description: Used for getting a list of applications for the passed nino filtered by optional state(s)
+      parameters:
+        - in: path
+          name: nino
+          required: true
+          schema:
+            type: string
+            pattern: ^(?!BG|GB|NK|KN|TN|NT|ZZ)[ABCEGHJ-PRSTW-Z][ABCEGHJ-NPRSTW-Z]\d{6}[A-D]
+            example: "NS212121D"
+        - in: query
+          name: states
+          required: false
+          explode: false
+          schema:
+            type: array
+            items:
+              $ref: "includes/components.yaml#/components/schemas/StateEnum"
+      responses:
+        200:
+          description: OK - applications returned
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: 'includes/components.yaml#/components/schemas/ApplicationCoordinatorDto'
+        404:
+          description: No applications found with the given nino and filters
+        400:
+          description: Bad request, no nino passed

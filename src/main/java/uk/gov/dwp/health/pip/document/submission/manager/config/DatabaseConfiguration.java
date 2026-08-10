@@ -3,7 +3,7 @@ package uk.gov.dwp.health.pip.document.submission.manager.config;
 import com.mongodb.ServerApi;
 import com.mongodb.ServerApiVersion;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.mongo.MongoClientSettingsBuilderCustomizer;
+import org.springframework.boot.mongodb.autoconfigure.MongoClientSettingsBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.core.convert.MongoCustomConversions;

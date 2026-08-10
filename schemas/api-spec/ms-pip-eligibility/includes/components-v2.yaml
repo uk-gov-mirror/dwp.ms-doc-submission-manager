@@ -1,0 +1,142 @@
+components:
+  schemas:
+    Question:
+      type: object
+      description: question
+      properties:
+        question:
+          $ref: "#/components/schemas/QuestionEnum"
+
+    QuestionEnum:
+      title: QuestionEnum
+      example: "nino"
+      type: string
+      enum:
+        - "nino"
+        - "name"
+        - "address"
+        - "dateOfBirth"
+        - "dateOfDeath"
+        - "nationality"
+        - "residencyPresence"
+        - "immigrationStatus"
+        - "srel"
+        - "representativeAppointee"
+        - "withdrawn"
+        - "age"
+        - "alternativeFormat"
+        - "fraud"
+        - "kcis"
+        - "workingAbroad"
+        - "foreignBenefits"
+        - "dla"
+        - "disabilityPayment"
+        - "afip"
+        - "wpms"
+        - "caa"
+        - "previousPipClaim"
+        - "correspondenceAddress"
+
+    Answer:
+      type: object
+      description: answer
+      properties:
+        answer:
+          $ref: "#/components/schemas/AnswerEnum"
+
+    AnswerEnum:
+      title: AnswerEnum
+      example: "yes"
+      type: string
+      enum:
+        - "yes"
+        - "no"
+        - "comeBack"
+        - "overStatePensionAge"
+        - "under16"
+
+    Status:
+      type: object
+      description: status
+      properties:
+        status:
+          $ref: "#/components/schemas/StatusEnum"
+
+    StatusEnum:
+      title: StatusEnum
+      example: "done"
+      type: string
+      enum:
+        - "done"
+        - "issue"
+        - "pending"
+
+    EligibilityId:
+      type: object
+      description: eligibility id
+      properties:
+        eligibility_id:
+          example: "6ed1d430716609122be7a4d6"
+          type: string
+          pattern: ^[a-zA-Z0-9]{24}
+
+    ApplicationId:
+      type: object
+      description: application id
+      properties:
+        application_id:
+          example: "6ed1d430716609122be7a4d6"
+          type: string
+          pattern: ^[a-zA-Z0-9]{24}
+
+    Outcome:
+      type: object
+      description: pre HAS eligibility outcome
+      properties:
+        outcome:
+          $ref: "#/components/schemas/OutcomeEnum"
+
+    OutcomeEnum:
+      title: OutcomeEnum
+      example: "disallow"
+      type: string
+      enum:
+        - "sendToHas"
+        - "moveToPIPCS"
+        - "disallow"
+        - "withdraw"
+
+    OutcomeDate:
+      type: object
+      description: date outcome recorded against the application
+      properties:
+        outcome_date:
+          example: "2023-01-29T17:32:28Z"
+          type: string
+          format: date-time
+
+    QuestionAnswer:
+      title: QuestionAnswer
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Question'
+        - $ref: '#/components/schemas/Answer'
+        - $ref: '#/components/schemas/Status'
+
+    EligibilityQuestionAnswer:
+      title: EligibilityQuestionAnswer
+      type: object
+      description: question answers related to eligibility.
+      properties:
+        question_answers:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuestionAnswer'
+
+    UserWhoCreatedTheOutcome:
+      type: object
+      description: user who created the outcome
+      properties:
+        user_who_created_the_outcome:
+          example: "aUser"
+          type: string

@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "title": "award-created-v1",
+  "description": "Award created event from Award Manager to PIP Payment Gateway",
+  "required": [
+    "award_id",
+    "application_id",
+    "nino",
+    "start_date",
+    "end_date",
+    "payable_from_date",
+    "review_date",
+    "payment_frequency",
+    "daily_living_rate",
+    "mobility_rate",
+    "decision_date"
+  ],
+  "properties": {
+    "award_id": {
+      "$ref": "#/$defs/award_id_def"
+    },
+    "application_id": {
+      "$ref": "#/$defs/application_id_def"
+    },
+    "nino": {
+      "$ref": "#/$defs/nino_def"
+    },
+    "start_date": {
+      "$ref": "#/$defs/start_date_def"
+    },
+    "end_date": {
+      "$ref": "#/$defs/end_date_def"
+    },
+    "payable_from_date": {
+      "$ref": "#/$defs/payable_from_date_def"
+    },
+    "review_date": {
+      "$ref": "#/$defs/review_date_def"
+    },
+    "payment_frequency": {
+      "$ref": "common/payment-frequency.json"
+    },
+    "daily_living_rate": {
+      "$ref": "common/award-rate.json"
+    },
+    "mobility_rate": {
+      "$ref": "common/award-rate.json"
+    },
+    "decision_date": {
+      "$ref": "#/$defs/decision_date_def"
+    },
+    "review_period": {
+      "$ref": "common/review-period.json"
+    },
+    "bank_details": {
+      "$ref": "common/bank-details-v1.json"
+    }
+  },
+  "$defs": {
+    "award_id_def": {
+      "type": "string",
+      "description": "Award ID"
+    },
+    "application_id_def": {
+      "type": "string",
+      "description": "Application ID"
+    },
+    "nino_def": {
+      "type": "string",
+      "description": "Citizen nino associated with the application"
+    },
+    "start_date_def": {
+      "type": "string",
+      "format": "date",
+      "description": "Date string (yyyy-MM-dd) of the start of the award"
+    },
+    "end_date_def": {
+      "type": "string",
+      "format": "date",
+      "description": "Date string (yyyy-MM-dd) of the end of the award"
+    },
+    "payable_from_date_def": {
+      "type": "string",
+      "format": "date",
+      "description": "Date string (yyyy-MM-dd) when the claimant was entitled from"
+    },
+    "review_date_def": {
+      "type": "string",
+      "format": "date",
+      "description": "Date string (yyyy-MM-dd) when the award needs reviewing"
+    },
+    "decision_date_def": {
+      "type": "string",
+      "format": "date",
+      "description": "Date string (yyyy-MM-dd) when the decision was made"
+    }
+  }
+}

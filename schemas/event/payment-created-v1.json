@@ -1,0 +1,132 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "title": "payment-created-v1",
+  "description": "Payment created event from PIP Payment Gateway to Award Manager",
+  "required": [
+    "award_id",
+    "application_id",
+    "nino",
+    "start_date",
+    "end_date",
+    "payable_from_date",
+    "review_date",
+    "payment_frequency",
+    "daily_living_rate",
+    "mobility_rate",
+    "decision_date"
+  ],
+  "properties": {
+    "award_id": {
+      "$ref": "#/$defs/award_id_def"
+    },
+    "decision_id": {
+      "$ref": "#/$defs/decision_id_def"
+    },
+    "nino": {
+      "$ref": "#/$defs/nino_def"
+    },
+    "mobility_award_rate": {
+      "$ref": "#/$defs/mobility_award_rate_def"
+    },
+    "mobility_payable_from_date": {
+      "$ref": "#/$defs/mobility_payable_from_date_def"
+    },
+    "mobility_award_end_date": {
+      "$ref": "#/$defs/mobility_award_end_date_def"
+    },
+    "daily_living_payable_rate": {
+      "$ref": "#/$defs/daily_living_payable_rate_def"
+    },
+    "daily_living_payable_from_date": {
+      "$ref": "#/$defs/daily_living_payable_from_date_def"
+    },
+    "daily_living_award_end_date": {
+      "$ref": "#/$defs/daily_living_award_end_date_def"
+    },
+    "payment_day": {
+      "$ref": "#/$defs/payment_day_def"
+    },
+    "arrears_amount": {
+      "$ref": "#/$defs/arrears_amount_def"
+    },
+    "arrears_payment_date": {
+      "$ref": "#/$defs/arrears_payment_date_def"
+    },
+    "arrears_start_date": {
+      "$ref": "#/$defs/arrears_start_date_def"
+    },
+    "arrears_end_date": {
+      "$ref": "#/$defs/arrears_end_date_def"
+    }
+  },
+  "$defs": {
+    "award_id_def": {
+      "type": "string",
+      "description": "Award ID"
+    },
+    "decision_id_def": {
+      "type": "string",
+      "description": "Decision Id"
+    },
+    "nino_def": {
+      "type": "string",
+      "description": "Citizen nino associated with the application"
+    },
+    "mobility_award_rate_def": {
+      "type": "number",
+      "description": "Weekly amount due to claimant for mobility component, in £ and p"
+    },
+    "mobility_payable_from_date_def": {
+      "type": "string",
+      "format": "date",
+      "description": "The date from which the claimant is payable for mobility component (yyyy-MM-dd)"
+    },
+    "mobility_award_end_date_def": {
+      "type": "string",
+      "format": "date",
+      "description": "The date the claimant is payable until for mobility component (yyyy-MM-dd)"
+    },
+    "daily_living_payable_rate_def": {
+      "type": "number",
+      "description": "Weekly amount due to claimant for daily living component, in £ and p"
+    },
+    "daily_living_payable_from_date_def": {
+      "type": "string",
+      "format": "date",
+      "description": "The date from which the claimant is payable for daily living component (yyyy-MM-dd)"
+    },
+    "daily_living_award_end_date_def": {
+      "type": "string",
+      "format": "date",
+      "description": "The date the claimant is payable until for mobility component (yyyy-MM-dd)"
+    },
+    "payment_day_def": {
+      "type": "string",
+      "description": "The day of the week which the claimant will be paid on",
+      "enum": [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday"
+      ]
+    },
+    "arrears_amount_def": {
+      "type": "number",
+      "description": "The amount which the claimant is owed in arrears, in £ and p"
+    },
+    "arrears_payment_date_def": {
+      "type": "string",
+      "description": "The date that the claimant will be paid their arrears payment (yyyy-MM-dd)"
+    },
+    "arrears_start_date_def": {
+      "type": "string",
+      "description": "The date that the claimant became payable for arrears (yyyy-MM-dd)"
+    },
+    "arrears_end_date_def": {
+      "type": "string",
+      "description": "The date that the claimant will no longer be payable for arrears (yyyy-MM-dd)"
+    }
+  }
+}

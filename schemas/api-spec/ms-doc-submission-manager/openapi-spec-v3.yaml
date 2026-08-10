@@ -1,0 +1,51 @@
+openapi: 3.1.0
+
+info:
+  title: Document Submission Service - PIP-Apply
+  description: Rest API for managing document submissions to DRS
+  version: '@project.version@'
+
+servers:
+  - url: 'https://localhost:9980'
+
+paths:
+  /v3/apply:
+    post:
+      tags:
+        - submission
+      summary: POST call to complete all actions upon submission and send first batch of evidence to DRS
+      description: > 
+        endpoint to complete all actions upon submission and send evidence to DRS
+        the response has been set to type object due to the nested objects within the response (HealthCaptureApplicationDto)
+        this response can be parsed to a HealthCaptureApplicationDto anywhere it is consumed
+      operationId: applyPIP
+      parameters:
+        - in: header
+          name: x-user-id
+          description: Id of user that is logged in,
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplicationIdDto'
+      responses:
+        202:
+          description: submission accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                description: a health capture application dto
+
+components:
+  schemas:
+    ApplicationIdDto:
+      type: object
+      properties:
+        application_id:
+          type: string
+          pattern: ^[a-z0-9]{24}
+          example: 507f1f77bcf86cd799439011

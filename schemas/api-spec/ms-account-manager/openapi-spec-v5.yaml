@@ -1,0 +1,174 @@
+openapi: '3.1.0'
+
+info:
+  title: DWP Apply for PIP account manager service v5
+  version: 4.0.0
+
+servers:
+  - url: 'https://localhost:8080'
+
+paths:
+  /v5/can-apply/{nino}:
+    get:
+      tags:
+        - Citizens
+      summary: Indicate if an application can be submitted for the citizen
+      description: "For given citizen NINO provide information indicating if an application can be made:\r\n* an active PIP Award exists\r\n* an active application exists\r\n\r\n Agent Use Case(s):\r\n* No digital account exists, perform **realtime**\r\n* Digital account exists and all claim/application records have a state of [withdrawn or decision-made]; perform **realtime**\r\n\r\nCitizen Use Case(s):\r\n* private beta only and application record state in [application_pending, application_started]; perform **realtime**\r\n\r\nPerforms BR3008 check"
+      parameters:
+        - name: x-dwp-correlation-id
+          in: header
+          required: true
+          schema:
+            type: string
+        - name: nino
+          in: path
+          required: true
+          schema:
+            type: string
+          description: 'pattern is ^(?!BG)(?!GB)(?!NK)(?!KN)(?!TN)(?!NT)(?!ZZ)[A-Z&&[^DFIQUV]][A-Z&&[^DFIOQUV]][0-9]{6}[A-D]$ and maxLength is 9'
+      responses:
+        '200':
+          description: A new claim can be made now.
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/CheckClaimResponse'
+        '400':
+          description: The data request is invalid. Check the error message for further information and resend the request with the corrected data.
+        '412':
+          description: 1.A new claim can not be made as an existing claim is in progress. 2.A new claim can not be made as no award end date is set on current claim. 3.A new claim can not be made as the award end date is more than 6 months in the future.
+        '417':
+          description: nino data item failed PIPCS validation rules.PIP Apply data not uploaded to PIPCS.
+        '500':
+          description: An internal server error occurred. Contact your administrator for more information
+        default:
+          description: An unexpected error occurred. Check the error message for further information
+
+  /v5/account/transfer/:
+    patch:
+      tags:
+        - patch
+      summary: PATCH an account with transfer status details
+      description: PATCH to updating claimant transfer status details
+      operationId: updateTransferStatus
+      parameters:
+        - name: x-email
+          in: header
+          required: true
+          schema:
+            type: string
+            pattern: "(^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$)"
+            example: fred.blogs@email.com
+            description: Email address
+      responses:
+        200:
+          description: OK - No update required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/message'
+        202:
+          description: ACCEPTED - Claimant transfer details update accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/message'
+        400:
+          description: BAD REQUEST - badly formed json
+        401:
+          description: UNAUTHORIZED - Account does not exist with given email
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+
+  /v5/accounts:
+    post:
+      tags:
+        - create
+      summary: POST call to create a new account
+      description: POST call to create new account with all the verified data that will be used as part of the identification and authorisation steps
+      operationId: createAccount
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/V5NewAccountRequest'
+      responses:
+        201:
+          description: CREATED - new account created
+          content:
+            application/json:
+              schema:
+                $ref: 'openapi-spec-v1.yaml#/components/schemas/AccountReturn'
+        400:
+          description: BAD REQUEST - badly formed json or duplicate entry
+        409:
+          description: CONFLICT - citizen account already exists. Will return message body of 'NINO' or 'EMAIL'
+          content:
+            application/json:
+              schema:
+                $ref: 'openapi-spec-v1.yaml#/components/schemas/FailureResponse'
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+
+  /v5/limiter:
+    get:
+      tags:
+        - limiter
+      summary:
+        check whether the number of account registrations has reached the limit for this period
+      operationId: getLimiter
+      responses:
+        200:
+          description:
+            indicates whether the number of account registrations has reached the limit for this period
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegistrationsLimiterDto'
+
+components:
+  schemas:
+    CheckClaimResponse:
+      type: object
+      properties:
+        responseMessage:
+          type: string
+          maxLength:
+        nino:
+          type: string
+          maxLength: 9
+    message:
+      type: object
+      properties:
+        message:
+          description: Transfer Status has successfully been updated.
+          type: string
+    V5NewAccountRequest:
+      type: object
+      required:
+        - email
+        - nino
+        - dob
+        - forename
+        - surname
+        - mobile_phone
+        - postcode
+        - language
+        - user_journey
+      allOf:
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/EmailAddress'
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/NationalInsurance'
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/DateOfBirth'
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/Surname'
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/Forename'
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/Postcode'
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/MobilePhoneNumber'
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/Language'
+        - $ref: 'openapi-spec-v3.yaml#/components/schemas/UserJourney'
+    RegistrationsLimiterDto:
+      type: object
+      properties:
+        limit_reached:
+          type: boolean
+          default: false

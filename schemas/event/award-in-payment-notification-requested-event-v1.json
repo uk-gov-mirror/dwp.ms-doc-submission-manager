@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "award-in-payment-notification-requested-event-v1.json",
+  "type": "object",
+  "title": "award-in-payment-notification-requested-event-v1",
+  "description": "Event used to notify coordinator to send notification that a decision awarded is in payment",
+  "required": [
+    "application_id",
+    "notification"
+  ],
+  "properties": {
+    "application_id": {
+      "type": "string",
+      "description": "The application id for which decision notification request has been made"
+    },
+    "nino": {
+      "type": "string",
+      "description": "The nino for the application"
+    },
+    "notification": {
+      "$ref": "decision-notification-event-v1.json"
+    }
+  }
+}

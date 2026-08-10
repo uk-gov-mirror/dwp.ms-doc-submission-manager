@@ -1,10 +1,10 @@
 package uk.gov.dwp.health.pip.document.submission.manager.service.impl;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 import uk.gov.dwp.health.integration.message.events.EventManager;
 import uk.gov.dwp.health.pip.document.submission.manager.config.properties.EventConfigProperties;
 import uk.gov.dwp.health.pip.document.submission.manager.event.PipDrsEvent;

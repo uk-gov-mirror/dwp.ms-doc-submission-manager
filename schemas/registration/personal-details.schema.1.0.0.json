@@ -1,0 +1,295 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "$id": "https://gitlab.com/dwp/health/pip-apply/schemas/registration/personal-details.schema.1.0.0.json",
+  "title": "personal details schema",
+  "description": "The personal-details section of the registration data",
+  "type": "object",
+  "properties": {
+    "surname": {
+      "description": "The claimant's surname",
+      "type": "string",
+      "pattern": "^[ -~]+$",
+      "maxLength": 35,
+      "minLength": 1,
+      "examples": [
+        "Claimant"
+      ]
+    },
+    "firstname": {
+      "description": "The claimant's first name",
+      "type": "string",
+      "pattern": "^[ -~]+$",
+      "maxLength": 35,
+      "minLength": 1,
+      "examples": [
+        "Bob",
+        "Alice"
+      ]
+    },
+    "nino": {
+      "description": "The claimant's nino",
+      "type": "string",
+      "pattern": "^(?!BG|GB|NK|KN|TN|NT|ZZ)[ABCEGHJ-PRSTW-Z][ABCEGHJ-NPRSTW-Z]\\d{6}[A-D]$",
+      "maxLength": 9,
+      "examples": [
+        "AA111111A"
+      ]
+    },
+    "dob": {
+      "description": "The claimant's date of birth",
+      "type": "string",
+      "format": "date",
+      "examples": [
+        "2001-01-01"
+      ]
+    },
+    "address": {
+      "description": "The claimant's address",
+      "$ref": "address.schema.1.0.0.json"
+    },
+    "alternativeAddress": {
+      "description": "The claimant's address",
+      "$ref": "address.schema.1.0.0.json"
+    },
+    "contact": {
+      "$ref": "#/$defs/contact100"
+    },
+    "bankDetails": {
+      "$ref": "#/$defs/bankDetails100"
+    },
+    "alternateFormat": {
+      "$ref": "#/$defs/alternateFormat100"
+    }
+  },
+  "required": [
+    "surname",
+    "firstname",
+    "nino",
+    "dob",
+    "address",
+    "bankDetails",
+    "contact"
+  ],
+  "$defs": {
+    "bankDetails100": {
+      "description": "Supports the collection of bank details as part of the PIP1 journey",
+      "type": "object",
+      "properties": {
+        "enterBankDetails": {
+          "$ref": "#/$defs/enterBankDetails"
+        }
+      },
+      "oneOf": [
+        {
+          "properties": {
+            "enterBankDetails": {
+              "const": "No"
+            }
+          },
+          "required": [ "enterBankDetails" ],
+          "additionalProperties": false
+        },
+        {
+          "properties": {
+            "enterBankDetails": {
+              "const": "Yes"
+            },
+            "accountName": {
+              "description": "The name associated with the bank, building society or credit union account",
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 60,
+              "examples": [
+                "My Bank Account"
+              ]
+            },
+            "accountNumber": {
+              "description": "The number associated with the bank, building society or credit union account",
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 8,
+              "examples": [
+                "12345678"
+              ]
+            },
+            "sortCode": {
+              "description": "The sort code associated with the bank, building society or credit union account",
+              "type": "string",
+              "minLength": 6,
+              "maxLength": 6,
+              "examples": [
+                "123456"
+              ]
+            },
+            "rollNumber": {
+              "description": "The roll number associated with the bank, building society or credit union account",
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 18,
+              "examples": [
+                "1234567890",
+                "ABC/123",
+                "XY-234567"
+              ]
+            }
+          },
+          "required": [ "enterBankDetails", "accountName", "accountNumber", "sortCode" ],
+          "dependentRequired": {
+            "rollNumber": [
+              "accountName",
+              "accountNumber",
+              "sortCode"
+            ]
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "contact100": {
+      "description": "The claimant's contact details",
+      "type": "object",
+      "properties": {
+        "mobileNumber": {
+          "type": "string",
+          "pattern": "^07\\d{9}$",
+          "examples": [
+            "07123123123"
+          ]
+        },
+        "alternativeNumber": {
+          "type": "string",
+          "pattern": "^0(?:\\d{10}|\\d{9})$",
+          "examples": [
+            "01234567891"
+          ]
+        },
+        "textphone": {
+          "type": "string",
+          "pattern": "^0(?:\\d{10}|\\d{9})$",
+          "examples": [
+            "01234567891"
+          ]
+        },
+        "smsUpdates": {
+          "description": "receive updates on the progress of the application via sms",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "mobileNumber",
+        "smsUpdates"
+      ]
+    },
+    "alternateFormat100": {
+      "type": "object",
+      "properties": {
+        "formatType": {
+          "type": "string",
+          "enum": [
+            "braille",
+            "signLanguage",
+            "audio",
+            "other"
+          ],
+          "examples": [
+            "braille"
+          ]
+        }
+      },
+      "oneOf": [
+        {
+          "properties": {
+            "formatType": {
+              "const": "braille"
+            },
+            "brailleOptions": {
+              "type": "string",
+              "enum": [
+                "type1Uncontracted",
+                "type2Contracted"
+              ]
+            }
+          },
+          "required": [
+            "brailleOptions"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "properties": {
+            "formatType": {
+              "const": "signLanguage"
+            },
+            "signLanguageOptions": {
+              "type": "string",
+              "enum": [
+                "britishDvd",
+                "britishMpeg",
+                "irishDvd",
+                "irishMpeg"
+              ]
+            }
+          },
+          "required": [
+            "signLanguageOptions"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "properties": {
+            "formatType": {
+              "const": "audio"
+            },
+            "audioOptions": {
+              "type": "string",
+              "enum": [
+                "cassette",
+                "cd",
+                "dvd",
+                "mp3"
+              ]
+            }
+          },
+          "required": [
+            "audioOptions"
+          ]
+        },
+        {
+          "properties": {
+            "formatType": {
+              "const": "other"
+            },
+            "otherOptions": {
+              "type": "string",
+              "enum": [
+                "colouredPaper",
+                "largePrint16Font",
+                "largePrintCustomFont",
+                "accessiblePDF",
+                "email",
+                "other"
+              ]
+            },
+            "alternateFormatAdditionalInfo": {
+              "type": "string",
+              "pattern": "^[ -~]+$",
+              "maxLength": 240
+            }
+          },
+          "required": [
+            "otherOptions"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "enterBankDetails": {
+      "description": "The claimant's response to Can you provide bank, building society or credit union account details?",
+      "type": "string",
+      "examples": [
+        "Yes",
+        "No"
+      ]
+    }
+  }
+}

@@ -1,0 +1,84 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "recordId": {
+      "type": "string",
+      "description": "Unique Identifier for each record in the file"
+    },
+    "fileName": {
+      "type": "string",
+      "pattern": "^[p|P]80201500[1|2]00\\d{5}$",
+      "description": "Carer Event file name"
+    },
+    "lastRecord": {
+      "type": "boolean",
+      "description": "Flag indicating if this is the last record"
+    },
+    "totalRecordCount": {
+      "type": "integer",
+      "description": "Total number of records in the file(populated when lastRecord is true)"
+    },
+    "recordType": {
+      "type": "string",
+      "enum": [
+        "1",
+        "2"
+      ]
+    },
+    "dpNino": {
+      "type": "string",
+      "pattern": "^(?!BG|GB|NK|KN|TN|NT|ZZ)[ABCEGHJ-PRSTW-Z][ABCEGHJ-NPRSTW-Z]\\d{6}"
+    },
+    "customerNino": {
+      "type": "string",
+      "pattern": "^(?!BG|GB|NK|KN|TN|NT|ZZ)[ABCEGHJ-PRSTW-Z][ABCEGHJ-NPRSTW-Z]\\d{6}[A-D]"
+    },
+    "serviceIndicator": {
+      "enum": [
+        "1",
+        "2"
+      ]
+    },
+    "startDate": {
+      "$ref": "#/$defs/date_def"
+    },
+    "customerSurname": {
+      "$ref": "#/$defs/customer_name_def"
+    },
+    "customerFirstForename": {
+      "$ref": "#/$defs/customer_name_def"
+    },
+    "customerOtherForename": {
+      "$ref": "#/$defs/customer_name_def"
+    },
+    "customerDob": {
+      "$ref": "#/$defs/date_def"
+    }
+  },
+  "$defs": {
+    "customer_name_def": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9\\s\\-']{1,35}$|^\\s{35}$",
+      "description": "Alphanumeric string, 1 to 35 characters long or space padded string"
+
+    },
+    "date_def": {
+      "type": "string",
+      "pattern": "^\\d{8}$",
+      "description": "Format: DDMMCCYY"
+    }
+  },
+  "required": [
+    "fileName",
+    "recordType",
+    "dpNino",
+    "customerNino",
+    "serviceIndicator",
+    "startDate",
+    "customerSurname",
+    "customerFirstForename",
+    "customerOtherForename",
+    "customerDob"
+  ]
+}

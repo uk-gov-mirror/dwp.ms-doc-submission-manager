@@ -1,0 +1,113 @@
+{
+  "channelType": "Phone",
+  "identityConfirmed": "Yes",
+  "motabilityScheme": {
+    "receiveMotabilityInformation": "Yes"
+  },
+  "additionalSupport": {
+    "helpCommunicating": true,
+    "helpUnderstandingLetters": true,
+    "helperDetails": {
+      "surname": "T7vQ1SD6YL153OmQWxuzdoskGVLCToeTest",
+      "firstName": "T7vQ1SD6YL153OmQWxuzdoskGVLCToeTest"
+    }
+  },
+  "personalDetails": {
+    "surname": "Azzzle",
+    "firstName": "1SD6YL153OmQWxuzdoskGVLCToeRamaAzme",
+    "nino": "RN000020D",
+    "dob": "2000-01-01",
+    "address": {
+      "line1": "NQC2JhPWurvWRP1ZL7Goz2LKBFDufFjeP3o",
+      "line2": "NQC2JhPWurvWRP1ZL7Goz2LKBFDufFjeP3o",
+      "line3": "NQC2JhPWurvWRP1ZL7Goz2LKBFDufFjeP3o",
+      "town": "NQC2JhPWurvWRP1ZL7Goz2LKBFDufFjeP3o",
+      "county": "QvBQYuxiXXVytGCxzVllpgTJKhRQq",
+      "country": "England",
+      "postcode": "AB11AB"
+    },
+    "bankDetails":{
+      "enterBankDetails": "Yes",
+      "accountName": "Bank of Yorkshire",
+      "accountNumber": "12341234",
+      "sortCode": "123123",
+      "rollNumber": "123123123"
+    },
+    "alternativeAddress": {
+      "line1": "YdvDhtAsLghPXAgtbprXPZkhnfLTBSX",
+      "line2": "NQC2JhPWurvWRP1ZL7Goz2LKBFDufFjeP3o",
+      "line3": "NQC2JhPWurvWRP1ZL7Goz2LKBFDufFjeP3o",
+      "town": "NQC2JhPWurvWRP1ZL7Goz2LKBFDufFjeP3o",
+      "county": "QvBQYuxiXXVytGCxzVllpgTJKhRQq",
+      "country": "England",
+      "postcode": "AB1 1AB"
+    },
+    "contact": {
+      "mobileNumber": "07777777777",
+      "alternativeNumber": "01139999999",
+      "textphone": "01139999999",
+      "smsUpdates": true
+    }
+  },
+  "residenceAndPresence": {
+    "nationality": "French",
+    "residentBeforeBrexit": "Yes",
+    "inUkTwoOutOfThreeYears": "Yes",
+    "receivingPensionsOrBenefitsFromEEA": true,
+    "payingInsuranceEEA": false
+  },
+  "aboutYourHealth": {
+    "healthConditions": [
+      "RTKctXFpeDPGM8Y37FWoO8hYqt1TAj11NlT486pd9qtxItRhJ9eUYQ7eSOiFJlZHuaTBwqIL9KIutQ43a3VRZgAxcmykGlX4duA1mpvv9HlBSjUWhcfc1oCpJKBBZAJy0BwPCGcvB7AVr679rcAiLPJpdzAHz711QhwmtPMPSnuEBf5DaycxxqeXMRgPgNRUxYrSUQKO",
+      "Az5rCDj6vsNPUzcT1TOFdtKEeeWzEMNkARpo2GzAtvHQLHKhj9JqwKx0KfVKYG9WIOmkszGUhhiTjwRULEc5E9IogknMGoVYYwrrSvaLSTMa4ay0V67lGXh1BkfK6x9EgRDQWSblWdZlQQdT4tfrpn",
+      "AA"
+    ],
+    "hcpContactConsent": true,
+    "hcpShareConsent": true,
+    "healthProfessionalsDetails1": {
+      "name": "NjqwMn0yr7FKjR2Xo0TIKwz0f5yAG8mKogfpuHSiUfSVLO5kRfYqb7el",
+      "profession": "Doctor",
+      "phoneNumber": "07777777777",
+      "address": {
+        "line1": "sPb0fbsQW1oWxg4BFtUdEAODG2qJM5xGZiL",
+        "line2": "sPb0fbsQW1oWxg4BFtUdEAODG2qJM5xGZiL",
+        "line3": "sPb0fbsQW1oWxg4BFtUdEAODG2qJM5xGZiL",
+        "town": "sPb0fbsQW1oWxg4BFtUdEAODG2qJM5xGZiL",
+        "county": "sPb0fbsQW1oWxg4BFtUdEAODG2qJM5xGZiL",
+        "country": "England",
+        "postcode": "AB11AB"
+      },
+      "lastContact": "01/01/2021"
+    },
+    "healthProfessionalsDetails2": {
+      "name": "Nj",
+      "profession": "Do",
+      "phoneNumber": "07777777777",
+      "address": {
+        "line1": "ABC",
+        "line2": "ABC",
+        "line3": "ABC",
+        "town": "ABC",
+        "county": "ABC",
+        "country": "England",
+        "postcode": "AB11AB"
+      },
+      "lastContact": "2 months ago"
+    },
+    "hospitalHospiceOrCarehome": {
+      "accommodationType": "hospital",
+      "accommodationName": "accommodation-name",
+      "address": {
+        "line1": "sPb0fbsQW1oWxg4BFtUdEAODG2qJM5xGZiL",
+        "line2": "sPb0fbsQW1oWxg4BFtUdEAODG2qJM5xGZiL",
+        "line3": "sPb0fbsQW1oWxg4BFtUdEAODG2qJM5xGZiL",
+        "town": "sPb0fbsQW1oWxg4BFtUdEAODG2qJM5xGZiL",
+        "county": "sPb0fbsQW1oWxg4BFtUdEAODG2qJM5xGZiL",
+        "country": "England",
+        "postcode": "AB1 1AB"
+      },
+      "admissionDate": "2021-01-01",
+      "privatePatientPayingOwnCosts": "Yes"
+    }
+  }
+}

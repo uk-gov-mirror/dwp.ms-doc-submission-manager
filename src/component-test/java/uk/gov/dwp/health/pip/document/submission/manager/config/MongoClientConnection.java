@@ -1,14 +1,13 @@
 package uk.gov.dwp.health.pip.document.submission.manager.config;
 
+import static uk.gov.dwp.health.pip.document.submission.manager.utils.EnvironmentUtil.getEnv;
+
 import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
-import com.mongodb.client.MongoCollection;
 import org.bson.Document;
 import org.springframework.data.mongodb.core.MongoTemplate;
-
-import static uk.gov.dwp.health.pip.document.submission.manager.utils.EnvironmentUtil.getEnv;
 
 public class MongoClientConnection {
   public static MongoTemplate getMongoTemplate() {
@@ -25,15 +24,12 @@ public class MongoClientConnection {
 
     MongoClient mongoClient = MongoClients.create(mongoClientSettings);
 
-    return new MongoTemplate(mongoClient, "test");
+    return new MongoTemplate(mongoClient, "doc-sub-mgr-db");
   }
 
   public static void emptyMongoCollections() {
-    MongoCollection<Document> documentCollection = getMongoTemplate().getCollection("document");
-    MongoCollection<Document> drsUploadCollection = getMongoTemplate().getCollection("drs_upload");
-    MongoCollection<Document> submissionCollection = getMongoTemplate().getCollection("submission");
-    documentCollection.drop();
-    drsUploadCollection.drop();
-    submissionCollection.drop();
+    getMongoTemplate().getCollection("document").deleteMany(new Document());
+    getMongoTemplate().getCollection("drs_upload").deleteMany(new Document());
+    getMongoTemplate().getCollection("submission").deleteMany(new Document());
   }
 }

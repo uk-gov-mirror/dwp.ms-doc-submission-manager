@@ -1,0 +1,206 @@
+openapi: '3.1.0'
+
+info:
+  title: DWP PIP Application Manager Service
+  description: Rest API for managing the application
+  version: '@project.version@'
+
+servers:
+  - url: 'https://localhost:8080'
+
+paths:
+
+  /v1/application/status:
+    get:
+      tags:
+        - application
+      summary: Return application current overall status
+      operationId: getApplicationStatus
+      parameters:
+        - in: query
+          name: claimantId
+          description: claimant unique ID
+          required: true
+          schema:
+            type: string
+            pattern: ^[a-z0-9]{24}
+      responses:
+        200:
+          description: OK - existing application overall status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationCoordinatorStatusDto'
+        404:
+          description: NOT FOUND - either claimant or application not found
+
+  /v1/application/registration:
+    get:
+      tags:
+        - registration
+      summary: get registration data
+      operationId: getRegistrationData
+      parameters:
+        - in: query
+          description: unique claimant ID
+          name: claimantId
+          required: true
+          schema:
+            type: string
+            pattern: ^[a-z0-9]{24}
+      responses:
+        200:
+          description: OK - existing registration data found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegistrationDto'
+        404:
+          description: NOT FOUND - registration data not found
+        409:
+          description: CONFLICT - multiple registration data found for claimant
+
+  /v1/application/{application_id}/registration:
+    get:
+      tags:
+        - registration
+      summary: get registration data by application id. Deprecated as there is no support for invited digital applicants. Please use v4.
+      operationId: getRegistrationDataByApplicationId
+      deprecated: true
+      parameters:
+        - in: path
+          name: application_id
+          required: true
+          schema:
+            type: string
+            pattern: ^[a-z0-9]{24}
+            example: "5ed0d430716609122be7a4d6"
+      responses:
+        200:
+          description: OK - existing registration data found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegistrationDto'
+    put:
+      tags:
+        - registration
+      summary: update registration data
+      operationId: updateRegistrationData
+      parameters:
+        - in: path
+          name: application_id
+          required: true
+          schema:
+            type: string
+            pattern: ^[a-z0-9]{24}
+            example: "5ed0d430716609122be7a4d6"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FormDataDto'
+      responses:
+        200:
+          description: OK - existing registration data updated
+        400:
+          description: BAD REQUEST - badly formed json or invalid request
+          content:
+            application/json:
+              schema:
+                $ref: 'includes/components.yaml#/components/schemas/ErrorResponseDto'
+        403:
+          description: FORBIDDEN - prohibited action
+          content:
+            application/json:
+              schema:
+                $ref: 'includes/components.yaml#/components/schemas/ErrorResponseDto'
+        404:
+          description: NOT FOUND - application does not exist
+
+  /v1/application/{application_id}/registration/submission:
+    put:
+      tags:
+        - registration
+      summary: submit registration data
+      operationId: registrationSubmission
+      parameters:
+        - in: path
+          name: application_id
+          required: true
+          schema:
+            type: string
+            pattern: ^[a-z0-9]{24}
+            example: "5ed0d430716609122be7a4d6"
+      responses:
+        202:
+          description: ACCEPTED - registration data submitted
+        403:
+          description: FORBIDDEN - submission not allowed
+        404:
+          description: NOT FOUND - application does not exist
+        422:
+          description: UNPROCESSABLE - registration data not valid
+
+components:
+  schemas:
+    RegistrationDto:
+      type: object
+      allOf:
+        - $ref: 'includes/components.yaml#/components/schemas/ApplicationId'
+        - $ref: '#/components/schemas/FormDataDto'
+        - $ref: 'includes/components.yaml#/components/schemas/ApplicationStatus'
+        - $ref: '#/components/schemas/SubmissionDate'
+    ApplicationCoordinatorStatusDto:
+      type: object
+      description: current application status or stage
+      title: application status
+      allOf:
+        - $ref: 'includes/components.yaml#/components/schemas/ApplicationId'
+        - $ref: 'includes/components.yaml#/components/schemas/ApplicationCoordinatorStatus'
+        - $ref: '#/components/schemas/MetaDataDto'
+        - $ref: '#/components/schemas/SubmissionId'
+    FormDataDto:
+      type: object
+      required:
+        - form_data
+      properties:
+        form_data:
+          type: object
+        meta:
+          type: object
+    MetaDataDto:
+      type: object
+      properties:
+        surname:
+          type: string
+        forename:
+          type: string
+        date_of_birth:
+          type: string
+        national_insurance_number:
+          type: string
+        postcode:
+          type: string
+    SubmissionId:
+      type: object
+      description: submission id
+      properties:
+        submission_id:
+          example: "5ed0d430716609122be7a4d6"
+          type: string
+          pattern: ^[a-z0-9]{24}
+    SubmissionDate:
+      type: object
+      properties:
+        submission_date:
+          description: the date of application submission
+          example: 2019-01-01
+          type: string
+    ClaimantIdAndApplicationStatus:
+      type: object
+      description: current application status and claimant id
+      title: Claimant id and application status
+      allOf:
+        - $ref: 'includes/components.yaml#/components/schemas/ClaimantId'
+        - $ref: 'includes/components.yaml#/components/schemas/ApplicationStatus'

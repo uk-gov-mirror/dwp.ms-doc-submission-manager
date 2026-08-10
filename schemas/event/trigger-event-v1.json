@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "title": "trigger-event-schema",
+  "description": "Event used to trigger behaviour in payment manager - date checker, send payment requests, uprating",
+  "required": [
+    "trigger_type",
+    "trigger_date"
+  ],
+  "properties": {
+    "trigger_type": {
+      "$ref": "#/$defs/trigger_type_def"
+    },
+    "trigger_date": {
+      "$ref": "#/$defs/trigger_date_def"
+    },
+    "data": {
+      "anyOf": {
+        "type": "object"
+      },
+      "description": "Any additional data required for trigger, e.g. new and old rating for uprating"
+    }
+  },
+  "$defs": {
+    "trigger_date_def": {
+      "type": "string",
+      "description": "The date that this action should be run for (YYYY-MM-DD)"
+    },
+    "trigger_type_def": {
+      "type": "string",
+      "description": "The type of trigger that is being requested",
+      "enum": [
+        "UPRATING",
+        "DATE_CHECKER",
+        "PAYMENT_QUEUE"
+      ]
+    }
+  }
+}

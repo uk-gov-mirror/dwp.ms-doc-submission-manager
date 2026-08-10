@@ -8,6 +8,7 @@
     "mobile_phone": "01234567890",
     "postcode": "AB12 3CD",
     "language": "EN",
-    "user_journey": "STRATEGIC"
+    "user_journey": "STRATEGIC",
+    "region": "GB"
   }
 ]

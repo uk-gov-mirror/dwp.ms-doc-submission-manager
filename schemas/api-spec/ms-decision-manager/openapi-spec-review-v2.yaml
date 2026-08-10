@@ -1,0 +1,142 @@
+openapi: '3.1.0'
+
+info:
+  title: DWP PIP Decision Manager Service
+  description: Rest API for operations relating to the review for a claim
+  version: '@project.version@'
+
+servers:
+  - url: 'https://localhost:8080'
+
+paths:
+  /v2/reviews:
+    post:
+      tags:
+        - review
+      summary: Create new review
+      operationId: createReview
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: 'openapi-spec-review-v1.yaml#/components/schemas/CreateReviewRequest'
+      responses:
+        201:
+          description: CREATED - review created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewDetails'
+        400:
+          description: BAD REQUEST - badly formed json or values not valid
+        409:
+          description: CONFLICT - review for application id already exists, currently only one is allowed
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+
+    get:
+      tags:
+        - review
+      summary: Get review by query parameters
+      operationId: reviewsByQueryParameters
+      parameters:
+        - name: applicationId
+          in: query
+          description: applicationId for the review
+          required: true
+          schema:
+            type: string
+            example: "6ed1d430716609122be7a4d6"
+      responses:
+        200:
+          description: OK - review exists for query parameters
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReviewDetails'
+        400:
+          description: BAD REQUEST - badly formed request
+        404:
+          description: NOT FOUND - review does not exist for provided applicationId
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+
+
+  /v2/reviews/{reviewId}:
+    get:
+      tags:
+        - review
+      summary: Get review by review id
+      operationId: reviewByReviewId
+      parameters:
+        - name: reviewId
+          in: path
+          description: unique review id
+          required: true
+          schema:
+            type: string
+            example: "6ed1d430716609122be7a4d6"
+      responses:
+        200:
+          description: OK - review exists for reviewId
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewDetails'
+        400:
+          description: BAD REQUEST - badly formed request
+        404:
+          description: NOT FOUND - review does not exist for provided review id
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+
+  /v2/reviews/{reviewId}/documents-used:
+    put:
+      tags:
+        - documents-used
+      summary: Create or update documents-used for review
+      operationId: createOrUpdateDocumentsUsedInReview
+      parameters:
+        - name: reviewId
+          in: path
+          description: unique reviewId
+          required: true
+          schema:
+            type: string
+            example: "6ed1d430716609122be7a4d6"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: 'includes/components-v2.yaml#/components/schemas/ReviewDocumentsUsed'
+      responses:
+        200:
+          description: OK - Created or updated documents-used for review.
+        400:
+          description: BAD REQUEST - badly formed request.
+        404:
+          description: NOT FOUND - Documents-used for review does not exist.
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+
+components:
+  securitySchemes:
+    sideCarProxySecurity:
+      type: mutualTLS
+      description: "Security is enforced by an external side car proxy using mTLS, not directly by this API"
+      x-sidecar-implementation: true
+  schemas:
+    ReviewDetails:
+      type: object
+      allOf:
+        - $ref: 'includes/components.yaml#/components/schemas/ReviewId'
+        - $ref: 'includes/components.yaml#/components/schemas/ApplicationId'
+        - $ref: 'includes/components.yaml#/components/schemas/UserWhoCreatedTheReview'
+        - $ref: 'includes/components.yaml#/components/schemas/ReviewCreatedDate'
+        - $ref: 'includes/components-v2.yaml#/components/schemas/ReviewDocumentsUsed'
+        - $ref: 'openapi-spec-review-v1.yaml#/components/schemas/ReviewQpPtDto'
+security:
+  - sideCarProxySecurity : []

@@ -1,0 +1,450 @@
+openapi: 3.1.0
+
+info:
+  title: DWP IDENTITY STATUS SERVICE IDV
+  description: Rest API for managing user identity
+  version: 1.0.0
+
+servers:
+  - url: 'https://localhost:8080'
+
+paths:
+  /v1/identity/limiter:
+    get:
+      tags:
+        - limiter
+      summary:
+        check whether the number of account registrations has reached the limit for this period
+      operationId: getLimiter
+      responses:
+        200:
+          description:
+            indicates whether the number of account registrations has reached the limit for this period
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegistrationsLimiterDto'
+
+  /v1/identity/get-idv-status-by-subject-id:
+    get:
+      tags:
+        - get
+      summary: Get the IDV status by a subject id
+      operationId: getIdentityBySubjectId
+      parameters:
+        - name: X-Subject-ID
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/subjectId'
+          description: The subject id (email address) of the identity object.
+      responses:
+        200:
+          description: The identity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdvDto'
+        404:
+          description: An identity with the given subject id was not found
+
+  /v1/identity/get-idv-status-by-nino:
+    get:
+      tags:
+        - get
+      summary: Get the IDV status by a nino
+      operationId: getIdentityByNino
+      parameters:
+        - name: X-Nino
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/nino'
+          description: The National Insurance Number tied to the identity object.
+      responses:
+        200:
+          description: The identity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdvDto'
+        404:
+          description: An identity with the given subject id was not found
+
+  /v1/identity/get-identity-by-id/{identityId}:
+    get:
+      tags:
+        - get
+      summary: Get the Identity record by id.
+      operationId: getIdentityById
+      parameters:
+        - name: identityId
+          in: path
+          description: unique id in identity database
+          required: true
+          schema:
+            type: string
+            example: 507f1f77bcf86cd799439011
+      responses:
+        200:
+          description: The identity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentityDto'
+        404:
+          description: An identity with the given id was not found
+
+  /v1/identity/get-identity-by-application-id/{applicationId}:
+    get:
+      deprecated: true
+      tags:
+        - get
+      summary: Get the Identity record by application id.
+      operationId: getIdentityByApplicationId
+      parameters:
+        - name: applicationId
+          in: path
+          description: unique application id
+          required: true
+          schema:
+            type: string
+            example: 507f1f77bcf86cd799439011
+      responses:
+        200:
+          description: The identity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentityDto'
+        404:
+          description: An identity with the given application id was not found
+
+  /v1/identity:
+    post:
+      tags:
+        - identity
+      summary: Endpoint to create or update identity status
+      operationId: register
+      parameters:
+        - name: x-id-token
+          in: header
+          description: JWT Token
+          required: true
+          schema:
+            type: string
+        - name: x-channel
+          in: header
+          description: Channel
+          required: false
+          schema:
+            type: string
+            enum:
+              - "oidv"
+              - "aidv"
+              - "seeded"
+            default: "oidv"
+        - name: publish-guid-event
+          in: query
+          description: flag indicating whether to publish guid event to PIPCS
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        201:
+          description: Identity Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IdentityResponse"
+        200:
+          description: Identity Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IdentityResponse"
+        400:
+          description: Bad request - Invalid input
+        500:
+          description: Internal server error - an internal error occurred
+
+  /v1/identity/seed:
+    post:
+      tags:
+        - identity seed
+      summary: Endpoint to seed an identity
+      operationId: seed
+      parameters:
+        - name: x-email
+          in: header
+          description: Email address (sub)
+          required: true
+          schema:
+            $ref: '#/components/schemas/subjectId'
+        - name: x-nino
+          in: header
+          description: National Insurance number
+          required: true
+          schema:
+            $ref: '#/components/schemas/nino'
+      responses:
+        201:
+          description: Identity Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IdentityResponse"
+        400:
+          description: Bad request - Invalid input
+        409:
+          description: Conflict - Identity record exists for sub
+        500:
+          description: Internal server error - an internal error occurred
+
+  /v1/identity/{identityId}:
+    patch:
+      deprecated: true
+      tags:
+        - patch
+      summary: PATCH an identity with an applicationId
+      description: PATCH to update identity with applicationId
+      operationId: updateApplicationId
+      parameters:
+        - in: path
+          name: identityId
+          description: The id of the identity also called _id
+          required: true
+          schema:
+            type: string
+            pattern: ^[a-z0-9]{24}
+            example: "5ed0d430716609122be7a4d6"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/applicationIdDto'
+      responses:
+        202:
+          description: ACCEPTED - Application id set for provided Identity
+        404:
+          description: NOT FOUND - Identity not found
+
+  /v1/identity/agent-idv-uplift/{applicationId}:
+    patch:
+      deprecated: true
+      tags:
+        - patch
+      summary: PATCH to update identity status for an applicationId to medium confidence
+      description: PATCH to update identity status for an applicationId to medium confidence
+      operationId: upliftIdentityStatusForApplicationId
+      parameters:
+        - name: applicationId
+          in: path
+          description: unique application id
+          required: true
+          schema:
+            type: string
+            example: 507f1f77bcf86cd799439011
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/upliftDto'
+      responses:
+        202:
+          description: ACCEPTED - identity status updated for an applicationId
+        404:
+          description: NOT FOUND - Identity not found
+        423:
+          description: LOCKED - Identity already has Medium confidence
+
+
+  /v1/identity/nino:
+    get:
+      tags:
+        - get
+      summary: Get nino from the x-id-token
+      description: Get nino from the claimant's x-id-token
+      operationId: getNinoFromIdToken
+      parameters:
+        - name: x-id-token
+          in: header
+          description: JWT Token
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK - Nino from token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ninoDto"
+        400:
+          description: BAD REQUEST - Invalid input
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+
+  /v1/identity/{guid}/nino:
+    get:
+      tags:
+        - get
+      summary: Get nino from the guid
+      description: Get nino from the DWP-GUID
+      operationId: getNinoFromGuid
+      parameters:
+        - name: guid
+          in: path
+          description: A unique identifier for a Citizen
+          required: true
+          schema:
+            type: string
+            pattern: '^[0-9a-f]{64}$'
+      responses:
+        200:
+          description: OK - Nino from guid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ninoDto"
+        400:
+          description: BAD REQUEST - Invalid input
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+
+  /v1/identity/guid:
+    get:
+      tags:
+        - get
+      summary: Get dwp guid from nino
+      description: Get dwp guid from the claimant's nino
+      operationId: getGuidFromNino
+      parameters:
+        - name: nino
+          in: header
+          description: NINO
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK - Guid from nino
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/guidDto"
+        400:
+          description: BAD REQUEST - Invalid input
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+
+components:
+  securitySchemes:
+    dthAuth:
+      type: http
+      scheme: bearer
+      name: x-id-token
+      in: header
+      description: "Authentication is handled by DTH and token is passed on"
+  schemas:
+    IdvDto:
+      required:
+        - idv_status
+      type: object
+      properties:
+        idv_status:
+          type: string
+          description: status of the identification
+          example: verified
+          enum:
+            - verified
+            - unverified
+
+    subjectId:
+      type: string
+      pattern: "(^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$)"
+      example: fred.blogs@email.com
+
+    nino:
+      type: string
+      pattern: ^(?!BG|GB|NK|KN|TN|NT|ZZ)[ABCEGHJ-PRSTW-Z][ABCEGHJ-NPRSTW-Z]\d{6}[A-D]
+
+    IdentityDto:
+      type: object
+      required:
+        - subjectIdDto
+        - ninoDto
+        - applicationIdDto
+        - IdvDto
+      allOf:
+        - $ref: '#/components/schemas/subjectIdDto'
+        - $ref: '#/components/schemas/ninoDto'
+        - $ref: '#/components/schemas/applicationIdDto'
+        - $ref: '#/components/schemas/IdvDto'
+
+    subjectIdDto:
+      type: object
+      properties:
+        subjectId:
+          type: string
+          pattern: "(^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$)"
+          example: fred.blogs@email.com
+
+    ninoDto:
+      type: object
+      properties:
+        nino:
+          type: string
+          pattern: ^(?!BG|GB|NK|KN|TN|NT|ZZ)[ABCEGHJ-PRSTW-Z][ABCEGHJ-NPRSTW-Z]\d{6}[A-D]
+          example: AA000000A
+
+    guidDto:
+      type: object
+      properties:
+        guid:
+          type: string
+          pattern: ^[a-z0-9]{64}
+          example: f51cbaa1abd28e74c239a25168a090d9ccf38ed80cb349e9a7fc18df239ac701
+
+    applicationIdDto:
+      type: object
+      properties:
+        applicationId:
+          type: string
+          pattern: ^[a-z0-9]{24}
+          example: 507f1f77bcf86cd799439011
+
+    upliftDto:
+      type: object
+      properties:
+        staffId:
+          type: string
+          pattern: ^[0-9]{8}
+          example: 12346789
+
+    IdentityResponse:
+      type: object
+      required:
+        - subjectIdDto
+      properties:
+        ref:
+          type: string
+          description: reference number
+          example: "5ed0d430716609122be7a4d6"
+        applicationId:
+          type: string
+          description: Application Id
+          example: "507f1f77bcf86cd799439011"
+      allOf:
+        - $ref: '#/components/schemas/subjectIdDto'
+
+    RegistrationsLimiterDto:
+      type: object
+      properties:
+        limit_reached:
+          type: boolean
+          default: false
+
+security:
+  - dthAuth: []

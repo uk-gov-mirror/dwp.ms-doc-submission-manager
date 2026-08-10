@@ -1,12 +1,12 @@
 package uk.gov.dwp.health.pip.document.submission.manager.service.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.stereotype.Service;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import uk.gov.dwp.health.integration.message.consumers.HealthMessageConsumer;
 import uk.gov.dwp.health.pip.document.submission.manager.config.properties.EventConfigProperties;
 import uk.gov.dwp.health.pip.document.submission.manager.entity.DrsUpload;
@@ -52,6 +52,9 @@ public class EventListenerService implements HealthMessageConsumer<Map<String, O
   }
 
   private void updateDrsRequestAudit(DrsUploadResponse response, DrsUpload drsRequest) {
+    if (response.isSuccess()) {
+      log.info("Successful Doc Batch request for {}", response.getRequestId());
+    }
     drsRequest.setStatus(
         response.isSuccess() ? DrsStatusEnum.SUCCESS.status : DrsStatusEnum.FAIL.status);
     if (!response.isSuccess()) {
@@ -61,7 +64,7 @@ public class EventListenerService implements HealthMessageConsumer<Map<String, O
               d -> {
                 try {
                   drsRequest.setAdditionalErrorDetails(objectMapper.writeValueAsString(d));
-                } catch (JsonProcessingException e) {
+                } catch (JacksonException e) {
                   log.error("Fail to marshal additional error to JSON string");
                 }
               });

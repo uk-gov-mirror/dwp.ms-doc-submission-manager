@@ -1,8 +1,5 @@
 package uk.gov.dwp.health.pip.document.submission.manager.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -10,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+import tools.jackson.databind.ObjectMapper;
 import uk.gov.dwp.health.pip.document.submission.manager.config.MsAccountConfig;
 import uk.gov.dwp.health.pip.document.submission.manager.config.restclient.model.V7AccountDetails;
 import uk.gov.dwp.health.pip.document.submission.manager.model.application.AccountMgrDataNotFoundResultFailure;
@@ -26,8 +24,7 @@ public class AccountManagerService {
   private final RestTemplate restTemplate;
   private final ObjectMapper objectMapper;
 
-  public ResultWrapper<V7AccountDetails> getAccountMgrData(String claimantId)
-      throws JsonProcessingException {
+  public ResultWrapper<V7AccountDetails> getAccountMgrData(String claimantId) {
 
     var accountMgrUri = msAccountConfig.getAccountMgrDataUri();
 
@@ -38,8 +35,6 @@ public class AccountManagerService {
       );
       ResponseEntity<String> result = restTemplate
           .getForEntity(accountMgrUri, String.class, claimantId);
-
-      objectMapper.registerModule(new JavaTimeModule());
 
       final Object[] responseBodyObject = objectMapper.readValue(result.getBody(), Object[].class);
       if (responseBodyObject == null || responseBodyObject.length == 0) {

@@ -1,6 +1,3 @@
 [submodule "schemas"]
 	path = schemas
 	url = ../../libraries/schemas.git
-[submodule "pip-form-specifications"]
-	path = pip-form-specifications
-	url = ../../libraries/pip-form-specifications.git

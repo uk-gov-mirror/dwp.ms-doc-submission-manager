@@ -1,0 +1,42 @@
+{
+  "mappings": [
+    {
+      "priority": 1,
+      "request": {
+        "urlPattern": "/v4/application/rcmresponseunparsable123/registration",
+        "method": "GET"
+      },
+      "response": {
+        "status": 200,
+        "bodyFileName": "rcm_GET_v4_application_rcmresponseunparsable123_registration.json",
+        "headers": {
+          "Content-Type": "application/json;charset=UTF-8"
+        }
+      }
+    },
+    {
+      "priority": 1,
+      "request": {
+        "urlPattern": "/v4/application/000000000000000000000400/registration",
+        "method": "GET"
+      },
+      "response": {
+        "status": 400
+      }
+    },
+    {
+      "priority": 99,
+      "request": {
+        "urlPattern": "/v4/application/([\\w]+)/registration",
+        "method": "GET"
+      },
+      "response": {
+        "status": 200,
+        "bodyFileName": "rcm_GET_v4_application_any_registration.json",
+        "headers": {
+          "Content-Type": "application/json;charset=UTF-8"
+        }
+      }
+    }
+  ]
+}

@@ -1,13 +1,13 @@
 package uk.gov.dwp.health.pip.document.submission.manager.service.impl;
 
-import com.amazonaws.services.cloudwatch.AmazonCloudWatch;
-import com.amazonaws.services.cloudwatch.model.Dimension;
-import com.amazonaws.services.cloudwatch.model.MetricDatum;
-import com.amazonaws.services.cloudwatch.model.PutMetricDataRequest;
-import com.amazonaws.services.cloudwatch.model.StandardUnit;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
+import software.amazon.awssdk.services.cloudwatch.CloudWatchClient;
+import software.amazon.awssdk.services.cloudwatch.model.MetricDatum;
+import software.amazon.awssdk.services.cloudwatch.model.PutMetricDataRequest;
+import software.amazon.awssdk.services.cloudwatch.model.StandardUnit;
+import software.amazon.awssdk.services.cloudwatch.model.Dimension;
 import uk.gov.dwp.health.pip.document.submission.manager.config.properties.CloudWatchProperties;
 import uk.gov.dwp.health.pip.document.submission.manager.service.CloudWatchMetricsService;
 
@@ -15,9 +15,7 @@ import uk.gov.dwp.health.pip.document.submission.manager.service.CloudWatchMetri
 @RequiredArgsConstructor
 public class CloudWatchMetricsServiceImpl implements CloudWatchMetricsService {
 
-  private static final String CHANNEL_NAME_STRATEGIC = "strategic";
-  private static final String DIMENSION_NAME_CHANNEL = "channel";
-  private final AmazonCloudWatch cloudWatchClient;
+  private final CloudWatchClient cloudWatchClient;
   private final CloudWatchProperties cloudWatchProperties;
   private final Environment environment;
 
@@ -30,36 +28,31 @@ public class CloudWatchMetricsServiceImpl implements CloudWatchMetricsService {
 
   @Override
   public void incrementMetric(final String metricName) {
-    final MetricDatum datum = new MetricDatum()
-        .withMetricName(metricName)
-        .withUnit(StandardUnit.None)
-        .withValue(1d);
-    final PutMetricDataRequest request = new PutMetricDataRequest()
-        .withNamespace(cloudWatchProperties.getNamespace())
-        .withMetricData(datum);
-
-    final Dimension appVersionDimension = new Dimension()
-        .withName("AppVersion")
-        .withValue(getBuildVersion());
-
-    final Dimension productDimension = new Dimension()
-        .withName("Product")
-        .withValue(cloudWatchProperties.getMetricProduct());
-
-    final Dimension environmentDimension = new Dimension()
-        .withName("Environment")
-        .withValue(cloudWatchProperties.getMetricEnvironment());
-
-    final Dimension envIdDimension = new Dimension()
-        .withName("Env_id")
-        .withValue(cloudWatchProperties.getMetricEnvId());
-
-    final Dimension channelDimension = new Dimension()
-        .withName(DIMENSION_NAME_CHANNEL)
-        .withValue(CHANNEL_NAME_STRATEGIC);
-
-    datum.withDimensions(appVersionDimension, productDimension, environmentDimension,
-        envIdDimension, channelDimension);
+    final PutMetricDataRequest request =
+        PutMetricDataRequest.builder()
+            .namespace(cloudWatchProperties.getNamespace())
+            .metricData(
+                MetricDatum.builder()
+                    .metricName(metricName)
+                    .unit(StandardUnit.NONE)
+                    .value(1d)
+                    .dimensions(
+                        Dimension.builder().name("AppVersion").value(getBuildVersion()).build(),
+                        Dimension.builder()
+                            .name("Product")
+                            .value(cloudWatchProperties.getMetricProduct())
+                            .build(),
+                        Dimension.builder()
+                            .name("Environment")
+                            .value(cloudWatchProperties.getMetricEnvironment())
+                            .build(),
+                        Dimension.builder()
+                            .name("Env_id")
+                            .value(cloudWatchProperties.getMetricEnvId())
+                            .build(),
+                        Dimension.builder().name("channel").value("strategic").build())
+                    .build())
+            .build();
 
     cloudWatchClient.putMetricData(request);
   }
@@ -70,5 +63,4 @@ public class CloudWatchMetricsServiceImpl implements CloudWatchMetricsService {
     }
     return buildVersion;
   }
-
 }

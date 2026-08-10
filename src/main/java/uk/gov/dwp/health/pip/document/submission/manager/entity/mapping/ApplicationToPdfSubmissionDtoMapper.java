@@ -1,59 +1,81 @@
 package uk.gov.dwp.health.pip.document.submission.manager.entity.mapping;
 
-import java.text.SimpleDateFormat;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import uk.gov.dwp.health.pip.document.submission.manager.model.application.AuditableFormSpecificationDto;
-import uk.gov.dwp.health.pip.document.submission.manager.model.application.HealthCaptureApplicationDto;
-import uk.gov.dwp.health.pip.document.submission.manager.openapi.model.QuestionAnswerSectionDto;
-import uk.gov.dwp.health.pip.document.submission.manager.openapi.model.SubmissionDto;
-import uk.gov.dwp.health.pip.forms.FormSpecification;
-import uk.gov.dwp.health.pip.forms.enumerations.ViewType;
-import uk.gov.dwp.health.pip.forms.viewspecifications.TaskList;
-import uk.gov.dwp.health.pip.forms.viewspecifications.elements.TaskListTask;
+import uk.gov.dwp.health.pip.document.submission.manager.openapi.healthinformation.v2.dto.HealthCaptureApplicationDtoV2;
+import uk.gov.dwp.health.pip.document.submission.manager.openapi.pdfgenerator.v4.dto.HealthInformationGatherRequest;
+import uk.gov.dwp.health.pip.document.submission.manager.openapi.pdfgenerator.v4.dto.PersonalDetailsDto;
+import uk.gov.dwp.health.pip.document.submission.manager.openapi.pdfgenerator.v4.dto.RegistrationDetailsDto;
+import uk.gov.dwp.health.pip.document.submission.manager.openapi.pdfgenerator.v4.dto.SubmissionDtoV4;
+
+import static uk.gov.dwp.health.pip.document.submission.manager.utils.DateTimeUtils.convertISOToYYYYMMDD;
 
 @Component
 @RequiredArgsConstructor
 public class ApplicationToPdfSubmissionDtoMapper {
 
-  public SubmissionDto map(final HealthCaptureApplicationDto healthCaptureApplication,
-      final AuditableFormSpecificationDto formSpecification) {
-    var dateFormatter = new SimpleDateFormat("dd-MM-yyyy");
-    var submissionDate = dateFormatter.format(healthCaptureApplication.getSubmissionDate());
+  private static final ObjectMapper OBJECT_MAPPER =
+      new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-    var dto = new SubmissionDto();
-    dto.setApplicationId(healthCaptureApplication.getApplicationId());
-    dto.setClaimantId(healthCaptureApplication.getClaimantId());
-    dto.setFormSpecificationId(healthCaptureApplication.getFormSpecificationId());
-    dto.setSubmissionDate(submissionDate);
-    dto.setResponses(
-        filterAndSortResponsesIntoFormSpecOrder(healthCaptureApplication.getResponses(),
-            formSpecification));
-    dto.setRegistrationDetails(healthCaptureApplication.getRegistrationDetails());
+  public SubmissionDtoV4 map(final HealthCaptureApplicationDtoV2 healthCaptureApplicationDtoV2) {
+    SubmissionDtoV4 dto = new SubmissionDtoV4();
+    dto.setApplicationId(healthCaptureApplicationDtoV2.getApplicationId());
+    dto.setClaimantId(healthCaptureApplicationDtoV2.getClaimantId());
+    dto.setSubmissionDate(convertISOToYYYYMMDD(healthCaptureApplicationDtoV2.getSubmissionDate()));
+    dto.setFormData(
+        convertJsonToObject(
+            healthCaptureApplicationDtoV2.getFormData().getMappedData(),
+            HealthInformationGatherRequest.class));
+    dto.setRegistrationDetails(
+        mapRegistrationDetails(healthCaptureApplicationDtoV2.getRegistrationDetails()));
 
     return dto;
   }
 
-  private List<QuestionAnswerSectionDto> filterAndSortResponsesIntoFormSpecOrder(
-      List<QuestionAnswerSectionDto> responses, FormSpecification formSpecification) {
-    var sectionReferences = ((TaskList) formSpecification.getViews().stream()
-        .filter(view -> view.getType().equals(ViewType.TASK_LIST)).findFirst().get()).getTasks()
-        .stream().map(TaskListTask::getReference).toList();
+  private RegistrationDetailsDto mapRegistrationDetails(
+      uk.gov.dwp.health.pip.document.submission.manager.openapi.healthinformation.v2.dto
+              .RegistrationDetailsDto
+          registrationDetails) {
+    RegistrationDetailsDto registrationDetailsDto = new RegistrationDetailsDto();
 
-    Map<String, Integer> order = IntStream.range(0, sectionReferences.size()).boxed()
-        .collect(Collectors.toMap(sectionReferences::get, Function.identity()));
+    if (registrationDetails != null) {
+      registrationDetailsDto.personalDetails(mapPersonalDetails(registrationDetails));
+    }
 
-    Comparator<QuestionAnswerSectionDto> comparator = Comparator.comparingInt(
-        obj -> order.getOrDefault(obj.getReference(), order.size()));
+    return registrationDetailsDto;
+  }
 
-    return responses.stream().filter(
-            questionAnswerSection -> !questionAnswerSection.getReference().contains("submission"))
-        .sorted(comparator).toList();
+  private PersonalDetailsDto mapPersonalDetails(
+      uk.gov.dwp.health.pip.document.submission.manager.openapi.healthinformation.v2.dto
+              .RegistrationDetailsDto
+          registrationDetails) {
+    PersonalDetailsDto personalDetailsDto = new PersonalDetailsDto();
+
+    if (registrationDetails.getPersonalDetails() != null) {
+      personalDetailsDto
+          .firstName(registrationDetails.getPersonalDetails().getFirstName())
+          .surname(registrationDetails.getPersonalDetails().getSurname())
+          .dateOfBirth(registrationDetails.getPersonalDetails().getDateOfBirth())
+          .nationalInsuranceNumber(
+              registrationDetails.getPersonalDetails().getNationalInsuranceNumber())
+          .postcode(registrationDetails.getPersonalDetails().getPostcode())
+          .email(registrationDetails.getPersonalDetails().getEmail());
+    }
+
+    return personalDetailsDto;
+  }
+
+  private <T> T convertJsonToObject(Object object, Class<T> clazz) {
+    try {
+      if (object instanceof String) {
+        return OBJECT_MAPPER.readValue((String) object, clazz);
+      }
+      return OBJECT_MAPPER.convertValue(object, clazz);
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException("Failed to deserialize object to " + clazz.getSimpleName(), e);
+    }
   }
 }

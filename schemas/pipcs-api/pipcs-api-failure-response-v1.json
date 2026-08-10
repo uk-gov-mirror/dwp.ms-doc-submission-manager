@@ -1,0 +1,107 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "https://gitlab.com/dwp/health/pip-apply/schemas/pipcs-api/pipcs-api-failure-response-v1.json",
+  "type": "object",
+  "title": "PIPCS-API failure response body",
+  "description": "Schema describe how PIPCS-api failure response",
+  "default": {},
+  "examples": [
+    {
+      "errors": [
+        {
+          "code": 0,
+          "message": "string",
+          "message_id": "string",
+          "level": "string",
+          "stackTrace": "string"
+        }
+      ]
+    }
+  ],
+  "required": [
+    "errors"
+  ],
+  "properties": {
+    "errors": {
+      "$id": "#/properties/errors",
+      "type": "array",
+      "title": "The Error schema",
+      "description": "PIPCS API error response details",
+      "default": [],
+      "minItems": 1,
+      "examples": [
+        [
+          {
+            "code": 0,
+            "message": "string",
+            "message_id": "string",
+            "level": "string",
+            "stackTrace": "string"
+          }
+        ]
+      ],
+      "additionalItems": true,
+      "items": {
+        "$id": "#/properties/error/items",
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "$id": "#/properties/error/items/anyOf/0/properties/code",
+            "type": "integer",
+            "title": "The code schema",
+            "description": "Error code",
+            "default": 0,
+            "examples": [
+              0
+            ]
+          },
+          "message": {
+            "$id": "#/properties/error/items/anyOf/0/properties/message",
+            "type": "string",
+            "title": "[pip-apply-application-id] failure details",
+            "description": "Message include [pip-apply-application-id] follow by failure details",
+            "default": "",
+            "examples": [
+              "string"
+            ]
+          },
+          "message_id": {
+            "$id": "#/properties/error/items/anyOf/0/properties/message_id",
+            "type": "string",
+            "title": "The message_id schema",
+            "description": "PIPCS API error message ID",
+            "default": "",
+            "examples": [
+              "string"
+            ]
+          },
+          "level": {
+            "$id": "#/properties/error/items/anyOf/0/properties/level",
+            "type": "string",
+            "title": "The level schema",
+            "description": "PIPCS API error level",
+            "default": "",
+            "examples": [
+              "string"
+            ]
+          },
+          "stackTrace": {
+            "$id": "#/properties/error/items/anyOf/0/properties/stackTrace",
+            "type": "string",
+            "title": "internal stack trace",
+            "description": "PIPCS API error stackTrace",
+            "default": "",
+            "examples": [
+              "string"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

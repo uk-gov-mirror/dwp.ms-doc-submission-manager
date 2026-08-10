@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "$id": "https://gitlab.com/dwp/health/pip-apply/schemas/registration/about-your-health.schema.1.2.0.json",
+  "title": "about your health schema",
+  "description": "The about your health section of the registration data",
+  "type": "object",
+  "properties": {
+    "healthConditions": {
+      "description": "A list of health conditions",
+      "type": "array",
+      "minItems": 0,
+      "items": {
+        "type": "string",
+        "pattern": "^[ -~]+$",
+        "maxLength": 200,
+        "examples": [
+          "broken arm"
+        ]
+      }
+    },
+    "hcpContactConsent": {
+      "description": "Old contact consent item that is no longer used left here to allow old data to still be parsed",
+      "type": "boolean"
+    },
+    "hcpShareConsent": {
+      "description": "Do you agree that your health professionals can share relevant information about your health conditions to support your application?",
+      "type": "boolean"
+    },
+    "healthProfessionalsDetails": {
+      "description": "A list of health professionals",
+      "type": "array",
+      "items": {
+        "$ref": "health-professionals-details.schema.1.1.0.json"
+      }
+    },
+    "hospitalHospiceOrCarehome": {
+      "$ref": "hospital-hospice-or-carehome.schema.1.1.0.json"
+    }
+  },
+  "required": [
+    "healthConditions",
+    "hcpShareConsent"
+  ]
+    }

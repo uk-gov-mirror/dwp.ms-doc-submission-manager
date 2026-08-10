@@ -1,0 +1,76 @@
+openapi: 3.1.0
+info:
+  title: DWP PIP Payments
+  description: Rest API for operations relating to payments
+  version: 1.0.0
+servers:
+  - url: 'https://localhost:8080'
+
+paths:
+  /v1/payment/{awardId}/arrears:
+    get:
+      operationId: getArrearsByAwardId
+      parameters:
+        - name: awardId
+          in: path
+          required: true
+          schema:
+            type: string
+            example: 'AWD001'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArrearsDto'
+        400:
+          description: Bad request - No award ID in request
+        404:
+          description: Not Found - Arrears payment for given award ID not found
+        500:
+          description: Internal server error - An internal error occurred
+
+
+components:
+  securitySchemes:
+    sideCarProxySecurity:
+      type: mutualTLS
+      description: "Security is enforced by an external side car proxy using mTLS, not directly by this API"
+      x-sidecar-implementation: true
+  schemas:
+    ArrearsDto:
+      type: object
+      required:
+        - awardId
+        - arrearsAmount
+        - arrearsPaymentDate
+        - arrearsStartDate
+        - arrearsEndDate
+      properties:
+        awardId:
+          type: string
+          example: 'AWD001'
+          nullable: false
+        arrearsAmount:
+          type: number
+          format: currency
+          example: 1021.56
+          nullable: false
+        arrearsPaymentDate:
+          type: string
+          format: date
+          example: '2000-12-21'
+          nullable: false
+        arrearsStartDate:
+          type: string
+          format: date
+          example: '2000-12-01'
+          nullable: false
+        arrearsEndDate:
+          type: string
+          format: date
+          example: '2000-12-10'
+          nullable: false
+security:
+  - sideCarProxySecurity : []

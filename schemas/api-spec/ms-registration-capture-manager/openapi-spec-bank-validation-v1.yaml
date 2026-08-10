@@ -1,0 +1,69 @@
+openapi: 3.1.0
+info:
+  title: Bank Account Details Validation API
+  description: RESTful API for bank account details validation
+  version: '@project.version@'
+
+paths:
+  /v1/validate:
+    post:
+      description: >-
+        Endpoint used to validate bank details.<br/>Correlation Id (UUID) is a required header.
+      operationId: validate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountDetails'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                example: [VALID]
+                enum: [VALID,SERVICE_DOWN,INVALID_ACCOUNT_COMBINATION,INVALID_ROLL_NUMBER,ROLL_NUMBER_FORMAT,ROLL_NUMBER_REQUIRED,INVALID_SORT_CODE_ACCOUNT_NUMBER_DATA_FORMAT]
+
+  /v1/application/{application_id}/bank-details:
+    get:
+      tags:
+        - bank-details
+      summary: get bank details by application id
+      operationId: getBankDetailsByApplicationId
+      parameters:
+        - in: path
+          name: application_id
+          required: true
+          schema:
+            type: string
+            pattern: ^[a-z0-9]{24}
+            example: "5ed0d430716609122be7a4d6"
+      responses:
+        200:
+          description: OK - existing registration data found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BankDetailsDto'
+
+components:
+  schemas:
+    AccountDetails:
+      type: object
+      properties:
+        sortCode:
+          type: string
+        accountNumber:
+          type: string
+        rollNumber:
+          type: string
+    BankDetailsDto:
+      type: object
+      properties:
+        name:
+          type: string
+        accountDetails:
+          $ref: '#/components/schemas/AccountDetails'

@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "string",
+  "javaType" : "uk.gov.dwp.health.pip.common.model.events.v1.award.AwardRate",
+  "title": "AwardRate",
+  "description": "Rate the claimant will be paid for daily living",
+  "enum": [
+    "STANDARD",
+    "ENHANCED",
+    "NIL"
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "title": "trigger-event-schema",
+  "description": "Event sent from application coordinator to doc submission manager after health information gather is complete",
+  "required": [
+    "application_id"
+  ],
+  "properties": {
+    "application_id": {
+      "$ref": "#/$defs/application_id_def"
+    }
+  },
+  "$defs": {
+    "application_id_def": {
+      "type": "string",
+      "description": "Application ID"
+    }
+  }
+}

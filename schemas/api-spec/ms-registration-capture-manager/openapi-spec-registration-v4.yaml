@@ -1,0 +1,418 @@
+openapi: '3.1.0'
+
+info:
+  title: DWP PIP Application Manager Service
+  description: Rest API for managing the application
+  version: '@project.version@'
+
+servers:
+  - url: 'https://localhost:8080'
+
+paths:
+
+  /v4/application/{application_id}/registration:
+    get:
+      tags:
+        - registration
+      summary: get registration data by application id
+      operationId: getRegistrationDataByApplicationId
+      parameters:
+        - in: path
+          name: application_id
+          required: true
+          schema:
+            type: string
+            pattern: ^[a-z0-9]{24}
+            example: "5ed0d430716609122be7a4d6"
+      responses:
+        200:
+          description: OK - existing registration data found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegistrationDto'
+
+  /v4/registration/latest/personal-details:
+    get:
+      tags:
+        - registration
+      summary: get latest registration personal details by NINO
+      operationId: getLatestRegistrationPersonalDetailsByNino
+      parameters:
+        - in: header
+          name: nino
+          schema:
+            $ref: './includes/components.yaml#/components/schemas/Nino/properties/nino'
+          required: true
+      responses:
+        200:
+          description: OK - found latest registration personal details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LatestInvitedDigitalRegistrationDto'
+        404:
+          description: NOT FOUND - latest registration personal details
+          content:
+            application/json:
+              schema:
+                $ref: 'includes/components.yaml#/components/schemas/ErrorResponseDto'
+        400:
+          description: Bad request - please search using NINO.
+          content:
+            application/json:
+              schema:
+                $ref: 'includes/components.yaml#/components/schemas/ErrorResponseDto'
+
+  /v4/registration/latest/personal-details/{applicationId}:
+    put:
+      tags:
+        - registration
+      summary: updates a registration's personal details using applicationId to locate it
+      operationId: updatePersonalDetails
+      parameters:
+        - in: path
+          name: applicationId
+          required: true
+          description: application id
+          schema:
+            example: "5ed0d430716609122be7a4d6"
+            type: string
+            pattern: ^[a-z0-9]{24}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateInvitedDigitalRegistrationRequest'
+      responses:
+        200:
+          description: personal details updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LatestInvitedDigitalRegistrationDto'
+        400:
+          description: invalid request
+          content:
+            application/json:
+              schema:
+                $ref: 'includes/components.yaml#/components/schemas/ErrorResponseDto'
+        404:
+          description: registration not found
+          content:
+            application/json:
+              schema:
+                $ref: 'includes/components.yaml#/components/schemas/ErrorResponseDto'
+
+  /v4/registration/invite:
+    post:
+      tags:
+        - registration
+      summary: create invited digital registration data
+      operationId: createInvitedDigitalRegistrationData
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateInviteRegistrationDto'
+      responses:
+        201:
+          description: CREATED - invited digital registration data created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvitedDigitalRegistrationDto'
+        400:
+          description: BAD REQUEST - badly formed json or invalid request
+
+
+components:
+  schemas:
+    RegistrationDto:
+      type: object
+      properties:
+        claimantId:
+          type: string
+        effectiveFrom:
+          description: Timestamp in format yyyy-MM-dd'T'HH:mm:ss'Z'
+          example: 2023-05-09T11:00:25Z
+          type: string
+        effectiveTo:
+          description: Timestamp in format yyyy-MM-dd'T'HH:mm:ss'Z'
+          example: 2023-05-09T11:00:25Z
+          type: string
+        submissionDate:
+          type: string
+          example: 2019-02-21
+        channelType:
+          $ref: 'includes/components.yaml#/components/schemas/ChannelTypeEnum'
+        identityConfirmed:
+          $ref: 'includes/components.yaml#/components/schemas/IdentityConfirmedEnum'
+        userId:
+          type: string
+          maxLength: 20
+        motabilityScheme:
+          $ref: '#/components/schemas/MotabilityDto'
+        personalDetails:
+          $ref: '#/components/schemas/PersonalDetailsDto'
+        aboutYourHealth:
+          $ref: '#/components/schemas/AboutYourHealthDto'
+        residenceAndPresence:
+          $ref: '#/components/schemas/ResidenceAndPresenceDto'
+        additionalSupport:
+          $ref: '#/components/schemas/AdditionalSupportDto'
+        stateDto:
+          $ref: '#/components/schemas/StateDto'
+        language:
+          $ref: 'includes/components.yaml#/components/schemas/LanguageEnum'
+    MotabilityDto:
+      type: object
+      properties:
+        receiveMotabilityInformation:
+          $ref: 'includes/components.yaml#/components/schemas/ReceiveMotabilityInformationEnum'
+    PersonalDetailsDto:
+      type: object
+      properties:
+        surname:
+          type: string
+        firstName:
+          type: string
+        nationalInsuranceNumber:
+          type: string
+        dateOfBirth:
+          type: string
+          example: 2019-12-31
+        address:
+          $ref: '#/components/schemas/AddressDto'
+        alternativeAddress:
+          $ref: '#/components/schemas/AddressDto'
+        contact:
+          $ref: '#/components/schemas/ContactDto'
+        alternateFormat:
+          $ref: '#/components/schemas/AlternateFormatDto'
+    AboutYourHealthDto:
+      type: object
+      properties:
+        conditions:
+          type: array
+          items:
+            type: string
+        careAccommodation:
+          $ref: '#/components/schemas/CareAccommodationDto'
+        hcpContactConsent:
+          type: boolean
+        hcpShareConsent:
+          type: boolean
+        healthProfessionals:
+          type: array
+          items:
+            $ref: '#/components/schemas/HealthProfessionalDto'
+    ResidenceAndPresenceDto:
+      type: object
+      properties:
+        nationality:
+          type: string
+        residentBeforeBrexit:
+          type: string
+        inUkTwoOutOfThreeYears:
+          type: string
+        receivingPensionsOrBenefitsFromEEA:
+          type: boolean
+        payingInsuranceEEA:
+          type: boolean
+    AdditionalSupportDto:
+      type: object
+      properties:
+        helpCommunicating:
+          type: boolean
+        helpUnderstandingLetters:
+          type: boolean
+        helper:
+          $ref: '#/components/schemas/HelperDto'
+        anyoneToHelp:
+          type: boolean
+        writeInWelsh:
+          type: boolean
+        speakInWelsh:
+          type: boolean
+    HelperDto:
+      type: object
+      properties:
+        firstName:
+          type: string
+        surname:
+          type: string
+        canCompleteForms:
+          type: boolean
+        canManagePost:
+          type: boolean
+    AddressDto:
+      type: object
+      properties:
+        line1:
+          type: string
+        line2:
+          type: string
+        line3:
+          type: string
+        town:
+          type: string
+        county:
+          type: string
+        postcode:
+          type: string
+        country:
+          type: string
+        noFixedAbode:
+          type: boolean
+    ContactDto:
+      type: object
+      properties:
+        mobileNumber:
+          type: string
+        smsUpdates:
+          type: string
+        alternativeNumber:
+          type: string
+        textPhone:
+          type: string
+    CareAccommodationDto:
+      type: object
+      properties:
+        accommodationType:
+          $ref: 'includes/components.yaml#/components/schemas/AccommodationTypeEnum'
+        admissionDate:
+          type: string
+          example: 2021-01-01
+        address:
+          $ref: '#/components/schemas/AddressDto'
+        costsPaid:
+          $ref: 'includes/components.yaml#/components/schemas/CostsPaidEnum'
+        payingOrgName:
+          type: string
+        agreeToRepay:
+          type: string
+        privatePatientPaying:
+          type: string
+    HealthProfessionalDto:
+      type: object
+      properties:
+        name:
+          type: string
+        profession:
+          type: string
+        phoneNumber:
+          type: string
+        address:
+          $ref: '#/components/schemas/AddressDto'
+        lastContact:
+          type: string
+    AlternateFormatDto:
+      type: object
+      properties:
+        formatType:
+          $ref: 'includes/components.yaml#/components/schemas/FormatTypeEnum'
+        option:
+          $ref: 'includes/components.yaml#/components/schemas/OptionEnum'
+        additionalInfo:
+          type: string
+    StateDto:
+      type: object
+      properties:
+        currentState:
+          $ref: 'includes/components.yaml#/components/schemas/CurrentStateEnum'
+        history:
+          type: array
+          items:
+            $ref: '#/components/schemas/HistoryDto'
+    HistoryDto:
+      type: object
+      properties:
+        state:
+          description: the status of the application
+          $ref: 'includes/components.yaml#/components/schemas/CurrentStateEnum'
+        timestamp:
+          description: Timestamp in format yyyy-MM-dd'T'HH:mm:ss.SSS'Z'
+          example: 2023-05-09T11:00:25.954Z
+          type: string
+    CreateInviteRegistrationDto:
+      type: object
+      required: [surname, firstName, nino, dob, postcode, mobileNumber, applicationId, language]
+      description: update / patch selected personal detail fields
+      properties:
+        surname:
+          $ref: '../../registration/personal-details.schema.1.2.0.json#/properties/surname'
+        firstName:
+          $ref: '../../registration/personal-details.schema.1.2.0.json#/properties/firstname'
+        nino:
+          $ref: '../../registration/personal-details.schema.1.2.0.json#/properties/nino'
+        dob:
+          $ref: '../../registration/personal-details.schema.1.2.0.json#/properties/dob'
+        postcode:
+          $ref: "../../registration/address.schema.1.0.0.json#/properties/postcode"
+        mobileNumber:
+          $ref: "../../registration/personal-details.schema.1.1.0.json#/$defs/contact110/properties/mobileNumber"
+        claimantId:
+          $ref: './includes/components.yaml#/components/schemas/ClaimantId/properties/claimant_id'
+        applicationId:
+          $ref: './includes/components.yaml#/components/schemas/ApplicationId/properties/application_id'
+        language:
+          $ref: 'includes/components.yaml#/components/schemas/LanguageEnum'
+    InvitedDigitalRegistrationDto:
+      type: object
+      required: [applicationId]
+      description: update / patch selected personal detail fields
+      properties:
+        applicationId:
+          $ref: './includes/components.yaml#/components/schemas/ApplicationId/properties/application_id'
+        surname:
+          $ref: '../../registration/personal-details.schema.1.2.0.json#/properties/surname'
+        firstName:
+          $ref: '../../registration/personal-details.schema.1.2.0.json#/properties/firstname'
+        nino:
+          $ref: '../../registration/personal-details.schema.1.2.0.json#/properties/nino'
+        dob:
+          $ref: '../../registration/personal-details.schema.1.2.0.json#/properties/dob'
+        postcode:
+          $ref: "../../registration/address.schema.1.0.0.json#/properties/postcode"
+        mobileNumber:
+          $ref: "../../registration/personal-details.schema.1.1.0.json#/$defs/contact110/properties/mobileNumber"
+        language:
+          $ref: 'includes/components.yaml#/components/schemas/LanguageEnum'
+    UpdateInvitedDigitalRegistrationRequest:
+      type: object
+      description: update invited digital registration personal details
+      properties:
+        surname:
+          $ref: '../../registration/personal-details.schema.1.2.0.json#/properties/surname'
+        firstName:
+          $ref: '../../registration/personal-details.schema.1.2.0.json#/properties/firstname'
+        nino:
+          $ref: '../../registration/personal-details.schema.1.2.0.json#/properties/nino'
+        dob:
+          $ref: '../../registration/personal-details.schema.1.2.0.json#/properties/dob'
+        postcode:
+          $ref: "../../registration/address.schema.1.0.0.json#/properties/postcode"
+        mobileNumber:
+          $ref: "../../registration/personal-details.schema.1.1.0.json#/$defs/contact110/properties/mobileNumber"
+    LatestInvitedDigitalRegistrationDto:
+      type: object
+      required: [ applicationId ]
+      description: invited digital registration personal details
+      properties:
+        applicationId:
+          $ref: './includes/components.yaml#/components/schemas/ApplicationId/properties/application_id'
+        surname:
+          $ref: '../../registration/personal-details.schema.1.2.0.json#/properties/surname'
+        firstName:
+          $ref: '../../registration/personal-details.schema.1.2.0.json#/properties/firstname'
+        nino:
+          $ref: '../../registration/personal-details.schema.1.2.0.json#/properties/nino'
+        dob:
+          $ref: '../../registration/personal-details.schema.1.2.0.json#/properties/dob'
+        postcode:
+          $ref: "../../registration/address.schema.1.0.0.json#/properties/postcode"
+        mobileNumber:
+          $ref: "../../registration/personal-details.schema.1.1.0.json#/$defs/contact110/properties/mobileNumber"

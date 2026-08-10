@@ -1,7 +1,5 @@
 package uk.gov.dwp.health.pip.document.submission.manager.service.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -15,6 +13,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.test.util.ReflectionTestUtils;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import uk.gov.dwp.health.pip.document.submission.manager.config.properties.EventConfigProperties;
 import uk.gov.dwp.health.pip.document.submission.manager.entity.DrsUpload;
 import uk.gov.dwp.health.pip.document.submission.manager.event.response.DrsUploadResponse;
@@ -97,7 +97,7 @@ class EventListenerServiceTest {
 
     @Test
     @DisplayName("Test handle DRS failure response")
-    void testHandleDrsFailureResponse() throws JsonProcessingException {
+    void testHandleDrsFailureResponse() {
       DrsUpload audit = spy(new DrsUpload());
       audit.setId("drs-request-id");
       Map<String, Object> payload = mock(Map.class);
@@ -126,7 +126,7 @@ class EventListenerServiceTest {
 
     @Test
     @DisplayName("Test fail to marshal DRS details error to json string error logged")
-    void testFailToMarshalDrsDetailsErrorToJsonStringErrorLogged() throws JsonProcessingException {
+    void testFailToMarshalDrsDetailsErrorToJsonStringErrorLogged() {
       DrsUpload audit = spy(new DrsUpload());
       audit.setId("drs-request-id");
       DrsUploadResponse response = new DrsUploadResponse();
@@ -138,7 +138,7 @@ class EventListenerServiceTest {
       Map<String, Object> payload = mock(Map.class);
       when(dataService.findDrsRequestByRequestId(anyString())).thenReturn(audit);
       when(objectMapper.writeValueAsString(any(List.class)))
-          .thenThrow(JsonProcessingException.class);
+          .thenThrow(JacksonException.class);
       when(objectMapper.convertValue(any(Map.class), any(Class.class))).thenReturn(response);
       cut.handleMessage(messageHeaders, payload);
       verify(dataService).findDrsRequestByRequestId(strArgCaptor.capture());

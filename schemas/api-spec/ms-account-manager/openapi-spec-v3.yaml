@@ -1,0 +1,421 @@
+openapi: 3.1.0
+
+info:
+  title: DWP HTDS Submission Service - PIP
+  description: Rest API for managing document submissions
+  version: 3.0.0
+
+servers:
+  - url: 'https://localhost:8080'
+
+paths:
+  /v3/account/create:
+    post:
+      tags:
+        - create
+      summary: POST call to create a new account
+      description: POST call to create new account with all the verified data that will be used as part of the identification and authorisation steps
+      operationId: createAccount
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/V3NewAccountRequest'
+      responses:
+        201:
+          description: CREATED - new account created
+          content:
+            application/json:
+              schema:
+                $ref: 'openapi-spec-v1.yaml#/components/schemas/AccountReturn'
+        400:
+          description: BAD REQUEST - badly formed json or duplicate entry
+        409:
+          description: CONFLICT - citizen account already exists. Will return message body of 'NINO' or 'EMAIL'
+          content:
+            application/json:
+              schema:
+                $ref: 'openapi-spec-v1.yaml#/components/schemas/FailureResponse'
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+
+
+  /v3/account/claimantdetails:
+    patch:
+      tags:
+        - patch
+      summary: PATCH an account with claimant details
+      description: PATCH to request updating claimant details
+      operationId: updateClaimantDetails
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateClaimantDetailsRequest'
+      responses:
+        202:
+          description: ACCEPTED - Claimant details update accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/V3AccountDetails'
+        400:
+          description: BAD REQUEST - badly formed json
+        401:
+          description: UNAUTHORIZED - Account does not exist with given REF
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+
+
+  /v3/account/password:
+    post:
+      tags:
+        - password
+      summary: POST call request to create/reset password
+      description: POST to request create or reset password
+      operationId: createUpdatePassword
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: 'openapi-spec-v1.yaml#/components/schemas/PasswordSetResetRequest'
+      responses:
+        200:
+          description: OK - password reset successfully
+        201:
+          description: CREATED - new password created successfully
+        400:
+          description: BAD REQUEST - badly formed json
+        401:
+          description: UNAUTHORIZED - TOTP or credentials not valid
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+        503:
+          description: SERVICE UNAVAILABLE - TOTP or Notify failure
+
+
+  /v3/account/details/id/{accountId}:
+    get:
+      tags:
+        - query
+      summary: Get request to get account(s) details
+      description: GET request account details
+      operationId: accountDetailsByAccountNumber
+      parameters:
+        - name: accountId
+          in: path
+          description: unique account id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK - account exists with these values
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/V3AccountDetails'
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+
+  /v3/account/mobilephone/claimantid/{claimantIdCsv}:
+    get:
+      tags:
+        - query
+      summary: Get request to get account(s) mobile phone numbers
+      description: GET mobile phone numbers for multiple claimants
+      operationId: mobilePhoneNumbersByClaimantId
+      parameters:
+        - name: claimantIdCsv
+          in: path
+          description: comma separated claimantIds
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK - accounts exist with these claimantIds
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/V3AccountMobilePhone'
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+
+  /v3/account/details/email/{email}:
+    get:
+      tags:
+        - query
+      summary: Get request to get account(s) details
+      description: GET request account details
+      operationId: accountDetailsByEmail
+      parameters:
+        - name: email
+          in: path
+          description: email address
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK - account exists with these values
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/V3AccountDetails'
+        400:
+          description: BAD REQUEST
+          content:
+            application/json:
+              schema:
+                $ref: 'openapi-spec-v1.yaml#/components/schemas/FailureResponse'
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+
+  /v3/account/details/nino/{nino}:
+    get:
+      tags:
+        - query
+      summary: Get request to get account(s) details
+      description: GET request account details
+      operationId: accountDetailsByNino
+      parameters:
+        - name: nino
+          in: path
+          description: national insurance number
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK - account exists with these values
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/V3AccountDetails'
+        400:
+          description: BAD REQUEST
+          content:
+            application/json:
+              schema:
+                $ref: 'openapi-spec-v1.yaml#/components/schemas/FailureResponse'
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+
+  /v3/account/identification:
+    post:
+      tags:
+        - identification
+      summary: POST call to identify account holder
+      description: request account manager to identify citizen account exists with the option to generate a totp and send it for verification
+      operationId: identification
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: 'openapi-spec-v1.yaml#/components/schemas/IdRequest'
+      responses:
+        200:
+          description: OK - account exists with these values
+          content:
+            application/json:
+              schema:
+                $ref: 'openapi-spec-v1.yaml#/components/schemas/IdentificationResponse'
+        400:
+          description: BAD REQUEST - badly formed json
+        401:
+          description: UNAUTHORIZED - account does not exist with these values
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+        503:
+          description: SERVICE NOT AVAILABLE - TOTP or Notify failure
+
+  /v3/account/verify/login:
+    post:
+      tags:
+        - identification
+      summary: POST call request for initial login validation using email and password
+      description: POST call request to validate email with password and generate totp
+      operationId: validFirstFactor
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: 'openapi-spec-v1.yaml#/components/schemas/ValidEmailPasswordRequest'
+      responses:
+        200:
+          description: OK - account exist and credentials valid
+          content:
+            application/json:
+              schema:
+                $ref: 'openapi-spec-v1.yaml#/components/schemas/AccountReturn'
+        400:
+          description: BAD REQUEST - badly formed json
+        401:
+          description: UNAUTHORIZED - credentials not valid or account not exist
+        403:
+          description: FORBIDDEN - acccount locked allowed login attempts exceeded
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+        503:
+          description: SERVICE NOT AVAILABLE - TOTP or Notify failure
+
+  /v3/account/verify/totp:
+    post:
+      tags:
+        - identification
+      summary: POST call request to confirm and complete login validation using account and totp
+      description: POST call request validate totp
+      operationId: valid2fFactor
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: 'openapi-spec-v1.yaml#/components/schemas/ValidTotpRequest'
+      responses:
+        200:
+          description: OK - account validated
+        400:
+          description: BAD REQUEST - badly formed json
+        401:
+          description: UNAUTHORIZED - final credentials validation failed
+        500:
+          description: INTERNAL SERVER ERROR - an internal error occurred
+        503:
+          description: SERVICE NOT AVAILABLE - TOTP failure
+
+
+components:
+  schemas:
+
+    CurrentNationalInsurance:
+      type: object
+      properties:
+        current_nino:
+          type: string
+          description: Current NINO
+          example: AA123456C
+          pattern: "(^(?!BG)(?!GB)(?!NK)(?!KN)(?!TN)(?!NT)(?!ZZ)[A-Z&&[^DFIQUV]][A-Z&&[^DFIOQUV]][0-9]{6}[A-D]$)"
+
+    NewNationalInsurance:
+      type: object
+      properties:
+        new_nino:
+          type: string
+          description: Updated NINO
+          example: AA123456C
+          pattern: "(^(?!BG)(?!GB)(?!NK)(?!KN)(?!TN)(?!NT)(?!ZZ)[A-Z&&[^DFIQUV]][A-Z&&[^DFIOQUV]][0-9]{6}[A-D]$)"
+
+    UpdateNinoRequest:
+      type: object
+      required:
+        - current_nino
+        - new_nino
+      allOf:
+        - $ref: 'openapi-spec-v3.yaml#/components/schemas/CurrentNationalInsurance'
+        - $ref: '#/components/schemas/NewNationalInsurance'
+
+    UpdateClaimantDetailsRequest:
+      type: object
+      required:
+        - ref
+        - current_nino
+        - new_nino
+        - current_email
+        - new_email
+        - dob
+        - forename
+        - surname
+        - mobile_phone
+        - postcode
+      allOf:
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/ref'
+        - $ref: '#/components/schemas/CurrentNationalInsurance'
+        - $ref: '#/components/schemas/NewNationalInsurance'
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/CurrentEmail'
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/NewEmail'
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/DateOfBirth'
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/Surname'
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/Forename'
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/Postcode'
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/MobilePhoneNumber'
+
+    V3NewAccountRequest:
+      type: object
+      required:
+        - email
+        - nino
+        - dob
+        - forename
+        - surname
+        - mobile_phone
+        - postcode
+        - language
+        - user_journey
+      allOf:
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/EmailAddress'
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/NationalInsurance'
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/DateOfBirth'
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/Surname'
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/Forename'
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/Postcode'
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/MobilePhoneNumber'
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/Language'
+        - $ref: '#/components/schemas/UserJourney'
+
+    ClaimantId:
+      type: object
+      properties:
+        claimant_id:
+          type: string
+          description: the claimant's unique identifier
+          pattern: "^(0-9a-z){24}$"
+          example: "636cd818db802c071f71b228"
+
+    V3AccountMobilePhone:
+      type: object
+      required:
+        - claimant_id
+        - mobile_phone
+      allOf:
+        - $ref: '#/components/schemas/ClaimantId'
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/MobilePhoneNumber'
+
+    V3AccountDetails:
+      type: object
+      required:
+        - nino
+        - forename
+        - surname
+        - dob
+        - mobile_phone
+        - email
+        - postcode
+        - language
+        - region
+        - user_journey
+      allOf:
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/EmailAddress'
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/NationalInsurance'
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/DateOfBirth'
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/Surname'
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/Forename'
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/Postcode'
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/MobilePhoneNumber'
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/Language'
+        - $ref: 'openapi-spec-v1.yaml#/components/schemas/Region'
+        - $ref: '#/components/schemas/UserJourney'
+
+    UserJourney:
+      type: object
+      properties:
+        user_journey:
+          description: PIP-apply user journey
+          type: string
+          enum:
+            - TACTICAL
+            - STRATEGIC

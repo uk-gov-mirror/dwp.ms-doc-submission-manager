@@ -1,0 +1,292 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "$id": "https://gitlab.com/dwp/health/pip-apply/schemas/registration/hospital-hospice-or-carehome.schema.1.1.0.json",
+  "title": "address schema",
+  "description": "hospital hospice or care home schema definition.",
+  "type": "object",
+  "properties": {
+    "accommodationType": {
+      "type": "string",
+      "enum": [
+        "hospital",
+        "hospice",
+        "carehome",
+        "residentialCollege",
+        "shelteredHousing",
+        "other",
+        "none"
+      ],
+      "examples": [
+        "hospice"
+      ]
+    }
+  },
+  "oneOf": [
+    {
+      "properties": {
+        "accommodationType": {
+          "const": "hospital"
+        },
+        "accommodationName": {
+          "description": "The name of the hospital",
+          "type": "string",
+          "maxLength": 35,
+          "minLength": 3,
+          "examples": [
+            "The Lady Sybil Free Hospital"
+          ]
+        },
+        "address": {
+          "$ref": "address.schema.1.0.0.json"
+        },
+        "admissionDate": {
+          "type": "string",
+          "format": "date"
+        },
+        "privatePatientPaying" :{
+          "type": "string",
+          "enum": [
+            "Yes",
+            "No",
+            "Don't know"
+          ]
+        }
+      },
+      "required": [
+        "accommodationType",
+        "accommodationName",
+        "address",
+        "privatePatientPaying"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "properties": {
+        "accommodationType": {
+          "const": "hospice"
+        },
+        "accommodationName": {
+          "description": "The name of the hospice",
+          "type": "string",
+          "maxLength": 35,
+          "minLength": 3,
+          "examples": [
+            "St Onan's"
+          ]
+        },
+        "address": {
+          "$ref": "address.schema.1.0.0.json"
+        },
+        "admissionDate": {
+          "type": "string",
+          "format": "date"
+        }
+      },
+      "required": [
+        "accommodationType",
+        "accommodationName",
+        "address"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "properties": {
+        "accommodationType": {
+          "const": "carehome"
+        },
+        "accommodationName": {
+          "description": "The name of the care home",
+          "type": "string",
+          "maxLength": 35,
+          "minLength": 3,
+          "examples": [
+            "Sunshine Sanctuary"
+          ]
+        },
+        "address": {
+          "$ref": "address.schema.1.0.0.json"
+        },
+        "admissionDate": {
+          "type": "string",
+          "format": "date"
+        },
+        "costsPaid": {
+          "type": "string",
+          "enum": [
+            "localAuthority",
+            "healthAuthority",
+            "educationAuthority",
+            "jobcentrePlus",
+            "governmentDepartment",
+            "charity",
+            "healthAndSocialCareTrust"
+          ]
+        },
+        "payingOrgName": {
+          "type": "string",
+          "maxLength": 177
+        },
+        "agreeToRepay": {
+          "type": "string",
+          "enum": [
+            "Yes",
+            "No",
+            "Don't know"
+          ]
+        }
+      },
+      "required": [
+        "accommodationType",
+        "accommodationName",
+        "address"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "properties": {
+        "accommodationType": {
+          "const": "shelteredHousing"
+        },
+        "accommodationName": {
+          "description": "The name of the sheltered housing",
+          "type": "string",
+          "maxLength": 35,
+          "minLength": 3,
+          "examples": [
+            "Sunshine Sanctuary"
+          ]
+        },
+        "address": {
+          "$ref": "address.schema.1.0.0.json"
+        },
+        "admissionDate": {
+          "type": "string",
+          "format": "date"
+        },
+        "costsPaid": {
+          "type": "string",
+          "enum": [
+            "localAuthority",
+            "healthAuthority",
+            "educationAuthority",
+            "jobcentrePlus",
+            "governmentDepartment",
+            "charity",
+            "healthAndSocialCareTrust"
+          ]
+        },
+        "payingOrgName": {
+          "type": "string",
+          "maxLength": 177
+        },
+        "agreeToRepay": {
+          "type": "string",
+          "enum": [
+            "Yes",
+            "No",
+            "Don't know"
+          ]
+        }
+      },
+      "required": [
+        "accommodationType",
+        "accommodationName",
+        "address"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "properties": {
+        "accommodationType": {
+          "const": "residentialCollege"
+        },
+        "accommodationName": {
+          "description": "The name of the residential college",
+          "type": "string",
+          "maxLength": 35,
+          "minLength": 3,
+          "examples": [
+            "Sunshine Sanctuary"
+          ]
+        },
+        "address": {
+          "$ref": "address.schema.1.0.0.json"
+        },
+        "admissionDate": {
+          "type": "string",
+          "format": "date"
+        },
+        "costsPaid": {
+          "type": "string",
+          "enum": [
+            "localAuthority",
+            "healthAuthority",
+            "educationAuthority",
+            "jobcentrePlus",
+            "governmentDepartment",
+            "charity",
+            "healthAndSocialCareTrust"
+          ]
+        },
+        "payingOrgName": {
+          "type": "string",
+          "maxLength": 177
+        },
+        "agreeToRepay": {
+          "type": "string",
+          "enum": [
+            "Yes",
+            "No",
+            "Don't know"
+          ]
+        }
+      },
+      "required": [
+        "accommodationType",
+        "accommodationName",
+        "address"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "properties": {
+        "accommodationType": {
+          "const": "other"
+        },
+        "accommodationName": {
+          "description": "The name of the other accommodation",
+          "type": "string",
+          "maxLength": 35,
+          "minLength": 3,
+          "examples": [
+            "Havelock Vetinari Ward"
+          ]
+        },
+        "address": {
+          "$ref": "address.schema.1.0.0.json"
+        },
+        "admissionDate": {
+          "type": "string",
+          "format": "date"
+        }
+      },
+      "required": [
+        "accommodationType",
+        "accommodationName",
+        "address"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "properties": {
+        "accommodationType": {
+          "const": "none"
+        }
+      },
+      "required": [
+        "accommodationType"
+      ],
+      "additionalProperties": false
+    }
+  ]
+}

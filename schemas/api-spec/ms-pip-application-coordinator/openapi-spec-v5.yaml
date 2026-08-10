@@ -1,0 +1,116 @@
+openapi: '3.1.0'
+
+info:
+  title: DWP PIP Application Coordinator Service
+  description: Version 5 Rest API for operations relating to the application coordinator
+  version: '@project.version@'
+
+servers:
+  - url: 'https://localhost:8080'
+
+paths:
+
+  /v5/applications:
+    get:
+      summary: Get the application for a given id, only pass one ID
+      operationId: getApplication
+      description: Please note only one query parameter is allowed
+      parameters:
+        - in: query
+          name: application_id
+          schema:
+            type: string
+            pattern: ^[a-z0-9]{24}
+            example: "5ed0d430716609122be7a4d6"
+        - in: query
+          name: submission_id
+          schema:
+            type: string
+            pattern: ^[a-z0-9]{24}
+            example: "5ed0d430716609122be7a4d6"
+      responses:
+        200:
+          description: OK - application returned
+          content:
+            application/json:
+              schema:
+                $ref: 'includes/components.yaml#/components/schemas/ApplicationDetails'
+        404:
+          description: An application with the given id was not found
+        400:
+          description: Bad request, either zero or more than one id is passed
+    post:
+      summary: Creates an application in a given state with a specified region, optionally provide a ApplicationId to use, or a random one is generated
+      operationId: createApplication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: 'includes/components.yaml#/components/schemas/ApplicationCreateV5Dto'
+      responses:
+        201:
+          description: CREATED - initial application data created
+          content:
+            application/json:
+              schema:
+                $ref: 'includes/components.yaml#/components/schemas/ApplicationDetails'
+        400:
+          description: BAD REQUEST - badly formed json or values not valid
+        409:
+          description: Conflict - active applications already exist
+
+  /v5/applications/{application_id}/language:
+
+    patch:
+      summary: Update language for a given application
+      description: Update language preference for a specific application
+      operationId: updateApplicationLanguage
+      parameters:
+        - in: path
+          name: application_id
+          required: true
+          schema:
+            type: string
+            pattern: ^[a-z0-9]{24}
+            example: "5ed0d430716609122be7a4d6"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: 'includes/components.yaml#/components/schemas/Language'
+      responses:
+        202:
+          description: ACCEPTED - language change accepted
+        400:
+          description: BAD REQUEST - invalid request
+        404:
+          description: NOT FOUND - application does not exist
+
+  /v5/applications/{application_id}/journey_type:
+    patch:
+      summary: Update journey type for a given application
+      description: Update journey type for a specific application
+      operationId: updateApplicationJourneyType
+      parameters:
+        - in: path
+          name: application_id
+          required: true
+          schema:
+            type: string
+            pattern: ^[a-z0-9]{24}
+            example: '5ed0d430716609122be7a4d6'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: 'includes/components.yaml#/components/schemas/JourneyType'
+      responses:
+        202:
+          description: ACCEPTED - Journey type change accepted
+        400:
+          description: BAD REQUEST - invalid request
+        404:
+          description: NOT FOUND - application does not exist

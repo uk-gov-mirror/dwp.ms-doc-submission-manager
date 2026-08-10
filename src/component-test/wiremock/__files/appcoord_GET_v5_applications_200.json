@@ -1,0 +1,11 @@
+{
+  "application_id": "000000000000000000000001",
+  "claimant_id": "000000000000000000000001",
+  "language": "EN",
+  "nino": "",
+  "region": "GB",
+  "routedTo": "PIPSERVICE",
+  "state": {
+    "currentState": "HEALTH_AND_DISABILITY"
+  }
+}
